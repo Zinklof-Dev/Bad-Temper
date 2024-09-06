@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ZinklofDEVUtilities</name>
+    </assembly>
+    <members>
+        <member name="T:zinklofdev.mapping.Noise">
+            <summary>
+            Class <c>Noise</c> provides functions that work in twine with UnityEngine to help make maps out of various noise methods like Perlin Noise.
+            </summary>
+        </member>
+        <member name="M:zinklofdev.mapping.Noise.GenPerlinNoiseMap(System.Int32,System.Int32,System.Int32,System.Single,System.Int32,System.Single,System.Single,UnityEngine.Vector2)">
+            <summary>
+            This generates perlin noise, then directly maps the perlin noise to a 2D float array, useful for perlin noise terrain generation, or generating a texture.
+            the width and height will directly translate to pixels if used to create a 2D texture, or roughly to the vert ID if used for a uniform plane
+            if you have a non uniform plane, or want to use this on a 3D shape, it is highly reccommended to use this to make a large (2/4k) texture to sample point height from.
+            <c>POTTENTIALLY SLOW FUNCTION, GENERATE ONCE THEN USE</c>
+            </summary>
+            <param name="width">how many points in the 2D x dimension.</param>
+            <param name="height">how many points in the 2D y dimension.</param>
+            <param name="seed">Seed used to change re-randomize the generated noise, or get the exact same again.</param>
+            <param name="scale">used to change how large or small the image used to make the point map is</param>
+            <param name="octaves">Changes how many layers of perlin noise to layer/sample, results in more detail</param>
+            <param name="persistance">above 0 - 1, changes how persistant your amplitude is per octave</param>
+            <param name="lacunarity">greater than 1, changes how much greater the frequency is per octave (how much smaller the details get)</param>
+            <param name="offset">the offset by pixels that the perlin noise has, used to shift the map if you want to make multiple chunks</param>
+            <returns>A 2d float array / float[]</returns>
+        </member>
+        <member name="M:zinklofdev.mapping.Noise.PoissonDiscSamplingVector2(System.Single,UnityEngine.Vector2,System.Int32)">
+            <summary>
+            uses the Poisson Disc Sampling method to provide a list of vector2 / points that can be used for various fairly uncommon needs.
+            made to help me generate a non uniform plane that can be used for low poly map generation. <c>EXTREMELY SLOW FUNCTION, GENERATE ONCE THEN USE</c>
+            </summary>
+            <param name="radius">how far away from another point a point can be</param>
+            <param name="regionSize">how large the region is</param>
+            <param name="accuracy">how many samples the algorithm does before giving up on a potential point, a low number can ruin the effect. too many gets very expensive.</param>
+            <returns>A List of Vector 2s</returns>
+        </member>
+        <member name="M:zinklofdev.mapping.Noise.GenerateFalloffMap(System.Int32,System.Single,System.Single)">
+            <summary>
+            Generates a falloff map to turn any other noise map into an island rather than potential infinite terrain, <c>SLOW FUNCTION, GENERATE ONCE THEN USE</c>
+            </summary>
+            <param name="size">size, assumes square map, screw you if its not square, i aint gonna help you :)</param>
+            <param name="a">changes how sharp the falloff is, higher = sharper</param>
+            <param name="b">changes when the falloff begins, higher = later</param>
+            <returns>float[,] that you can subtract from an existing float[,] heightmap</returns>
+        </member>
+    </members>
+</doc>
