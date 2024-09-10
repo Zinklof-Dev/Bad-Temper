@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     [Header("Player External Variables")]
     [SerializeField] public float health = 100f;
+    [SerializeField] public bool playerLive = true;
     [Space(10)]
     [Header("Movement")]
     [SerializeField] private float movementSpeed;
@@ -110,15 +111,36 @@ public class Player : MonoBehaviour
         characterController.Move(velocity);
     }
 
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
+        {
+            if (playerLive)
+            {
+                playerLive = false;
+                Cursor.lockState = CursorLockMode.None;
+            }
+            else
+            {
+                playerLive = true;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+        }
+
         try
         {
-            XRotation();
-            YRotation();
-            Cursor.lockState = CursorLockMode.Confined;
+            if (playerLive)
+            {
+                XRotation();
+                YRotation();
 
-            CalculateMovement();
+                CalculateMovement();
+            }
         }
         catch
         {
