@@ -4,7 +4,6 @@ using ZinklofDev.Console;
 
 public class IPV4toHex : MonoBehaviour
 {
-   
     private void Awake()
     {
         // All commands made must be registered with the Shell
@@ -13,7 +12,7 @@ public class IPV4toHex : MonoBehaviour
     }
 
     // Function Converts IPV4 To a Hexadecimal Number
-    public static void IPV4ToHexadecimal(string IP)
+    public static string IPV4ToHexadecimal(string IP)
     {
         string[] strings = IP.Split(".");
         string IPConverted = "";
@@ -33,10 +32,11 @@ public class IPV4toHex : MonoBehaviour
         }
 
         Log.LogResponse(IPConverted);
+        return IPConverted;
     }
 
     // Function converts the Hexadecimal format IP into standard format
-    public static void HexadecimalToIPV4(string IP)
+    public static string HexadecimalToIPV4(string IP)
     {
         bool onSecondLetter = false;
         int section = 0;
@@ -72,6 +72,7 @@ public class IPV4toHex : MonoBehaviour
         }
 
         Log.LogResponse(IPConverted); 
+        return IPConverted;
     }
 
     // Command To Run Functions 
