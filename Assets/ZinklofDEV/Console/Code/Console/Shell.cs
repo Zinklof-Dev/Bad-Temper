@@ -150,7 +150,7 @@ namespace ZinklofDev.Console
                     }
                     else if (commandList[i] as Command<string> != null)
                     {
-                        (commandList[i] as Command<string>).invoke(string.Format(alteredInput[1]));
+                        (commandList[i] as Command<string>).invoke(alteredInput[1]);
                         return;
                     }
                     else
