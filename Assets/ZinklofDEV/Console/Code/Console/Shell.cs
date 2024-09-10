@@ -44,6 +44,21 @@ namespace ZinklofDev.Console
             }
             commandList.Add(command);
         }
+        public static void RegisterCommnad(Command<string> command)
+        {
+            for (int i = 0; i < registeredIDs.Count; i++)
+            {
+                if (command.Id != registeredIDs[i])
+                {
+                    continue;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            commandList.Add(command);
+        }
         public static void RegisterCommand(Command<byte> command)
         {
             for (int i = 0; i < registeredIDs.Count; i++)
