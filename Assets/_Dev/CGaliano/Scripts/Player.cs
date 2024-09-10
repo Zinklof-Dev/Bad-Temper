@@ -11,8 +11,10 @@ public class Player : MonoBehaviour
     [SerializeField] private float movementSpeed;
     [SerializeField] private float sprintMult;
     [SerializeField] private float jumpForce;
-    [SerializeField] private float gravity = Physics.gravity.y;
+    [SerializeField] private float gravityMult;
+    [SerializeField] private float terminalVelocity;
     [SerializeField] private Vector3 velocity;
+    [SerializeField] private float drag;
     [Space(20)]
     [Header("References")]
     [SerializeField] private CharacterController characterController;
@@ -30,10 +32,15 @@ public class Player : MonoBehaviour
         }
         else
         {
-            movement.y = gravity * Time.deltaTime;
+            movement.y = Physics.gravity.y * gravityMult * Time.deltaTime;
         }
 
-        velocity = movement;
+        velocity += movement;
+
+        velocity.y = Mathf.Clamp(velocity.y, -terminalVelocity, terminalVelocity);
+        velocity.x = Mathf.Clamp(velocity.x, -terminalVelocity, terminalVelocity);
+        velocity.z = Mathf.Clamp(velocity.z, -terminalVelocity, terminalVelocity);
+        velocity = velocity * (1 - Time.deltaTime * drag);
 
         characterController.Move(velocity);
     }
