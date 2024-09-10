@@ -120,5 +120,9 @@ public class Player : MonoBehaviour
 
             CalculateMovement();
         }
+        catch
+        {
+
+        }
     }
 }
