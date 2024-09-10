@@ -41,6 +41,7 @@ public class NetworkCommands : MonoBehaviour
         {
             string targetIP = IPV4toHex.HexadecimalToIPV4(hostID);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(targetIP, 7777);
+            NetworkManager.Singleton.StartClient();
         }
         catch (Exception e)
         {

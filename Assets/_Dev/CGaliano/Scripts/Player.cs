@@ -1,8 +1,8 @@
-using Unity.VisualScripting;
-using UnityEditor.Rendering;
+using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     [Header("Player External Variables")]
     [SerializeField] public float health = 100f;
@@ -22,7 +22,19 @@ public class Player : MonoBehaviour
     [Space(20)]
     [Header("References")]
     [SerializeField] private CharacterController characterController;
-    [SerializeField] private Camera playerCamera;
+    [SerializeField] private GameObject playerCamera;
+
+    private void Awake()
+    {
+        if (!IsOwner)
+        {
+            return;
+        }
+
+        playerCamera = GameObject.FindWithTag("MainCamera");
+
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     private void XRotation()
     {
@@ -38,6 +50,7 @@ public class Player : MonoBehaviour
             cameraRotationEuler.x = -90;
         }
 
+        playerCamera.transform.position = gameObject.transform.position + new Vector3(0,0.9f,0);
         playerCamera.transform.localRotation = Quaternion.Euler(cameraRotationEuler);
     }
 
@@ -111,13 +124,13 @@ public class Player : MonoBehaviour
         characterController.Move(velocity);
     }
 
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-    }
-
     private void Update()
     {
+        if (!IsOwner)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
         {
             if (playerLive)
