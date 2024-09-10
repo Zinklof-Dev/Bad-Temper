@@ -148,9 +148,14 @@ namespace ZinklofDev.Console
                         (commandList[i] as Command<float>).invoke(float.Parse(alteredInput[1]));
                         return;
                     }
+                    else if (commandList[i] as Command<string> != null)
+                    {
+                        (commandList[i] as Command<string>).invoke(string.Format(alteredInput[1]));
+                        return;
+                    }
                     else
                     {
-                        Log.LogError(alteredInput[0] += " is not a poperly registered command");
+                        Log.LogError(alteredInput[0] += " is not a properly registered command");
                         return;
                     }
                 }

@@ -32,9 +32,15 @@ public class Player : MonoBehaviour
         {
             movement.y = gravity * Time.deltaTime;
         }
+
+        velocity = movement;
+
+        characterController.Move(velocity);
     }
 
     private void Update()
     {
+        CalculateMovement();
+
     }
 }
