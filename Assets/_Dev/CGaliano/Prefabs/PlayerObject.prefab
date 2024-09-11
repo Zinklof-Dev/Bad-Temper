@@ -164,7 +164,6 @@ MonoBehaviour:
   cameraRotationEuler: {x: 0, y: 0, z: 0}
   characterController: {fileID: 3075508261262474775}
   playerCamera: {fileID: 0}
-  usernameObject: {fileID: 5209503698148771270}
 --- !u!143 &3075508261262474775
 CharacterController:
   m_ObjectHideFlags: 0
@@ -234,6 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d66472cc129ebb44867652cc4d0bd37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  username: {fileID: 5209503698148771270}
 --- !u!1 &7314431768203336622
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,7 +246,7 @@ GameObject:
   - component: {fileID: 4149278200128509181}
   - component: {fileID: 5209503698148771270}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: UsernameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

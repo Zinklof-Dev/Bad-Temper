@@ -17,6 +17,7 @@ public class NetworkCommands : MonoBehaviour
     {
         Shell.RegisterCommand(HOST);
         Shell.RegisterCommand(CONNECT);
+        Shell.RegisterCommand(ClientBackend.CHANGEUSERNAME);
     }
 
     Command HOST =  new Command("0001x8800000000", "host", "starts server", false, ()=>

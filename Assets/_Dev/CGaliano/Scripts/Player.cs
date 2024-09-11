@@ -24,16 +24,15 @@ public class Player : NetworkBehaviour
     [SerializeField] private CharacterController characterController;
     [SerializeField] private GameObject playerCamera;
 
-    private void Awake()
+    public override void OnNetworkSpawn()
     {
-        if (!IsOwner)
-        {
-            return;
-        }
+        enabled = IsOwner;
 
         playerCamera = GameObject.FindWithTag("MainCamera");
 
         Cursor.lockState = CursorLockMode.Locked;
+
+        base.OnNetworkSpawn();
     }
 
     private void XRotation()
@@ -126,11 +125,6 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
         {
             if (playerLive)

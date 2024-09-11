@@ -1,38 +1,36 @@
 using TMPro;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerUsernameManager : NetworkBehaviour
 {
+    [SerializeField] private TextMeshPro username;
 
-    [SerializeField] string playerName = "player";
-    [SerializeField] private TextMeshPro usernameObject;
-    byte playerID;
-    Server serverObject;
+    NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>("Unkown");
 
-    private void Awake()
+    public override void OnNetworkSpawn()
     {
-        if (!IsOwner)
+        if (IsOwner)
         {
-            return;
+            ClientBackend.OnClientEndUsernameChanged += OncClientUsernameChange;
+
+            networkUsername.Value = ClientBackend.playerUsername;
         }
 
-        serverObject = GameObject.FindGameObjectWithTag("ServerObject").GetComponent<Server>();
+        username.text = networkUsername.Value.ToString();
+        networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
 
-        playerID = Server.getID();
-        serverObject.SubscribeNameUpdate(playerID, usernameObject);
-
-        serverObject.ChangeName(playerID, playerName);
+        base.OnNetworkSpawn();
     }
 
-    private void ChangeName(string newName)
+    void OncClientUsernameChange()
     {
-        playerName = newName;
-        serverObject.ChangeName(playerID, playerName);
+        networkUsername.Value = ClientBackend.playerUsername;
     }
 
-    private void UpdateName()
+    void OnNetworkUsernameValueChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
     {
-        serverObject.ChangeName(playerID, playerName);
+        username.text = newValue.Value.ToString();
     }
 }
