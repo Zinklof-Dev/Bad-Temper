@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7498820363913161763}
   - component: {fileID: -2559107864879871598}
   m_Layer: 0
-  m_Name: TemporaryBasePrefab
+  m_Name: TemporaryCampfirePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
