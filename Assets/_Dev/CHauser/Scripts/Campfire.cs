@@ -28,14 +28,17 @@ public class Campfire : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        if (!IsOwner)
+            return;
         if(!IsServer) 
             return;
-        Instantiate(castlePrefab);
-       
+        // Instantiate(castlePrefab);
     }
 
     private void Update()
     {
+        if (!IsOwner)
+            return;
         if(!IsServer) 
             return;
 
