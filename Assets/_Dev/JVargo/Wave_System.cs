@@ -18,10 +18,4 @@ public class Wave_System : NetworkBehaviour
 
         base.OnNetworkSpawn();
     }
-
-    public static Command
-    void Update()
-    {
-        
-    }
 }
