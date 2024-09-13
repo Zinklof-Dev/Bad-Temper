@@ -20,16 +20,17 @@ public class Campfire : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner)
-            return;
-        if(!IsServer) 
-            return;
-        
-        var instance = Instantiate(castlePrefab);
-        var instanceNetworkObject = instance.GetComponent<NetworkObject>();
-        instanceNetworkObject.Spawn();
+        if (IsOwner)
+        {
+            if (IsServer)
+            {
+                var instance = Instantiate(castlePrefab);
+                var instanceNetworkObject = instance.GetComponent<NetworkObject>();
+                instanceNetworkObject.Spawn();
+            }
 
-        healthText = instanceNetworkObject.GetComponent<TMP_Text>();
+            // healthText = GameObject.Find("HealthText").GetComponent<TMP_Text>;
+        }
     }
 
     private void Update()
