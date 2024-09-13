@@ -18,8 +18,9 @@ public class PlayerUsernameManager : NetworkBehaviour
             networkUsername.Value = ClientBackend.playerUsername;
         }
 
-        username.text = networkUsername.Value.ToString();
+
         networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
+        username.text = networkUsername.Value.ToString();
 
         base.OnNetworkSpawn();
     }
