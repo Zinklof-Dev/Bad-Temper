@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 7253384696774613487}
   - component: {fileID: 3075508261262474775}
   - component: {fileID: 3003481096287735715}
-  - component: {fileID: 8797789477924045995}
   m_Layer: 0
   m_Name: PlayerObject
   m_TagString: Untagged
@@ -164,6 +163,42 @@ MonoBehaviour:
   cameraRotationEuler: {x: 0, y: 0, z: 0}
   characterController: {fileID: 3075508261262474775}
   playerCamera: {fileID: 0}
+  username: {fileID: 5209503698148771270}
+  networkUsername:
+    m_InternalValue:
+      utf8LengthInBytes: 6
+      bytes:
+        offset0000:
+          byte0000: 85
+          byte0001: 110
+          byte0002: 107
+          byte0003: 111
+          byte0004: 119
+          byte0005: 110
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        byte0016: 0
+        byte0017: 0
+        byte0018: 0
+        byte0019: 0
+        byte0020: 0
+        byte0021: 0
+        byte0022: 0
+        byte0023: 0
+        byte0024: 0
+        byte0025: 0
+        byte0026: 0
+        byte0027: 0
+        byte0028: 0
+        byte0029: 0
 --- !u!143 &3075508261262474775
 CharacterController:
   m_ObjectHideFlags: 0
@@ -221,19 +256,6 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &8797789477924045995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4577821654866279753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d66472cc129ebb44867652cc4d0bd37, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  username: {fileID: 5209503698148771270}
 --- !u!1 &7314431768203336622
 GameObject:
   m_ObjectHideFlags: 0

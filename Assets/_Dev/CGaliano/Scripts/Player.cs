@@ -1,6 +1,8 @@
 using TMPro;
+using System;
 using Unity.Netcode;
 using UnityEngine;
+using Unity.Collections;
 
 public class Player : NetworkBehaviour
 {
@@ -23,6 +25,9 @@ public class Player : NetworkBehaviour
     [Header("References")]
     [SerializeField] private CharacterController characterController;
     [SerializeField] private GameObject playerCamera;
+    [SerializeField] private TextMeshPro username;
+    [Header("ignore me")]
+    [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>("Unkown");
 
     public override void OnNetworkSpawn()
     {
@@ -32,7 +37,32 @@ public class Player : NetworkBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
 
+        playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
+        playerCamera.transform.parent = gameObject.transform;
+
+        networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
+        username.text = networkUsername.Value.ToString();
+
+        if (IsOwner)
+        {
+            ClientBackend.OnClientEndUsernameChanged += OncClientUsernameChange;
+
+            networkUsername.Value = ClientBackend.playerUsername;
+        }
+
         base.OnNetworkSpawn();
+    }
+
+    void OncClientUsernameChange()
+    {
+        networkUsername.Value = ClientBackend.playerUsername;
+        Debug.Log("username change event called");
+    }
+
+    void OnNetworkUsernameValueChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
+    {
+        username.text = newValue.Value.ToString();
+        Debug.Log("username value updated???");
     }
 
     private void XRotation()
@@ -48,8 +78,6 @@ public class Player : NetworkBehaviour
         {
             cameraRotationEuler.x = -90;
         }
-
-        playerCamera.transform.position = gameObject.transform.position + new Vector3(0,0.9f,0);
         playerCamera.transform.localRotation = Quaternion.Euler(cameraRotationEuler);
     }
 
@@ -89,13 +117,13 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            xz.z = Input.GetAxis("Vertical") * movementSpeed * sprintMult * Time.deltaTime;
-            xz.x = Input.GetAxis("Horizontal") * movementSpeed * sprintMult * Time.deltaTime;
+            xz += Input.GetAxis("Vertical") * movementSpeed * sprintMult * transform.forward * Time.deltaTime;
+            xz += Input.GetAxis("Horizontal") * movementSpeed * sprintMult * transform.right * Time.deltaTime;
         }
         else
         {
-            xz.z = Input.GetAxis("Vertical") * movementSpeed * Time.deltaTime;
-            xz.x = Input.GetAxis("Horizontal") * movementSpeed * Time.deltaTime;
+            xz += Input.GetAxis("Vertical") * movementSpeed * transform.forward * Time.deltaTime;
+            xz += Input.GetAxis("Horizontal") * movementSpeed * transform.right * Time.deltaTime;
         }
         return xz;
     }
@@ -121,6 +149,7 @@ public class Player : NetworkBehaviour
         CalculateVelocityChanges();
 
         characterController.Move(velocity);
+        playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
     }
 
     private void Update()
@@ -149,9 +178,9 @@ public class Player : NetworkBehaviour
                 CalculateMovement();
             }
         }
-        catch
+        catch (Exception e)
         {
-
+            Debug.Log(e);
         }
     }
 }

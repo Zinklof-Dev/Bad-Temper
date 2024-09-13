@@ -7,7 +7,7 @@ public class PlayerUsernameManager : NetworkBehaviour
 {
     [SerializeField] private TextMeshPro username;
 
-    NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>("Unkown");
+    [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>("Unkown");
 
     public override void OnNetworkSpawn()
     {
@@ -27,10 +27,12 @@ public class PlayerUsernameManager : NetworkBehaviour
     void OncClientUsernameChange()
     {
         networkUsername.Value = ClientBackend.playerUsername;
+        Debug.Log("username change event called");
     }
 
     void OnNetworkUsernameValueChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
     {
         username.text = newValue.Value.ToString();
+        Debug.Log("username value updated???");
     }
 }
