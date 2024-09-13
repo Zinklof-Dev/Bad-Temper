@@ -11,16 +11,15 @@ public class PlayerUsernameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
+        username.text = networkUsername.Value.ToString();
+
         if (IsOwner)
         {
             ClientBackend.OnClientEndUsernameChanged += OncClientUsernameChange;
 
             networkUsername.Value = ClientBackend.playerUsername;
         }
-
-
-        networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
-        username.text = networkUsername.Value.ToString();
 
         base.OnNetworkSpawn();
     }
