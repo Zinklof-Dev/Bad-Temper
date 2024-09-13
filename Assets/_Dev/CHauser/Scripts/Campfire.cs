@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Console;
+using TMPro;
 
 public class Campfire : NetworkBehaviour
 {
@@ -15,16 +16,7 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private float healAmount = 1;
     [SerializeField] private float maxHealth = 100;
     private float healTimer;
-
-    /*public static Command<float> DAMAGE_CAMPFIRE = new Command<float>("0001x1500000003", "damage_campfire", "Damages Campfire", false, (t1) =>
-    {
-        DamageCastleClientRpc(t1);
-    });
-
-    private void Awake()
-    {
-        Shell.RegisterCommand(DAMAGE_CAMPFIRE);
-    }*/
+    [SerializeField] private TMP_Text healthText;
 
     public override void OnNetworkSpawn()
     {
@@ -32,7 +24,12 @@ public class Campfire : NetworkBehaviour
             return;
         if(!IsServer) 
             return;
-        // Instantiate(castlePrefab);
+        
+        var instance = Instantiate(castlePrefab);
+        var instanceNetworkObject = instance.GetComponent<NetworkObject>();
+        instanceNetworkObject.Spawn();
+
+        healthText = instanceNetworkObject.GetComponent<TMP_Text>();
     }
 
     private void Update()
@@ -47,9 +44,7 @@ public class Campfire : NetworkBehaviour
 
     [ClientRpc]
     private void HealCastleClientRpc()
-    {
-        campfireHealth.Value = this.campfireHealth.Value;
-
+    { 
         if(campfireHealth.Value > maxHealth)
             campfireHealth.Value = maxHealth;
 
@@ -66,6 +61,8 @@ public class Campfire : NetworkBehaviour
                 healTimer -= healSpeed * Time.deltaTime;
             }
         }
+        
+        healthText.text = campfireHealth.Value.ToString();
     }
 
     [ClientRpc]

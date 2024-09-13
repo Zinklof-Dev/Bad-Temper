@@ -174,7 +174,7 @@ GameObject:
   - component: {fileID: 85173333}
   - component: {fileID: 85173334}
   m_Layer: 0
-  m_Name: Campfire
+  m_Name: CampfireManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -215,6 +215,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 489296e4eb48c4245ad2501c1fe6d196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  castlePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
+    type: 3}
   campfireHealth:
     m_InternalValue: 100
   healSpeed: 1
@@ -2561,7 +2563,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1502518941}
-    PlayerPrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
+    PlayerPrefab: {fileID: 6387322184436762157, guid: 5dca7aa82ea1eed4a8d8dadb9f0e0982,
       type: 3}
     Prefabs:
       NetworkPrefabsLists:
