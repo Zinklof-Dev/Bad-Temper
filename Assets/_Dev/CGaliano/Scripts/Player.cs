@@ -31,14 +31,16 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        enabled = IsOwner;
+        if (IsOwner)
+        {
+            playerCamera = GameObject.FindWithTag("MainCamera");
 
-        playerCamera = GameObject.FindWithTag("MainCamera");
+            Cursor.lockState = CursorLockMode.Locked;
 
-        Cursor.lockState = CursorLockMode.Locked;
+            playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
+            playerCamera.transform.parent = gameObject.transform;
 
-        playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
-        playerCamera.transform.parent = gameObject.transform;
+        }
 
         networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
         username.text = networkUsername.Value.ToString();
@@ -154,6 +156,8 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
+        if (!IsOwner) return;
+
         if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
         {
             if (playerLive)
