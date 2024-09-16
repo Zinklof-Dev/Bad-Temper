@@ -215,13 +215,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 489296e4eb48c4245ad2501c1fe6d196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  castlePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
-    type: 3}
   campfireHealth:
     m_InternalValue: 100
+  castlePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
+    type: 3}
+  healthBar: {fileID: 0}
+  healthBarName: CampfireHealthBar
   healSpeed: 1
   healAmount: 1
   maxHealth: 100
+  healTime: 10
 --- !u!4 &85173335
 Transform:
   m_ObjectHideFlags: 0

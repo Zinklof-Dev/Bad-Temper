@@ -6,8 +6,14 @@ using TMPro;
 public class Campfire : NetworkBehaviour
 {
     [Header("Variables Synced Across Network")]
-    [SerializeField] private GameObject castlePrefab;
     [SerializeField] private NetworkVariable<float> campfireHealth = new NetworkVariable<float>(100);
+
+    [Space(10)]
+
+    [Header("Client Side Refrences")]
+    [SerializeField] private GameObject castlePrefab;
+    [SerializeField] private GameObject healthBar;
+    [SerializeField] private string healthBarName = "CampfireHealthBar";
 
     [Space(10)]
 
@@ -15,36 +21,35 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private float healSpeed = 1f;
     [SerializeField] private float healAmount = 1;
     [SerializeField] private float maxHealth = 100;
+    [SerializeField] private float healTime = 10;
     private float healTimer;
-    [SerializeField] private TMP_Text healthText;
+
 
     public override void OnNetworkSpawn()
     {
-        if (IsOwner)
-        {
-            if (IsServer)
-            {
-                var instance = Instantiate(castlePrefab);
-                var instanceNetworkObject = instance.GetComponent<NetworkObject>();
-                instanceNetworkObject.Spawn();
-            }
+        Instantiate(castlePrefab);
+        healthBar = GameObject.Find(healthBarName);
+        campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
+    }
 
-            // healthText = GameObject.Find("HealthText").GetComponent<TMP_Text>;
-        }
+    private void UpdateCampfireHealthValue(float oldValue, float newValue)
+    {
+        campfireHealth.Value = newValue;
     }
 
     private void Update()
     {
+        UpdateHealthBar();
+
         if (!IsOwner)
             return;
-        if(!IsServer) 
+        if (!IsServer) 
             return;
 
-        HealCastleClientRpc();
+        HealCastle();
     }
 
-    [ClientRpc]
-    private void HealCastleClientRpc()
+    private void HealCastle()
     { 
         if(campfireHealth.Value > maxHealth)
             campfireHealth.Value = maxHealth;
@@ -55,7 +60,7 @@ public class Campfire : NetworkBehaviour
             {
                 campfireHealth.Value += healAmount;
                 Debug.Log(OwnerClientId + "; " + campfireHealth.Value);
-                healTimer = 10;
+                healTimer = healTime;
             }
             else
             {
@@ -63,11 +68,16 @@ public class Campfire : NetworkBehaviour
             }
         }
         
-        healthText.text = campfireHealth.Value.ToString();
+       
     }
 
-    [ClientRpc]
-    private void DamageCastleClientRpc(float damage)
+    private void UpdateHealthBar()
+    {
+        float xScale = campfireHealth.Value / 10f;
+        healthBar.transform.localScale = new Vector3(xScale, 1, 1);
+    }
+
+    private void DamageCastle(float damage)
     {
         campfireHealth.Value -= damage;
     }
