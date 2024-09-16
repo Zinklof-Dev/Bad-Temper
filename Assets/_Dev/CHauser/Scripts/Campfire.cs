@@ -14,6 +14,7 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private GameObject castlePrefab;
     [SerializeField] private GameObject healthBar;
     [SerializeField] private string healthBarName = "CampfireHealthBar";
+    [SerializeField] private float campfireHealthRefrence;
 
     [Space(10)]
 
@@ -34,7 +35,7 @@ public class Campfire : NetworkBehaviour
 
     private void UpdateCampfireHealthValue(float oldValue, float newValue)
     {
-        campfireHealth.Value = newValue;
+        campfireHealthRefrence = newValue;
     }
 
     private void Update()
@@ -73,7 +74,7 @@ public class Campfire : NetworkBehaviour
 
     private void UpdateHealthBar()
     {
-        float xScale = campfireHealth.Value / 10f;
+        float xScale = campfireHealthRefrence / 10f;
         healthBar.transform.localScale = new Vector3(xScale, 1, 1);
     }
 
