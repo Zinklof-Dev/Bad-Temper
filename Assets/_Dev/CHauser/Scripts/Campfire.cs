@@ -36,6 +36,7 @@ public class Campfire : NetworkBehaviour
         healthBar = GameObject.Find(healthBarName);
         camera = GameObject.Find("Main Camera");
         campfireHealthRefrence = campfireHealth.Value;
+        UpdateHealthBar();
         campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
 
         base.OnNetworkSpawn();
@@ -44,17 +45,15 @@ public class Campfire : NetworkBehaviour
     private void UpdateCampfireHealthValue(float oldValue, float newValue)
     {
         campfireHealthRefrence = newValue;
+        UpdateHealthBar();
     }
 
     private void Update()
     {
-        if (healthBar = null)
+        if (healthBar != null)
         {
-            return;
+            HealthBarLookAtCamera();
         }
-
-        UpdateHealthBar();
-        HealthBarLookAtCamera();
 
         if (!IsOwner)
             return;
