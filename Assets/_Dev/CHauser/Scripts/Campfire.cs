@@ -2,17 +2,14 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Console;
 using TMPro;
+using System;
 
 public class Campfire : NetworkBehaviour
 {
-    [Header("Variables Synced Across Network")]
-    [SerializeField] private NetworkVariable<float> campfireHealth = new NetworkVariable<float>(100);
-
-    [Space(10)]
-
     [Header("Client Side Refrences")]
     [SerializeField] private GameObject castlePrefab;
     [SerializeField] private GameObject healthBar;
+    [SerializeField] private GameObject camera;
     [SerializeField] private string healthBarName = "CampfireHealthBar";
     [SerializeField] private float campfireHealthRefrence;
 
@@ -25,12 +22,23 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private float healTime = 10;
     private float healTimer;
 
+    [Space(10)]
+
+    [Header("Variables Synced Across Network")]
+    [SerializeField] private NetworkVariable<float> campfireHealth = new NetworkVariable<float>(0);
 
     public override void OnNetworkSpawn()
     {
+        if (IsServer)
+            campfireHealth.Value = maxHealth;
+
         Instantiate(castlePrefab);
         healthBar = GameObject.Find(healthBarName);
+        camera = GameObject.Find("Main Camera");
+        campfireHealthRefrence = campfireHealth.Value;
         campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
+
+        base.OnNetworkSpawn();
     }
 
     private void UpdateCampfireHealthValue(float oldValue, float newValue)
@@ -41,6 +49,7 @@ public class Campfire : NetworkBehaviour
     private void Update()
     {
         UpdateHealthBar();
+        HealthBarLookAtCamera();
 
         if (!IsOwner)
             return;
@@ -72,11 +81,24 @@ public class Campfire : NetworkBehaviour
        
     }
 
+    private void HealthBarLookAtCamera()
+    {
+        healthBar.transform.parent.LookAt(camera.transform);
+    }
+
     private void UpdateHealthBar()
     {
-        float xScale = campfireHealthRefrence / 10f;
-        healthBar.transform.localScale = new Vector3(xScale, 1, 1);
+        float percentage = campfireHealthRefrence / maxHealth;
+        healthBar.transform.localScale = new Vector3(percentage * .96f, 0.65f, 1);
     }
+
+    /* private void CheckIfEndGame()
+    {
+        if (campfireHealth.Value == 0)
+        {
+
+        }
+    } */
 
     private void DamageCastle(float damage)
     {
