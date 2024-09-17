@@ -48,6 +48,11 @@ public class Campfire : NetworkBehaviour
 
     private void Update()
     {
+        if (healthBar = null)
+        {
+            return;
+        }
+
         UpdateHealthBar();
         HealthBarLookAtCamera();
 
