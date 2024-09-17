@@ -7,7 +7,7 @@ using System;
 public class Campfire : NetworkBehaviour
 {
     [Header("Client Side Refrences")]
-    [SerializeField] private GameObject castlePrefab;
+    [SerializeField] private GameObject campfirePrefab;
     [SerializeField] private GameObject healthBar;
     [SerializeField] private GameObject camera;
     [SerializeField] private string healthBarName = "CampfireHealthBar";
@@ -32,7 +32,7 @@ public class Campfire : NetworkBehaviour
         if (IsServer)
             campfireHealth.Value = maxHealth;
 
-        Instantiate(castlePrefab);
+        Instantiate(campfirePrefab);
         healthBar = GameObject.Find(healthBarName);
         camera = GameObject.Find("Main Camera");
         campfireHealthRefrence = campfireHealth.Value;
