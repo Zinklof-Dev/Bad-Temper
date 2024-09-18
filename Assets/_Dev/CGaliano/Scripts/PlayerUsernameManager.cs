@@ -7,7 +7,11 @@ public class PlayerUsernameManager : NetworkBehaviour
 {
     [SerializeField] private TextMeshPro username;
 
-    [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>("Unkown");
+    [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>(
+        value: "unkown",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+        );
 
     public override void OnNetworkSpawn()
     {
