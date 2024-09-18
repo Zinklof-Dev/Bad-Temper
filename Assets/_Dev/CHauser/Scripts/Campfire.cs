@@ -34,7 +34,7 @@ public class Campfire : NetworkBehaviour
 
         Instantiate(castlePrefab);
         healthBar = GameObject.Find(healthBarName);
-        camera = GameObject.Find("Main Camera");
+        camera = GameObject.FindGameObjectWithTag("MainCamera");
         campfireHealthRefrence = campfireHealth.Value;
         campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
 
