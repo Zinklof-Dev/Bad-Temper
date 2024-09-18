@@ -44,6 +44,7 @@ public class Campfire : NetworkBehaviour
     private void UpdateCampfireHealthValue(float oldValue, float newValue)
     {
         campfireHealthRefrence = newValue;
+        UpdateHealthBar();
     }
 
     private void Update()
@@ -53,7 +54,6 @@ public class Campfire : NetworkBehaviour
             return;
         }
 
-        UpdateHealthBar();
         HealthBarLookAtCamera();
 
         if (!IsOwner)
@@ -82,8 +82,6 @@ public class Campfire : NetworkBehaviour
                 healTimer -= healSpeed * Time.deltaTime;
             }
         }
-        
-       
     }
 
     private void HealthBarLookAtCamera()
