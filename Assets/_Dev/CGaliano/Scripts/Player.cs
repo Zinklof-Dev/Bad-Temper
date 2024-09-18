@@ -164,6 +164,8 @@ public class Player : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        
+
         if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
         {
             if (playerLive)
