@@ -32,6 +32,7 @@ public class PlayerUsernameManager : NetworkBehaviour
 
     void OnNetworkUsernameValueChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
     {
+        networkUsername.Value = newValue;
         username.text = newValue.Value.ToString();
         Debug.Log("username value updated???");
     }
