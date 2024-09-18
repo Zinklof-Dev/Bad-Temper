@@ -2400,8 +2400,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1478669721}
-  - component: {fileID: 1478669720}
   - component: {fileID: 1478669722}
+  - component: {fileID: 1478669720}
   m_Layer: 0
   m_Name: CampfireManager
   m_TagString: Untagged
@@ -2422,7 +2422,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  castlePrefab: {fileID: 0}
+  castlePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
+    type: 3}
   healthBar: {fileID: 0}
   camera: {fileID: 0}
   healthBarName: CampfireHealthBar
