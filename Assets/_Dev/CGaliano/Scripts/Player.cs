@@ -27,7 +27,12 @@ public class Player : NetworkBehaviour
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private TextMeshPro username;
     [Header("ignore me")]
-    [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>("Unkown");
+    [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>(
+        value: "unkown",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+        );
+
 
     public override void OnNetworkSpawn()
     {
@@ -63,6 +68,7 @@ public class Player : NetworkBehaviour
 
     void OnNetworkUsernameValueChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
     {
+        networkUsername.Value = newValue;
         username.text = newValue.Value.ToString();
         Debug.Log("username value updated???");
     }
