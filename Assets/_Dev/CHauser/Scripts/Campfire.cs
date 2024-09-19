@@ -1,8 +1,5 @@
 using UnityEngine;
 using Unity.Netcode;
-using ZinklofDev.Console;
-using TMPro;
-using System;
 
 public class Campfire : NetworkBehaviour
 {
