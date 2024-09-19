@@ -147,7 +147,7 @@ public class Player : NetworkBehaviour
 
     private void CalculateMovement()
     {
-        Vector3 movement = new Vector3();
+        Vector3 movement;
 
         movement = CalculateXZ();
         movement.y = CalculateY();
