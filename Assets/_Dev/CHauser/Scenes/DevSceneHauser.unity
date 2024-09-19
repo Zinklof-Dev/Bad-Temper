@@ -203,6 +203,8 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &85173334
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,16 +217,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 489296e4eb48c4245ad2501c1fe6d196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  campfireHealth:
-    m_InternalValue: 100
-  castlePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
+  ShowTopMostFoldoutHeaderGroup: 1
+  campfirePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
     type: 3}
   healthBar: {fileID: 0}
+  camera: {fileID: 0}
   healthBarName: CampfireHealthBar
+  campfireHealthRefrence: 0
   healSpeed: 1
   healAmount: 1
   maxHealth: 100
   healTime: 10
+  campfireHealth:
+    m_InternalValue: 100
 --- !u!4 &85173335
 Transform:
   m_ObjectHideFlags: 0
@@ -1357,7 +1362,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 100, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -2563,10 +2568,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 593a2fe42fa9d37498c96f9a383b6521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NetworkManagerExpanded: 0
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1502518941}
-    PlayerPrefab: {fileID: 6387322184436762157, guid: 5dca7aa82ea1eed4a8d8dadb9f0e0982,
+    PlayerPrefab: {fileID: 4577821654866279753, guid: f8f245c017b96d642bcfa1b8613461ea,
       type: 3}
     Prefabs:
       NetworkPrefabsLists:
@@ -3034,8 +3040,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49df3c3ef294fc442b1b43de119a617f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  joinCodeText: {fileID: 0}
-  joinCodeInputField: {fileID: 0}
 --- !u!1 &1803964007
 GameObject:
   m_ObjectHideFlags: 0
