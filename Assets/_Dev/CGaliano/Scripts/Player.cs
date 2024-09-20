@@ -144,8 +144,8 @@ public class Player : NetworkBehaviour
         //I actually hate you kerbus, this function is NOT safe from variable frame rates... to be fair kerbus is not at fault i am for not doing the math and realizing what this code does and just kinda using it and being happy it works.
         //velocity.x = velocity.x * (1 - Time.deltaTime * drag);
         //velocity.z = velocity.z * (1 - Time.deltaTime * drag);
-        float dragForceMagnitude = velocity.magnitude ^ 2 * drag;
-        vector3 dragForceVector = dragForceMagnitude * -velocity.normalized;
+        float dragForceMagnitude = (velocity.magnitude * velocity.magnitude) * drag;
+        Vector3 dragForceVector = dragForceMagnitude * -velocity.normalized;
         velocity.z -= dragForceVector.z;
         velocity.x -= dragForceVector.x;
     }
