@@ -10,7 +10,6 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private GameObject campfirePrefab;
     [SerializeField] private GameObject healthBar;
     [SerializeField] private GameObject camera;
-    [SerializeField] private string healthBarName = "CampfireHealthBar";
     [SerializeField] private float campfireHealthRefrence;
 
     [Space(10)]
@@ -42,7 +41,7 @@ public class Campfire : NetworkBehaviour
 
         healTimer = healTime;
         Instantiate(campfirePrefab);
-        healthBar = GameObject.Find(healthBarName);
+        healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
         camera = GameObject.FindGameObjectWithTag("MainCamera");
         campfireHealthRefrence = campfireHealth.Value;
         campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
