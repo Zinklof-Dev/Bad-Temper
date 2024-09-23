@@ -13,9 +13,6 @@ public class Wave_System : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-
-
-
         base.OnNetworkSpawn();
     }
 }
