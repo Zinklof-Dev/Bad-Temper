@@ -11,7 +11,7 @@ namespace ZinklofDev.Console
         [SerializeField] static private TMP_Text console;
         static List<string> lines = new List<string>();
 
-        void Start()
+        void Awake()
         {
             Application.logMessageReceived += HandleUnityLog;
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using UnityEditor;
 using UnityEngine;
 
 namespace ZinklofDev.Console
@@ -14,6 +15,8 @@ namespace ZinklofDev.Console
             Command,
             Response,
             Misc,
+            TestPass,
+            TestFail,
         }
 
         public struct GSLog
@@ -47,7 +50,7 @@ namespace ZinklofDev.Console
             commandId = id;
             commandFormat = format;
             commandDescription = description;
-            this.commandCheat = isCheat;
+            commandCheat = isCheat;
         }
     }
 
@@ -55,7 +58,7 @@ namespace ZinklofDev.Console
     {
         private Action command;
 
-        public Command(string id, string format, string description, bool isCheat, Action command) : base (id, format, description, isCheat)
+        public Command(string id, string format, string description, bool isCheat, Action command) : base(id, format, description, isCheat)
         {
             this.command = command;
         }
@@ -70,12 +73,12 @@ namespace ZinklofDev.Console
     {
         private Action<T1> command;
 
-        public Command(string id, string format, string description, bool isCheat, Action<T1> command) : base (id, format, description, isCheat)
+        public Command(string id, string format, string description, bool isCheat, Action<T1> command) : base(id, format, description, isCheat)
         {
             this.command = command;
         }
 
-        public void invoke(T1 t1)
+        public void Invoke(T1 t1)
         {
             command.Invoke(t1);
         }
@@ -90,9 +93,9 @@ namespace ZinklofDev.Console
             this.command = command;
         }
 
-        public void invoke(T1 t1, T2 t2)
+        public void Invoke(T1 t1, T2 t2)
         {
-            command.Invoke(t1, t2); 
+            command.Invoke(t1, t2);
         }
     }
 
@@ -105,7 +108,7 @@ namespace ZinklofDev.Console
             this.command = command;
         }
 
-        public void invoke(T1 t1, T2 t2, T3 t3)
+        public void Invoke(T1 t1, T2 t2, T3 t3)
         {
             command.Invoke(t1, t2, t3);
         }

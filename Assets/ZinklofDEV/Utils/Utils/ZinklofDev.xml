@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ZinklofDev</name>
+    </assembly>
+    <members>
+        <member name="T:ZinklofDev.Utils.AssemblieZ.FindAssembly">
+            <summary>
+            Class of various methods that should help in finding assemblies
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.AssemblieZ.FindAssembly.GetAssemblyByName(System.String)">
+            <summary>
+            Searches for and finds an assembly by the provided name using linq
+            </summary>
+            <param name="name">Name of the assmebly you want to find</param>
+            <returns>Assembly</returns>
+        </member>
+        <member name="T:ZinklofDev.Utils.AssemblieZ.GetReferencedAssemblies">
+            <summary>
+                Intent: Get referenced assemblies, either recursively or flat. Not thread safe, if running in a multi
+                threaded environment must use locks.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.AssemblieZ.GetReferencedAssemblies.MyGetReferencedAssembliesFlat(System.Type)">
+            <summary>
+                Intent: Get assemblies referenced by entry assembly. Not recursive.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.AssemblieZ.GetReferencedAssemblies.MyGetReferencedAssembliesRecursive(System.Reflection.Assembly)">
+            <summary>
+                Intent: Get assemblies currently dependent on entry assembly. Recursive.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.AssemblieZ.GetReferencedAssemblies.MyGetMissingAssembliesRecursive(System.Reflection.Assembly)">
+            <summary>
+                Intent: Get missing assemblies.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.AssemblieZ.GetReferencedAssemblies.InternalGetDependentAssembliesRecursive(System.Reflection.Assembly)">
+            <summary>
+                Intent: Internal recursive class to get all dependent assemblies, and all dependent assemblies of
+                dependent assemblies, etc.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Fun.Grading.ZinkScale(System.Double)">
+            <summary>
+            Goofy way to grade things
+            </summary>
+            <param name="percentage">0-100 percentage you scored</param>
+            <returns></returns>
+        </member>
+        <member name="T:ZinklofDev.Utils.Mapping.Noise">
+            <summary>
+            Class <c>Noise</c> provides functions that work in twine with UnityEngine to help make maps out of various noise methods like Perlin Noise.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Mapping.Noise.GenPerlinNoiseMap(System.Int32,System.Int32,System.Int32,System.Single,System.Int32,System.Single,System.Single,UnityEngine.Vector2)">
+            <summary>
+            This generates perlin noise, then directly maps the perlin noise to a 2D float array, useful for perlin noise terrain generation, or generating a texture.
+            the width and height will directly translate to pixels if used to create a 2D texture, or roughly to the vert ID if used for a uniform plane
+            if you have a non uniform plane, or want to use this on a 3D shape, it is highly reccommended to use this to make a large (2/4k) texture to sample point height from.
+            <c>POTTENTIALLY SLOW FUNCTION, GENERATE ONCE THEN USE</c>
+            </summary>
+            <param name="width">how many points in the 2D x dimension.</param>
+            <param name="height">how many points in the 2D y dimension.</param>
+            <param name="seed">Seed used to change re-randomize the generated noise, or get the exact same again.</param>
+            <param name="scale">used to change how large or small the image used to make the point map is</param>
+            <param name="octaves">Changes how many layers of perlin noise to layer/sample, results in more detail</param>
+            <param name="persistance">above 0 - 1, changes how persistant your amplitude is per octave</param>
+            <param name="lacunarity">greater than 1, changes how much greater the frequency is per octave (how much smaller the details get)</param>
+            <param name="offset">the offset by pixels that the perlin noise has, used to shift the map if you want to make multiple chunks</param>
+            <returns>A 2d float array / float[]</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.Mapping.Noise.PoissonDiscSamplingVector2(System.Single,UnityEngine.Vector2,System.Int32)">
+            <summary>
+            uses the Poisson Disc Sampling method to provide a list of vector2 / points that can be used for various fairly uncommon needs.
+            made to help me generate a non uniform plane that can be used for low poly map generation. <c>EXTREMELY SLOW FUNCTION, GENERATE ONCE THEN USE</c>
+            </summary>
+            <param name="radius">how far away from another point a point can be</param>
+            <param name="regionSize">how large the region is</param>
+            <param name="accuracy">how many samples the algorithm does before giving up on a potential point, a low number can ruin the effect. too many gets very expensive.</param>
+            <returns>A List of Vector 2s</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.Mapping.Noise.GenerateFalloffMap(System.Int32,System.Single,System.Single)">
+            <summary>
+            Generates a falloff map to turn any other noise map into an island rather than potential infinite terrain, <c>SLOW FUNCTION, GENERATE ONCE THEN USE</c>
+            </summary>
+            <param name="size">size, assumes square map, screw you if its not square, i aint gonna help you :)</param>
+            <param name="a">changes how sharp the falloff is, higher = sharper</param>
+            <param name="b">changes when the falloff begins, higher = later</param>
+            <returns>float[,] that you can subtract from an existing float[,] heightmap</returns>
+        </member>
+        <member name="T:ZinklofDev.Utils.Testing.TestBasics">
+            <summary>
+            Base Class for tests, the main test class inherits from this, helps obscure some things you shouldn't touch
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestBasics._name">
+            <summary>
+            Name of the test, unused
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestBasics.action">
+            <summary>
+            Action the test will perform, gets invoked later
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestBasics.ID">
+            <summary>
+            ID of the test, used for debuging
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestBasics.testStatus">
+            <summary>
+            Status of the test, changes as the test progreses, fails, passes etc. etc.
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestBasics.originScript">
+            <summary>
+            the script in which you wrote the test
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestBasics.failReason">
+            <summary>
+            The reason(s) for failing
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestBasics.#ctor">
+            <summary>
+            The constructor for the TestBasics class, no user input needed.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestBasics.SetOriginScript(System.String)">
+            <summary>
+            Changes the origin class, you should avoid touching this function as the test does it by itself automatically as needed.
+            </summary>
+            <param name="originScript">Path to the script this test was written in</param>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestBasics.ForceFail">
+            <summary>
+            Forces a test to fail, only use if you really know what you're doing.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestBasics.ForceFail(System.String)">
+            <summary>
+            Forces a test to fail, but lets you further explain a reason, only use if you really know what you're doing.
+            </summary>
+            <param name="failReason">the reason your test failed</param>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestBasics.ForcePass">
+            <summary>
+            Forces a test to pass, only use if you really know what you're doing.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestBasics.Expect``2(``0,``1)">
+            <summary>
+            The primary function you will use, this is akin to if (x = y), but it automates everything for you, if x != y, it fails the test, if it does it goes to your next expect statement.
+            You shouldn't need more than this to be entirely honest, if you can think of something let me know and I'll make a ticket for it. Otherwise the force pass and fail exist for a reason... Don't abuse them though, a force pass on an endless fail isn't a true pass and I will catch you...
+            </summary>
+            <typeparam name="T1">Any Type, this is the value you are expecting to be something.</typeparam>
+            <typeparam name="T2">This is what you expect T1 to be, it should be of the same type or you'll probably explode unity, I dunno haven't tested it yet.</typeparam>
+            <param name="givenValue">This Value</param>
+            <param name="expectedValue">To Be</param>
+        </member>
+        <member name="T:ZinklofDev.Utils.Testing.Test">
+            <summary>
+            A test, used to ensure code works without too much manual testing, good practice to use these. visit zinklof.dev/testing for documentation (maybe)
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.Test.#ctor(System.String,System.Action)">
+            <summary>
+            Time to create a test! this is the Constructor for a test!
+            </summary>
+            <param name="fileName"> This should match the name of the CS file you're writing in, and is the workaround for StackFrame being a pain, may not be permanant. </param>
+            <param name="test"> The action of your test. </param>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.Test.RunTest">
+            <summary>
+            Run the test!
+            </summary>
+        </member>
+        <member name="T:ZinklofDev.Utils.Testing.TestManager">
+            <summary>
+            This class manages everything in the backend, from logging, handling settings, verbose logging, etc. etc. Runs after awake runs on every script in your FIRST scene
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestManager.verbose">
+            <summary>
+            Verbose is a bool that toggles whether or not the TestManager spits endless information, you must change this in an awake function in your FIRST loaded scene so that it is changed before tests get run.
+            </summary>
+        </member>
+        <member name="T:ZinklofDev.Utils.Testing.TestManager.TestStatus">
+            <summary>
+            The enum for test statuses.
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestManager.TestStatus.GenError">
+            <summary>
+            The Test ran into an error when being generated.
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestManager.TestStatus.Created">
+            <summary>
+            The test has been created, but not run.
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestManager.TestStatus.Started">
+            <summary>
+            The test is running.
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestManager.TestStatus.Failed">
+            <summary>
+            The test has failed.
+            </summary>
+        </member>
+        <member name="F:ZinklofDev.Utils.Testing.TestManager.TestStatus.Success">
+            <summary>
+            The test passed.
+            </summary>
+        </member>
+        <member name="P:ZinklofDev.Utils.Testing.TestManager.totalTests">
+            <summary>
+            The total tests in your project.
+            </summary>
+        </member>
+        <member name="P:ZinklofDev.Utils.Testing.TestManager.totalPasses">
+            <summary>
+            Total passes.
+            </summary>
+        </member>
+        <member name="P:ZinklofDev.Utils.Testing.TestManager.totalFailures">
+            <summary>
+            Total fails.
+            </summary>
+        </member>
+        <member name="P:ZinklofDev.Utils.Testing.TestManager.totalPercentage">
+            <summary>
+            percentage of tests passed.
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestManager.LogTest(System.Boolean,System.String)">
+            <summary>
+            Logs a test finishing, not for you to use, its for the test system only, NO TOUCHY.
+            </summary>
+            <param name="passed">Did the test pass?</param>
+            <param name="fileName">Where did the test come from?</param>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestManager.VerboseLog(System.String)">
+            <summary>
+            Logs a testing Verbose Log
+            </summary>
+            <param name="message">Message</param>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestManager.VerboseLogError(System.String)">
+            <summary>
+            Logs a testing Verbose Error Log
+            </summary>
+            <param name="message">Message</param>
+        </member>
+        <member name="M:ZinklofDev.Utils.Testing.TestManager.VerboseLogWarning(System.String)">
+            <summary>
+            Logs a testing Verbose Warning Log
+            </summary>
+            <param name="message">Message</param>
+        </member>
+    </members>
+</doc>

@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using ZinklofDev.Console;
+using ZinklofDev.Utils.Testing;
 
 public class IPV4toHex : MonoBehaviour
 {
@@ -74,6 +75,20 @@ public class IPV4toHex : MonoBehaviour
         Log.LogResponse(IPConverted); 
         return IPConverted;
     }
+
+    public static Test testTest = new Test("IPV4toHex.cs", () =>
+    {
+        string x = IPV4ToHexadecimal("255.124.74.8");
+
+        testTest.Expect(x, "FF7C4A08");
+    });
+
+    public static Test HexToIp = new Test("IPV4toHex.cs", () =>
+    {
+        string x = HexadecimalToIPV4("FF000FA4");
+
+        HexToIp.Expect(x, "255.0.15.164");
+    });
 
     // Command To Run Functions 
     public static Command<string> IP_TO_HEX = new Command<string>(/*Command ID: first 4 letters 0001 for game command, first two letters developer ID (Cole Hauser is 15), last letters command number*/ "0001x1500000001", /* Command inputed into the consol*/ "ip_to_hex", /* Command Description*/ "Converts an IPV4 to Hexadecimal Format", /* Is it a cheat? */false, /*Variable that allows input of comand to be passed into method*/(t1) =>

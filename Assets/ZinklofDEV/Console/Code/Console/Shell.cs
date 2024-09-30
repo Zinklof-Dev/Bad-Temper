@@ -129,27 +129,27 @@ namespace ZinklofDev.Console
                     }
                     else if (commandList[i] as Command<byte> != null)
                     {
-                        (commandList[i] as Command<byte>).invoke(byte.Parse(alteredInput[1]));
+                        (commandList[i] as Command<byte>).Invoke(byte.Parse(alteredInput[1]));
                         return;
                     }
                     else if (commandList[i] as Command<bool> != null)
                     {
-                        (commandList[i] as Command<bool>).invoke(bool.Parse(alteredInput[1]));
+                        (commandList[i] as Command<bool>).Invoke(bool.Parse(alteredInput[1]));
                         return;
                     }
                     else if (commandList[i] as Command<int> != null)
                     {
-                        (commandList[i] as Command<int>).invoke(int.Parse(alteredInput[1]));
+                        (commandList[i] as Command<int>).Invoke(int.Parse(alteredInput[1]));
                         return;
                     }
                     else if (commandList[i] as Command<float> != null)
                     {
-                        (commandList[i] as Command<float>).invoke(float.Parse(alteredInput[1]));
+                        (commandList[i] as Command<float>).Invoke(float.Parse(alteredInput[1]));
                         return;
                     }
                     else if (commandList[i] as Command<string> != null)
                     {
-                        (commandList[i] as Command<string>).invoke(alteredInput[1]);
+                        (commandList[i] as Command<string>).Invoke(alteredInput[1]);
                         return;
                     }
                     else

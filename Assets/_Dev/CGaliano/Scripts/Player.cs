@@ -36,8 +36,13 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        //subscribe to the event for the value of the username getting changed for this GameObject.
+        networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
+
+        //if the client running this code owns the object its attached to this is true
         if (IsOwner)
         {
+            //get the main camera, lock the cursor, move the camera to the player objects position with the default offset i always use, and make it a child of the player object on this clients end only.
             playerCamera = GameObject.FindWithTag("MainCamera");
 
             Cursor.lockState = CursorLockMode.Locked;
@@ -45,36 +50,39 @@ public class Player : NetworkBehaviour
             playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
             playerCamera.transform.parent = gameObject.transform;
 
-        }
 
-        networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
-        username.text = networkUsername.Value.ToString();
-
-        if (IsOwner)
-        {
+            //subscribe to the client backend event for changing your username.
             ClientBackend.OnClientEndUsernameChanged += OncClientUsernameChange;
 
+            //set the current username value to the current username value in the clientbackend class, likley set elsewhere like the main menu.
             networkUsername.Value = ClientBackend.playerUsername;
         }
-
+        //now let unity do its usual stuff
         base.OnNetworkSpawn();
     }
 
     void OncClientUsernameChange()
     {
+        //when the client changes their username, using the method in the clientbackend, change the value of the network variable which will then sync to everyone else without us calling an RPC
         networkUsername.Value = ClientBackend.playerUsername;
-        Debug.Log("username change event called");
+        //Debug.Log("username change event called");
     }
 
     void OnNetworkUsernameValueChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
     {
+        //unity calls this event when the network variable value is changed, we ackowledge that change by changing our local value to the new one, then change the TMP object
         networkUsername.Value = newValue;
         username.text = newValue.Value.ToString();
-        Debug.Log("username value updated???");
+        //Debug.Log("username value updated???");
     }
 
     private void XRotation()
     {
+        //simple method taking the mouses up/down movement, turning it into a float, and applying that to a perminant Vector3 that is then turned into a quaternion by unity since i depreciated my utils math library
+        //then the cameras internal quaternion used for its rotation is changed to the value of that generated quaternion. Is this the most performant route? no, but i don't wanna code in 4d, and i've used
+        //this exact method for years now, and i still hit 700 fps on my home rig and 120 on the school desktops. without this entire script its like... 2-3 FPS on the home rig, not even one on the school desktop
+        //since the school desktop is bottle necked on its GPU and has an actually pretty good CPU.
+
         float x = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
 
         cameraRotationEuler += new Vector3(-x, 0, 0);
@@ -91,6 +99,11 @@ public class Player : NetworkBehaviour
 
     private void YRotation()
     {
+        //this is a pretty simple section of code that just gets the mouses left and right movement and applies it to making the player object to move left and right
+        //we don't make the camera itself move left and right because we parent it to the player so it will adjust with the player object turning. allows transform.forward and the likes to work correctly
+        //and it would be much less performant to make sure the camera doesn't turn oddly when its not looking level with the horizon...
+        //if you don't get what i mean by that... you're blessed by not working in this line of work.
+
         float y = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
 
         gameObject.transform.Rotate(0, y, 0);
@@ -99,12 +112,15 @@ public class Player : NetworkBehaviour
 
     private float CalculateY()
     {
+        //temp float for local math
         float y = 0;
 
+        //iirc this bool is true when a raycast sent down from the player hits something, not the guy who made the default unity character controller though
         if (characterController.isGrounded)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                Debug.Log("playerJumping");
                 y = jumpForce;
             }
             else
@@ -121,15 +137,19 @@ public class Player : NetworkBehaviour
 
     private Vector3 CalculateXZ()
     {
+        //Temp Vector to calculate the X and Z axis movements, not the best choice for memory mangement, two floats, or a vector2 would be better, but this is more performant than doing math to get
+        //tranform.forward and transform.right to work kindly with regular floats or a Vector2
         Vector3 xz = Vector3.zero;
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
+            //if pressing shift, apply sprint mult to movement code
             xz += Input.GetAxis("Vertical") * movementSpeed * sprintMult * transform.forward * Time.deltaTime;
             xz += Input.GetAxis("Horizontal") * movementSpeed * sprintMult * transform.right * Time.deltaTime;
         }
         else
         {
+            //else do same code but without the sprint mult
             xz += Input.GetAxis("Vertical") * movementSpeed * transform.forward * Time.deltaTime;
             xz += Input.GetAxis("Horizontal") * movementSpeed * transform.right * Time.deltaTime;
         }
@@ -138,31 +158,43 @@ public class Player : NetworkBehaviour
 
     private void CalculateVelocityChanges()
     {
+        //clamping the velocity so you don't have some bug send the player into the eather realm
         velocity.y = Mathf.Clamp(velocity.y, -terminalVelocity, terminalVelocity);
         velocity.x = Mathf.Clamp(velocity.x, -terminalVelocity, terminalVelocity);
         velocity.z = Mathf.Clamp(velocity.z, -terminalVelocity, terminalVelocity);
-        //I actually hate you kerbus, this function is NOT safe from variable frame rates... to be fair kerbus is not at fault i am for not doing the math and realizing what this code does and just kinda using it and being happy it works.
-        //velocity.x = velocity.x * (1 - Time.deltaTime * drag);
-        //velocity.z = velocity.z * (1 - Time.deltaTime * drag);
-        float dragForceMagnitude = (velocity.magnitude * velocity.magnitude) * drag;
-        Vector3 dragForceVector = dragForceMagnitude * -velocity.normalized;
-        velocity.z -= dragForceVector.z;
-        velocity.x -= dragForceVector.x;
+
+
+        /*
+         * I actually hate you kerbus, this function is NOT safe from variable frame rates...
+         * to be fair kerbus is not at fault i am for not doing the math and realizing what this code does and just kinda using it and being happy it works.
+         * For the potential SkillsUSA person reading this later this year or next year;
+         * I have used this exact method for all of my character controllers over the years, originally getting from Unity Awnsers back when i had zero clue what I was doing.
+         * For the first time, this year, I didn't use V sync for some reason... and realized there was less drag... can't believe that took me three years to fix this...
+         * velocity.x = velocity.x * (1 - Time.deltaTime * drag);
+         * velocity.z = velocity.z * (1 - Time.deltaTime * drag);
+         */
+
+        //NEW VARIABLE FRAMERATE SAFE*** Method to apply drag, will apply at the same rate as the Vsync I had when I got this controller feeling good enough for later use.
+        velocity.z = velocity.z * (1 - 0.008333333f * drag);
+        velocity.x = velocity.x * (1 - 0.008333333f * drag);
     }
 
     private void CalculateMovement()
     {
+        //Create temp varible, C# garbage collection will deal with later.
         Vector3 movement;
 
+        //Give this temp Vector values
         movement = CalculateXZ();
         movement.y = CalculateY();
 
+        //Apply this temporary Vector to the velocity Vector
         velocity += movement;
 
+        //Call the function to clamp velocity to terminal velocity and apply drag.
         CalculateVelocityChanges();
 
         characterController.Move(velocity);
-        playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
     }
 
     private void Update()
@@ -170,7 +202,7 @@ public class Player : NetworkBehaviour
         if (!IsOwner) return;
 
         
-
+        //locks or unlocks the player cursor, movement, and ability to look if the tilde key is pressed, this allows the player to type, and use thier mouse when they open the console without the player moving everywhere
         if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
         {
             if (playerLive)
@@ -185,6 +217,8 @@ public class Player : NetworkBehaviour
             }
         }
 
+        //request all our movement, and look code is run, wrapped in a try catch statement for not really any real reason, this isn't calling any networked code and is pretty simple stuff so it wont fail catastrophically
+        //but... you never know i guess, so past me decided a try catch was worth it.
         try
         {
             if (playerLive)
