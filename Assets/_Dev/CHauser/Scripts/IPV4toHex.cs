@@ -15,13 +15,17 @@ public class IPV4toHex : MonoBehaviour
     // Function Converts IPV4 To a Hexadecimal Number
     public static string IPV4ToHexadecimal(string IP)
     {
+        // Splits the IP string into the four 
         string[] strings = IP.Split(".");
         string IPConverted = "";
 
         foreach (string s in strings) 
         { 
             int decimalNumber = int.Parse(s);
+
             // Converts an int decimal number into a string hex number
+            // When converting an int into a string, there are diffrent formats you can use. The format, "X", is hexadecimal
+
             string hexValue = decimalNumber.ToString("X");
 
             if (hexValue.Length == 1)
@@ -76,11 +80,11 @@ public class IPV4toHex : MonoBehaviour
         return IPConverted;
     }
 
-    public static Test testTest = new Test("IPV4toHex.cs", () =>
+    public static Test IPtoHex = new Test("IPV4toHex.cs", () =>
     {
         string x = IPV4ToHexadecimal("255.124.74.8");
 
-        testTest.Expect(x, "FF7C4A08");
+        IPtoHex.Expect(x, "FF7C4A08");
     });
 
     public static Test HexToIp = new Test("IPV4toHex.cs", () =>
