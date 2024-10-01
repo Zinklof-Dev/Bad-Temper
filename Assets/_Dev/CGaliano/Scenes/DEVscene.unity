@@ -2828,7 +2828,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71a1f304607a82a4c94ade264f52fcd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  VerboseLogs: 1
+  VerboseLogs: 0
   runUnitTests: 1
 --- !u!4 &1815397946
 Transform:

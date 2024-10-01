@@ -155,13 +155,13 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   health: 100
   playerLive: 0
-  movementSpeed: 2.5
-  sprintMult: 2
+  movementSpeed: 2
+  sprintMult: 1.75
   jumpForce: 0.17
   gravityMult: 0.05
   terminalVelocity: 50
   velocity: {x: 0, y: 0, z: 0}
-  drag: 25
+  drag: 20
   sensitivity: 500
   cameraRotationEuler: {x: 0, y: 0, z: 0}
   characterController: {fileID: 3075508261262474775}

@@ -33,6 +33,7 @@ public class Player : NetworkBehaviour
         NetworkVariableWritePermission.Owner
         );
 
+    private float lastJump;
 
     public override void OnNetworkSpawn()
     {
@@ -118,10 +119,11 @@ public class Player : NetworkBehaviour
         //iirc this bool is true when a raycast sent down from the player hits something, not the guy who made the default unity character controller though
         if (characterController.isGrounded)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && lastJump > 0.25f)
             {
-                Debug.Log("playerJumping");
+                //Debug.Log("playerJumping");
                 y = jumpForce;
+                lastJump = 0;
             }
             else
             {
@@ -141,17 +143,25 @@ public class Player : NetworkBehaviour
         //tranform.forward and transform.right to work kindly with regular floats or a Vector2
         Vector3 xz = Vector3.zero;
 
+        xz += Input.GetAxis("Vertical") * transform.forward;
+        xz += Input.GetAxis("Horizontal") * transform.right;
+
+        xz = xz.normalized;
+
         if (Input.GetKey(KeyCode.LeftShift))
         {
             //if pressing shift, apply sprint mult to movement code
-            xz += Input.GetAxis("Vertical") * movementSpeed * sprintMult * transform.forward * Time.deltaTime;
-            xz += Input.GetAxis("Horizontal") * movementSpeed * sprintMult * transform.right * Time.deltaTime;
+            xz *= movementSpeed * sprintMult * Time.deltaTime;
         }
         else
         {
             //else do same code but without the sprint mult
-            xz += Input.GetAxis("Vertical") * movementSpeed * transform.forward * Time.deltaTime;
-            xz += Input.GetAxis("Horizontal") * movementSpeed * transform.right * Time.deltaTime;
+            xz *= movementSpeed * Time.deltaTime;
+        }
+
+        if (!characterController.isGrounded)
+        {
+            xz = xz * 0.05f;
         }
         return xz;
     }
@@ -174,9 +184,17 @@ public class Player : NetworkBehaviour
          * velocity.z = velocity.z * (1 - Time.deltaTime * drag);
          */
 
-        //NEW VARIABLE FRAMERATE SAFE*** Method to apply drag, will apply at the same rate as the Vsync I had when I got this controller feeling good enough for later use.
-        velocity.z = velocity.z * (1 - 0.008333333f * drag);
-        velocity.x = velocity.x * (1 - 0.008333333f * drag);
+        //NEW VARIABLE FRAMERATE SAFE*** Method to apply drag
+        if (characterController.isGrounded)
+        {
+            velocity.z = velocity.z - ((velocity.z * drag) * Time.deltaTime);
+            velocity.x = velocity.x - ((velocity.x * drag) * Time.deltaTime);
+        }
+        else
+        {
+            velocity.z = velocity.z - ((velocity.z * (drag * 0.05f)) * Time.deltaTime);
+            velocity.x = velocity.x - ((velocity.x * (drag * 0.05f)) * Time.deltaTime);
+        }
     }
 
     private void CalculateMovement()
@@ -191,6 +209,8 @@ public class Player : NetworkBehaviour
         //Apply this temporary Vector to the velocity Vector
         velocity += movement;
 
+        Debug.Log((velocity.magnitude * 2.237f) + " MPH");
+
         //Call the function to clamp velocity to terminal velocity and apply drag.
         CalculateVelocityChanges();
 
@@ -201,6 +221,7 @@ public class Player : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        lastJump += Time.deltaTime;
         
         //locks or unlocks the player cursor, movement, and ability to look if the tilde key is pressed, this allows the player to type, and use thier mouse when they open the console without the player moving everywhere
         if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
