@@ -1,8 +1,9 @@
 You are assigned as a Musician, Programmer, and Modeler. in that order of importance.
 
 assignments:
+BUILDING PREP!: we need two primary systems for building, grid based, which will be for things like walls, floors, stairs etc etc. and free form, for crafting stations and whatever else i throw into this mess. Use the command system for now to start the placement process, use placeholder models for floors, walls, and ramps, floors would be easy as a 5x5x0.1m cube that snaps to every 2.5 meters, the stairs would snap to every 2.5m as well, the walls will be trickier, you can do the math on that as i have things to get done with the tightening schedule... free place items will be simplier, but ensure to check for colission! raycasts from the center of the camerea would be best to acheive this. i'll let you figure out the networking side of it yourself as there are quite a few options. 
+
+if you complete this before i can get you more work, open up maya and ask me what i need. i'll have something. we are waiting on luigi to finally get work done so you can start doing AI. yell at him not me, i've got this roadmap pre planned and am scrambling with the lack of prereqs being completed.
+
+
 improvements to mock menu, speak to team lead directly for vision on this.
-
-player settings class, this should be static, and include variables you'd expect for settings, from username, sensitivity, etc. etc. this will hook into a settings menu later, and other menus.. then will eventually hook into a persistence system to save these settings to disc.
-
-server/host sided spawn of an object at 0,0,0 that will be our enemy main attack point, like the castle in GB was, this would have a health bar that is synced between players so everyone can see it (BUT ONLY HOST CAN EDIT!) auto regen which the pace of doesn't matter yet as we have yet to do any balancing, and a function that can be called to damage the structure which would eventually be called by attacking enemies.
