@@ -20,12 +20,12 @@ public class LookAt : MonoBehaviour
         if (playerCamera = null);
         {
             Debug.LogError("LookAt.cs, can't find game object with tag (MainCamera)");
-            Destroy(this)
+            Destroy(this);
         }
     }
     
     public void FixedUpdate()
     {
-        transform.LookAt(playerCamera);
+        transform.LookAt(playerCamera.transform);
     }
 }
