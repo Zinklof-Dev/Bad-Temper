@@ -13,14 +13,15 @@ public class IPV4toHex : MonoBehaviour
     }
 
     // Function Converts IPV4 To a Hexadecimal Number
+    // 
     public static string IPV4ToHexadecimal(string IP)
     {
-        // Splits the IP string into the four 
+        // Splits the IP string into the four octets and discards the periods
         string[] strings = IP.Split(".");
         string IPConverted = "";
 
         foreach (string s in strings) 
-        { 
+        {
             int decimalNumber = int.Parse(s);
 
             // Converts an int decimal number into a string hex number
