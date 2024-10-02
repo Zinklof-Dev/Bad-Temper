@@ -9,7 +9,7 @@ public class Campfire : NetworkBehaviour
     [Header("Client Side Refrences")]
     [SerializeField] private GameObject campfirePrefab;
     [SerializeField] private GameObject healthBar;
-    [SerializeField] private GameObject camera;
+    [SerializeField] private GameObject playerCamera;
     [SerializeField] private float campfireHealthRefrence;
 
     [Space(10)]
@@ -42,7 +42,7 @@ public class Campfire : NetworkBehaviour
         healTimer = healTime;
         Instantiate(campfirePrefab);
         healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
-        camera = GameObject.FindGameObjectWithTag("MainCamera");
+        playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         campfireHealthRefrence = campfireHealth.Value;
 
         // Network variables have an event called "OnValueChanged" that allows the client to update their refrence to the Network variable
@@ -100,7 +100,7 @@ public class Campfire : NetworkBehaviour
 
     private void HealthBarLookAtCamera()
     {
-        healthBar.transform.parent.LookAt(camera.transform);
+        healthBar.transform.parent.LookAt(playerCamera.transform);
     }
 
     private void UpdateHealthBar()
