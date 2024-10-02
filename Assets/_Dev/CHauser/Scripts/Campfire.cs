@@ -44,6 +44,8 @@ public class Campfire : NetworkBehaviour
         healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
         camera = GameObject.FindGameObjectWithTag("MainCamera");
         campfireHealthRefrence = campfireHealth.Value;
+
+        // Network variables have an event called "OnValueChanged" that allows the client to update their refrence to the Network variable
         campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
 
         // Allows for base OnNetworkSpawn() function to do it's job, adds stuff back we overrided
@@ -61,22 +63,22 @@ public class Campfire : NetworkBehaviour
 
     private void Update()
     {
+        // Makes sure we aren't executing the code and getting a million error messages from Unity before the health bar gets refrenced when Network Spawn happens
         if (healthBar == null)
-        {
             return;
-        }
 
         HealthBarLookAtCamera();
 
+        // Makes it so that only the server runs the logic for healing the campfire 
         if (!IsOwner)
             return;
         if (!IsServer) 
             return;
 
-        HealCastle();
+        HealCampfire();
     }
 
-    private void HealCastle()
+    private void HealCampfire()
     { 
         if(campfireHealth.Value > maxHealth)
             campfireHealth.Value = maxHealth;
@@ -115,7 +117,7 @@ public class Campfire : NetworkBehaviour
         }
     } */
 
-    private void DamageCastle(float damage)
+    private void DamageCampfire(float damage)
     {
         campfireHealth.Value -= damage;
     }
