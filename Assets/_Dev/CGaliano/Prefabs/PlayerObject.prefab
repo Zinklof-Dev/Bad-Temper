@@ -127,7 +127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 260954070
+  GlobalObjectIdHash: 2219543440
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -276,6 +276,7 @@ GameObject:
   - component: {fileID: 6062558629079652966}
   - component: {fileID: 4149278200128509181}
   - component: {fileID: 5209503698148771270}
+  - component: {fileID: 6657124633052491913}
   m_Layer: 6
   m_Name: UsernameObject
   m_TagString: Untagged
@@ -441,3 +442,15 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 4149278200128509181}
   m_maskType: 0
+--- !u!114 &6657124633052491913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7314431768203336622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3b3549fe16d6194bb3f1b7a5b8f1b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

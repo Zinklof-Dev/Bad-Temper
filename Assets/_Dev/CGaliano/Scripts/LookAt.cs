@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[AddComponentMenu("!ZinklofDev/" + "Utils")]
+[AddComponentMenu("!ZinklofDev/" + "Utils/" + "LookAt")]
 public class LookAt : MonoBehaviour
 {
     GameObject playerCamera = null;
@@ -17,7 +17,7 @@ public class LookAt : MonoBehaviour
             Debug.LogException(e);
         }
 
-        if (playerCamera = null);
+        if (playerCamera = null)
         {
             Debug.LogError("LookAt.cs, can't find game object with tag (MainCamera)");
             Destroy(this);
