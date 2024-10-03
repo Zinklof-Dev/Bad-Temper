@@ -29,9 +29,6 @@ public class Player : NetworkBehaviour
     [SerializeField] private TextMeshPro username;
     [Header("ignore me")]
     [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>(
-        value: "unkown",
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
         );
 
     private float lastJump;

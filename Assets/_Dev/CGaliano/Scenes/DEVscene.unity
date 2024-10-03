@@ -3347,7 +3347,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VerboseLogs: 0
-  runUnitTests: 1
+  runUnitTests: 0
 --- !u!4 &1815397946
 Transform:
   m_ObjectHideFlags: 0
