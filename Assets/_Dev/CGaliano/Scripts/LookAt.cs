@@ -6,28 +6,14 @@ using UnityEngine;
 public class LookAt : NetworkBehaviour
 {
     GameObject playerCamera = null;
-
-    public override void OnNetworkSpawn()
-    {
-        try
-        {
-            playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
-
-        if (playerCamera = null)
-        {
-            Debug.LogError("LookAt.cs, can't find game object with tag (MainCamera)");
-            Destroy(this);
-        }
-        base.OnNetworkSpawn();
-    }
     
     public void FixedUpdate()
     {
+        if (playerCamera == null)
+        {
+            playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        }
+
         transform.LookAt(playerCamera.transform);
     }
 }
