@@ -1,0 +1,13 @@
+10/03/02024 A.D. | 14:00:00:247 || TESTS RESULTS - ZINKLOF.DEV Unity C# Test System
+ 
+ 
+ALL RESULTS:
+ 
+    IPV4toHex.cs    Total Tests: 1   |   1 Passed 0 Failed. 100% S
+    Wave_System.cs    Total Tests: 1   |   1 Passed 0 Failed. 100% S
+
+    Total Tests: 3   |   3 Passed 0 Failed.
+
+ Grade: 100% S
+ Time Elapsed 4.5216ms
+ END LOG || 10/03/02024 A.D. | 14:00:00:252
