@@ -158,8 +158,8 @@ MonoBehaviour:
   playerLive: 0
   movementSpeed: 1.5
   sprintMult: 2.25
-  jumpForce: 0.03094
-  gravityMult: 0.0091
+  jumpForce: 0.17
+  gravityMult: 0.05
   terminalVelocity: 50
   velocity: {x: 0, y: 0, z: 0}
   drag: 20
