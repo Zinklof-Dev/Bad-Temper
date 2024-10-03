@@ -1,14 +1,15 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 [AddComponentMenu("!ZinklofDev/" + "Utils/" + "LookAt")]
-public class LookAt : MonoBehaviour
+public class LookAt : NetworkBehaviour
 {
     GameObject playerCamera = null;
 
-    public void Awake()
+    public override void OnNetworkSpawn()
     {
-        try 
+        try
         {
             playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
@@ -22,6 +23,7 @@ public class LookAt : MonoBehaviour
             Debug.LogError("LookAt.cs, can't find game object with tag (MainCamera)");
             Destroy(this);
         }
+        base.OnNetworkSpawn();
     }
     
     public void FixedUpdate()

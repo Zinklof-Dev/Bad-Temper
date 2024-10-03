@@ -2774,9 +2774,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  campfirePrefab: {fileID: 0}
+  campfirePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
+    type: 3}
   healthBar: {fileID: 0}
-  camera: {fileID: 0}
+  playerCamera: {fileID: 0}
   campfireHealthRefrence: 0
   healSpeed: 1
   healAmount: 1
