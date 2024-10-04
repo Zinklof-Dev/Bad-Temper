@@ -4,22 +4,25 @@ using UnityEngine;
 using ZinklofDev.Console;
 using ZinklofDev.Utils.Testing;
 
-public class Wave_System : NetworkBehaviour
+public class WaveSystem : NetworkBehaviour
 {
+    public delegate void WaveSystemEventManager();
+    public static event WaveSystemEventManager TestServerTick;
+
     public NetworkVariable<Int32> waveCount = new NetworkVariable<Int32>(
         value: 0,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
         );
 
-    public void increaseWaveCount(int incremental)
+    public void increaseWaveCount()
     {
         if (!IsOwner) 
             return;
         if (!IsServer)
             return;
 
-        waveCount.Value += incremental;
+        waveCount.Value += 1;
         Debug.Log(waveCount.Value);
     }
 
@@ -32,11 +35,8 @@ public class Wave_System : NetworkBehaviour
         Debug.Log(waveCount);
     }
 
-    public static Test WaveManagerIncramentTest = new Test("Wave_System.cs", () =>
-    {
-      //   int wavecount = increaseWaveCount("");
-
-       // WaveManagerIncramentTest.Expect();
-    });
+    //public static Test WaveManagerIncramentTest = new Test("Wave_System.cs", () =>
+    //{
+    //});
     
 }
