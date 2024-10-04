@@ -1,5 +1,5 @@
-using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
 
 public class BuildSystem : NetworkBehaviour
 {
@@ -33,7 +33,7 @@ public class BuildSystem : NetworkBehaviour
         }
     }
 
-    [ServerRpc]
+    [ServerRpc()]
     private void PlaceObjectInSceneServerRpc(Vector3 spawnPos, int objectID)
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
