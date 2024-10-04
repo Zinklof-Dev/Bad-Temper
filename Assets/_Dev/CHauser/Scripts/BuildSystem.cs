@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class BuildSystem : MonoBehaviour
+public class BuildSystem : NetworkBehaviour
 {
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private GameObject[] placeableObjects;
