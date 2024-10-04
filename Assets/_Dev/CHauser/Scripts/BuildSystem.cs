@@ -23,18 +23,18 @@ public class BuildSystem : NetworkBehaviour
     private void FreePlace(int objectID)
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit;
+        RaycastHit hit; 
 
         Debug.Log("Start");
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            PlaceObjectInSceneServerRpc(hit.point, objectID);
+            PlaceObjectInSceneRpc(hit.point, objectID);
         }
     }
 
-    [ServerRpc()]
-    private void PlaceObjectInSceneServerRpc(Vector3 spawnPos, int objectID)
+    [Rpc(SendTo.Server)]
+    private void PlaceObjectInSceneRpc(Vector3 spawnPos, int objectID)
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
