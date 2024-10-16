@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using ZinklofDev.Utils.Testing;
 
 public class BuildSystem : NetworkBehaviour
 {
@@ -33,10 +34,33 @@ public class BuildSystem : NetworkBehaviour
         }
     }
 
+    // Cole | Usually Mathf.Round rounds to the nearest whole number, but for the building grid system, I need to round to a multipule of certian values
+    // Cole | Thank you to Bunny83 and dgoyette on Unity Discussions for the logic
+    private float RoundToMultipule(float inputValue, float baseNumberOfMultipule)
+    {
+        return Mathf.Round(inputValue/baseNumberOfMultipule) * baseNumberOfMultipule;
+    }
+
     [Rpc(SendTo.Server)]
     private void PlaceObjectInSceneRpc(Vector3 spawnPos, int objectID)
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
+
+    // Cole | Temp commented out because I don't fully know if it being static in a non static function will break it, and I don't want people having compiler errors when they pull (made this in GitHub)
+    
+    /* public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
+    {
+        float x = RoundToMultipule(2.6, 2.5);
+        RoundToMultipuleTest.Expect(x, 2.5);
+
+        x = RoundToMultipule(69, 2.5);
+        RoundToMultipuleTest.Expect(x, 70);
+
+        x = RoundToMultipule(420.69, 8);
+        RoundToMultipuleTest.Expect(x, 424);
+
+    });
+    */
 }
