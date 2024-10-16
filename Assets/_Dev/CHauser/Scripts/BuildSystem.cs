@@ -50,13 +50,13 @@ public class BuildSystem : NetworkBehaviour
 
     public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
     {
-        float x = RoundToMultipule(2.6, 2.5);
+        float x = RoundToMultipule(2.6f, 2.5f);
         RoundToMultipuleTest.Expect(x, 2.5);
 
-        x = RoundToMultipule(69, 2.5);
+        x = RoundToMultipule(69, 2.5f);
         RoundToMultipuleTest.Expect(x, 70);
 
-        x = RoundToMultipule(420.69, 8);
+        x = RoundToMultipule(420.69f, 8);
         RoundToMultipuleTest.Expect(x, 424);
 
     });
