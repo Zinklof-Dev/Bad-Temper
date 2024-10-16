@@ -36,7 +36,7 @@ public class BuildSystem : NetworkBehaviour
 
     // Cole | Usually Mathf.Round rounds to the nearest whole number, but for the building grid system, I need to round to a multipule of certian values
     // Cole | Thank you to Bunny83 and dgoyette on Unity Discussions for the logic
-    private float RoundToMultipule(float inputValue, float baseNumberOfMultipule)
+    private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule)
     {
         return Mathf.Round(inputValue/baseNumberOfMultipule) * baseNumberOfMultipule;
     }
@@ -48,9 +48,7 @@ public class BuildSystem : NetworkBehaviour
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 
-    // Cole | Temp commented out because I don't fully know if it being static in a non static function will break it, and I don't want people having compiler errors when they pull (made this in GitHub)
-    
-    /* public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
+    public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
     {
         float x = RoundToMultipule(2.6, 2.5);
         RoundToMultipuleTest.Expect(x, 2.5);
@@ -62,5 +60,5 @@ public class BuildSystem : NetworkBehaviour
         RoundToMultipuleTest.Expect(x, 424);
 
     });
-    */
+    
 }
