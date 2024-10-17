@@ -39,6 +39,16 @@ public class BuildSystem : NetworkBehaviour
         }
     }
 
+    private void RampPlace()
+    {
+        // Ramp Code
+    }
+
+    private void WallPlace()
+    {
+        // Wall Code
+    }
+
     private void FreePlace(int objectID)
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
@@ -52,9 +62,18 @@ public class BuildSystem : NetworkBehaviour
 
     // Cole | Usually Mathf.Round rounds to the nearest whole number, but for the building grid system, I need to round to a multipule of certian values
     // Cole | Thank you to Bunny83 and dgoyette on Unity Discussions for the logic
+    
     private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule)
     {
-        return Mathf.Round(inputValue/baseNumberOfMultipule) * baseNumberOfMultipule;
+        return Mathf.Round(inputValue / baseNumberOfMultipule) * baseNumberOfMultipule;
+    }
+
+
+    // Cole | Also thank you to Bunny83, this allows for the function to also take in an offset value for rounding
+
+    private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule, float offset)
+    {
+        return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * inputValue + offset;
     }
 
     [Rpc(SendTo.Server)]
@@ -78,6 +97,18 @@ public class BuildSystem : NetworkBehaviour
         x = RoundToMultipule(420.69f, 8);
         RoundToMultipuleTest.Expect(x, 424f);
 
+    });
+
+    public static Test RoundWithOffsetTest = new Test("BuildSystem.cs", () =>
+    {
+        float x = RoundToMultipule(0.1f, 5, 2.5f);
+        RoundWithOffsetTest.Expect(2.5f);
+
+        x = RoundToMultipule(69, 6, 0.69f);
+        RoundWithOffsetTest.Expect(66.69f);
+
+        x = RoundToMultipule(450, 420, 0.69f);
+        RoundWithOffsetTest.Expect(420.69f);
     });
     
 }
