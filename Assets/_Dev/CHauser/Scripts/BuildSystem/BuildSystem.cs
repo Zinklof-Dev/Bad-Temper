@@ -5,9 +5,20 @@ using System;
 
 public class BuildSystem : NetworkBehaviour
 {
+    [Header("Game Object Refrences")]
+
     [SerializeField] private GameObject playerCamera;
+    // Cole | Place the buildable prefabs from the assets file into here
     [SerializeField] private GameObject[] placeableObjects;
+    // Cole | Place the ghost objects in the scene in here
+    [SerializeField] private GameObject[] ghostObjects;
+
+    [Header("Layer Masks")]
+
     [SerializeField] private LayerMask layerMask;
+
+    [Header("Modifiable Variables")]
+
     [SerializeField] private int currentObjectID;
     [SerializeField] private float playerReach;
 
@@ -22,8 +33,30 @@ public class BuildSystem : NetworkBehaviour
             FreePlace(currentObjectID);
         */
 
-        if (Input.GetKeyDown(KeyCode.Mouse1))
-            FloorPlace();
+        if (currentObjectID == 1)
+            CheckFloorPlace();
+    }
+
+    private void CheckFloorPlace()
+    {
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+
+        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        {
+            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
+        }
+        else
+        {
+            ghostObjects[1].transform.position = ghostObject.defaultPosition;
+        }
+
+        if(ghostObject.isSpawnable == true)
+        {
+            if(Input.GetMouseButtonDown(1))
+                FloorPlace();
+        }
     }
 
     private void FloorPlace()
@@ -41,7 +74,7 @@ public class BuildSystem : NetworkBehaviour
 
     private void RampPlace()
     {
-        // Ramp Code
+        
     }
 
     private void WallPlace()
@@ -73,7 +106,7 @@ public class BuildSystem : NetworkBehaviour
 
     private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule, float offset)
     {
-        return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * inputValue + offset;
+        return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * baseNumberOfMultipule + offset;
     }
 
     [Rpc(SendTo.Server)]
