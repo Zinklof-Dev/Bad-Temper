@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.Design;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Localization.SmartFormat.Core.Parsing;
@@ -9,7 +10,10 @@ public class WaveSystem : NetworkBehaviour
 {
     public delegate void WaveSystemEventManager();
     public static event WaveSystemEventManager TestServerTick;
-    
+    static bool isOwnerStatic = false;
+    static bool isServerStatic = false;
+
+    static int _waveCount;
 
     public NetworkVariable<Int32> waveCount = new NetworkVariable<Int32>(
         value: 0,
@@ -17,21 +21,33 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableWritePermission.Server
         );
 
-    public void increaseWaveCount()
+    public static void increaseWaveCount() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
     {
-        if (!IsOwner) 
+        
+        if (!isOwnerStatic) 
             return;
-        if (!IsServer)
+        if (!isServerStatic)
             return;
 
-        waveCount.Value += 1;
-        Debug.Log(waveCount.Value);
+        _waveCount += 1;
+       // UpdateWaveCount();
+    }
+
+    public void UpdateWaveCount()
+    {
+        _waveCount = Convert.ToInt32(waveCount.Value);
     }
 
     public override void OnNetworkSpawn()
     {
-        Shell.RegisterCommand(WAVESTART);
+        if (IsOwner)
+            isOwnerStatic = true;
+        if (IsServer)
+            isServerStatic = true;
 
+        Shell.RegisterCommand(WAVESTART);
+        Shell.RegisterCommand(INCWAVE);
+        
         base.OnNetworkSpawn();
     }
     public void Update()
@@ -49,10 +65,14 @@ public class WaveSystem : NetworkBehaviour
 
     }
 
-
-
     public static Command WAVESTART = new Command("0001x3700000000", "wave_start", "This starts the wave", false, () =>
     {
         WaveStart();
+    });
+
+    public static Command INCWAVE = new Command("0001x3700000001", "inc_wave", "This increases the wave by the amount put in", false, () =>
+    {
+        increaseWaveCount();
+        Log.LogResponse("Increased wave, now " + _waveCount);
     });
 }
