@@ -52,6 +52,15 @@ public class BuildSystem : NetworkBehaviour
             ghostObjects[1].transform.position = ghostObject.defaultPosition;
         }
 
+        Vector3 checkBounds = new Vector3(5, 5, 5);
+
+        Collider[] objectsInSphere = Physics.OverlapBox(ghostObjects[1].transform.position, checkBounds);
+
+        foreach (Collider collider in objectsInSphere)
+        {
+            //if 
+        }
+
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
