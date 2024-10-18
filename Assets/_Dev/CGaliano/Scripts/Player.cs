@@ -220,13 +220,13 @@ public class Player : NetworkBehaviour
     {
         if (!characterController.isGrounded)
         {
-            Debug.Log("logged lastSpeedValue");
+            //Debug.Log("logged lastSpeedValue");
             lastSpeed = MathF.Abs(velocity.y * 50); //50 follows the convention of every unity unit being one meter in my games, the 50 was gotten from testing this current char controler as it moved past cubes.
         }
 
         if (characterController.isGrounded && lastSpeed > 4) //this should only ever run the frame your character hits the ground.
         {
-            Debug.Log("entered intto the apply dmg");
+            //Debug.Log("entered intto the apply dmg");
             //i'll be basing this off a NASA study on ejection systems and how they affect human bodies, 12 Meters Per Second seem to be survivable but cause life changing injuries, 17 MPS is certain death
 
             float damage = ((lastSpeed - 4) * (lastSpeed - 4) / 140) * maxHealth; //This may seem super random, but its a cheap, basic exponential function, you take 0 damage at 4 mps, 45.7% of your health is lost at 12 mps, and 100% at roughly 15.85 mps
@@ -267,7 +267,7 @@ public class Player : NetworkBehaviour
 
                 CalculateMovement();
 
-                ApplyFallDamage();
+                //ApplyFallDamage();
             }
         }
         catch (Exception e)

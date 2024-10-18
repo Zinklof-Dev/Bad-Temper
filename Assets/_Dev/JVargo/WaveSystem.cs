@@ -12,7 +12,7 @@ using ZinklofDev.Utils.Testing;
 public class WaveSystem : NetworkBehaviour
 {
     public delegate void WaveSystemEventManager();
-    public static event WaveSystemEventManager TestServerTick;
+    public static event WaveSystemEventManager TestServerTick; // Cameron | I love how this keeps chucking a warning at me in editor because its still unused KEK
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
  
@@ -27,11 +27,14 @@ public class WaveSystem : NetworkBehaviour
     
         public static void increaseWaveCount() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
         {
-           // Cole | 10/18/24 | Compiler error here
-           // Not how network variables work smh
-           // where is singapore - Lucas
+            // Cole | 10/18/24 | Compiler error here --->
+            // Not how network variables work smh
 
-           // var wave = NetworkVariable<Int32>.waveCount;
+            // where is singapore - Lucas
+
+            // Cameron | I thought i removed lucas's access to the repository when he left the team? (i also fixed these all being misaligned by one space)
+
+            // var wave = NetworkVariable<Int32>.waveCount; <---
         
             if (!isOwnerStatic) 
                 return;
@@ -39,8 +42,12 @@ public class WaveSystem : NetworkBehaviour
                 return;
 
             _waveCount += 1;
-            // Cole | 10/18/24 | and here to
-            // wave.UpdateWaveCount();
+
+            // Cole | 10/18/24 | and here to --->
+
+            // Cameron | Wrong kind of too ya idiot.
+
+            // wave.UpdateWaveCount(); <---
     }
 
     public void UpdateWaveCount()
