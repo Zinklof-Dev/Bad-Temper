@@ -1,6 +1,9 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.Design;
 using Unity.Netcode;
+using Unity.VisualScripting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Localization.SmartFormat.Core.Parsing;
 using ZinklofDev.Console;
@@ -12,6 +15,7 @@ public class WaveSystem : NetworkBehaviour
     public static event WaveSystemEventManager TestServerTick;
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
+ 
 
     static int _waveCount;
 
@@ -20,24 +24,25 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
         );
-
-    public static void increaseWaveCount() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
-    {
+    
+        public static void increaseWaveCount() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
+        {
+            var wave = NetworkVariable<Int32>.waveCount;
         
-        if (!isOwnerStatic) 
-            return;
-        if (!isServerStatic)
-            return;
+            if (!isOwnerStatic) 
+                return;
+            if (!isServerStatic)
+                return;
 
-        _waveCount += 1;
-       // UpdateWaveCount();
-    }
+            _waveCount += 1;
+
+            wave.UpdateWaveCount();
+        }
 
     public void UpdateWaveCount()
     {
-        _waveCount = Convert.ToInt32(waveCount.Value);
-    }
-
+        waveCount.Value = _waveCount;
+    } 
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
