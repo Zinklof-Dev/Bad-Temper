@@ -12,6 +12,8 @@ public class BuildSystem : NetworkBehaviour
     [SerializeField] private GameObject[] placeableObjects;
     // Cole | Place the ghost objects in the scene in here
     [SerializeField] private GameObject[] ghostObjects;
+    // Cole | List of all game objects with a "Building
+    [SerializeField] private GameObject[] buildObjectsInScene;
 
     [Header("Layer Masks")]
 
