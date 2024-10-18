@@ -27,7 +27,11 @@ public class WaveSystem : NetworkBehaviour
     
         public static void increaseWaveCount() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
         {
-            var wave = NetworkVariable<Int32>.waveCount;
+           // Cole | 10/18/24 | Compiler error here
+           // Not how network variables work smh
+           // where is singapore - Lucas
+
+           // var wave = NetworkVariable<Int32>.waveCount;
         
             if (!isOwnerStatic) 
                 return;
@@ -35,9 +39,9 @@ public class WaveSystem : NetworkBehaviour
                 return;
 
             _waveCount += 1;
-
-            wave.UpdateWaveCount();
-        }
+            // Cole | 10/18/24 | and here to
+            // wave.UpdateWaveCount();
+    }
 
     public void UpdateWaveCount()
     {
