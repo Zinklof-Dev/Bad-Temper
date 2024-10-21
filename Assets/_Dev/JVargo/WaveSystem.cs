@@ -1,13 +1,9 @@
 using System;
-using System.ComponentModel;
-using System.ComponentModel.Design;
 using Unity.Netcode;
-using Unity.VisualScripting;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Localization.SmartFormat.Core.Parsing;
+using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 using ZinklofDev.Console;
-using ZinklofDev.Utils.Testing;
 
 public class WaveSystem : NetworkBehaviour
 {
@@ -16,8 +12,9 @@ public class WaveSystem : NetworkBehaviour
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
  
+    static bool waveChanged = false;
 
-    static int _waveCount;
+    public static int _waveCount;
 
     public NetworkVariable<Int32> waveCount = new NetworkVariable<Int32>(
         value: 0,
@@ -25,35 +22,32 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableWritePermission.Server
         );
     
-        public static void increaseWaveCount() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
-        {
-            // Cole | 10/18/24 | Compiler error here --->
-            // Not how network variables work smh
+    public static void WaveStart() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
+    {
+        waveChanged = true;
+        // Cole | 10/18/24 | Compiler error here --->
+        // Not how network variables work smh
 
-            // where is singapore - Lucas
+        // where is singapore - Lucas
 
-            // Cameron | I thought i removed lucas's access to the repository when he left the team? (i also fixed these all being misaligned by one space)
+        // Cameron | I thought i removed lucas's access to the repository when he left the team? (i also fixed these all being misaligned by one space)
 
-            // var wave = NetworkVariable<Int32>.waveCount; <---
-        
-            if (!isOwnerStatic) 
-                return;
-            if (!isServerStatic)
-                return;
+        // var wave = NetworkVariable<Int32>.waveCount; <---
 
-            _waveCount += 1;
+        if (!isOwnerStatic)
+            return;
+        if (!isServerStatic)
+            return;
 
-            // Cole | 10/18/24 | and here to --->
+        _waveCount += 1;
 
-            // Cameron | Wrong kind of too ya idiot.
+        // Cole | 10/18/24 | and here to --->
 
-            // wave.UpdateWaveCount(); <---
+        // Cameron | Wrong kind of too ya idiot.
+
+        // wave.UpdateWaveCount(); <---
     }
 
-    public void UpdateWaveCount()
-    {
-        waveCount.Value = _waveCount;
-    } 
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
@@ -62,33 +56,30 @@ public class WaveSystem : NetworkBehaviour
             isServerStatic = true;
 
         Shell.RegisterCommand(WAVESTART);
-        Shell.RegisterCommand(INCWAVE);
         
         base.OnNetworkSpawn();
     }
     public void Update()
     {
+        if (waveChanged && IsServer)
+        {
+            waveCount.Value = _waveCount;
+            waveChanged = false;
+        }
+
+
         //Debug.Log(waveCount);
     }
 
-    public static void WaveStart()
+    public static void EndWave()
     {
-        Debug.Log("Placeholder");
+        Debug.LogWarning("EndWave(); not implimented yet");
     }
 
-    public void WaveEnd()
+    public static Command WAVESTART = new Command("0001x3700000000", "wave.force_start", "This starts the wave", true, () =>
     {
-
-    }
-
-    public static Command WAVESTART = new Command("0001x3700000000", "wave_start", "This starts the wave", false, () =>
-    {
+        EndWave();
         WaveStart();
-    });
-
-    public static Command INCWAVE = new Command("0001x3700000001", "inc_wave", "This increases the wave by the amount put in", false, () =>
-    {
-        increaseWaveCount();
-        Log.LogResponse("Increased wave, now " + _waveCount);
+        Log.LogResponse("Force Started wave, now " + _waveCount);
     });
 }
