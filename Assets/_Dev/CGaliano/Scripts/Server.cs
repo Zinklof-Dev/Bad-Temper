@@ -1,96 +1,135 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Server : NetworkBehaviour
 {
-    private void Start()
+    [Header("Tick Debug Display")]
+    [SerializeField] float serverTicksPerSecond;
+    [SerializeField] float aiTicksPerSecond;
+    [Header("Tick Settings")]
+    [SerializeField] int targetServerTicksPerSecond;
+    [SerializeField] int targetAiTicksPerSecond;
+    [SerializeField] int minServerTicksPerSecond;
+    [SerializeField] int minAiTicksPerSecond;
+    [Space(5)]
+    [SerializeField] bool logTicks;
+
+    List<Action> ActionQueue = new List<Action>();
+
+    public delegate void ServerEventManger();
+    public event ServerEventManger ServerTick;
+    public event ServerEventManger AITick;
+
+    float timeSinceLastServerTick;
+    float timeSinceLastAiTick;
+
+    float timeBetweenServerTicks;
+    float timeBetweenAITicks;
+
+    //deltaTimes for the ticks
+    static public float ServerDeltaTime;
+    public static float AIDeltaTime;
+
+    private void Awake()
     {
         DontDestroyOnLoad(this);
 
-        player1Name.OnValueChanged += (string previousValue, string newValue) =>
-        {
-            username1.text = newValue;
-        };
+        timeBetweenServerTicks = 1 / targetServerTicksPerSecond;
+        timeBetweenAITicks = 1 / targetAiTicksPerSecond;
     }
 
-    public static byte getID()
+    /// <summary>
+    /// This function queues an action to be run by the server next server tick. you probably wont have a reason to use this with the server tick event.
+    /// however, if you need it, please know that it will loose any references you have and thus is severely limited, if you really need to queue
+    /// actions to be done on a server tick, it may not be as performant but making a queue within your own script is probably best for you.
+    /// </summary>
+    /// <param name="action">the action to be invoked next server tick</param>
+    public void QueueServerAction(Action action)
     {
-        if (lastID == 6)
-        {
-            Debug.LogWarning("too many IDs taken, kicking client");
-            Application.Quit();
-            return 0;
-        }
-        byte id = (byte)(lastID + 1);
-        lastID++;
-        return id;
+        //this should allow scripts runnning more often than server ticks to request the server does something next tick and still get all of them/it done
+        //might go pretty unused
+        ActionQueue.Add(action);
     }
 
-    private static byte lastID = 0;
-
-    NetworkVariable<string> player1Name;
-    NetworkVariable<string> player2Name;
-    NetworkVariable<string> player3Name;
-    NetworkVariable<string> player4Name;
-    NetworkVariable<string> player5Name;
-    NetworkVariable<string> player6Name;
-
-    TextMeshPro username1;
-    TextMeshPro username2;
-    TextMeshPro username3;
-    TextMeshPro username4;
-    TextMeshPro username5;
-    TextMeshPro username6;
-
-    public void ChangeName(byte ID, string newName)
+    private void InternalServerTick()
     {
-        switch (ID)
+        ServerDeltaTime = timeSinceLastServerTick;
+
+        if (logTicks)
         {
-            case 1:
-                player1Name.Value = newName;
-                break;
-            case 2:
-                player2Name.Value = newName;
-                break;
-            case 3:
-                player3Name.Value = newName;
-                break;
-            case 4:
-                player4Name.Value = newName;
-                break;
-            case 5:
-                player5Name.Value = newName;
-                break;
-            case 6:
-                player6Name.Value = newName;
-                break;
+            Debug.Log("Server Tick");
         }
+
+        //Run through the action Queue
+        try
+        {
+            if (ActionQueue.Count < 0)
+            {
+                foreach (Action a in ActionQueue)
+                {
+                    a.Invoke();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
+
+        //Should always be at the end to ensure the server does all its stuff before other scripts run with the server tick.
+        ServerTick?.Invoke();
     }
 
-    public void SubscribeNameUpdate(byte ID, TextMeshPro nameObject)
+    private void InternalAITick()
     {
-        switch (ID)
+        AIDeltaTime = timeSinceLastAiTick;
+
+        if (logTicks)
         {
-            case 1:
-                username1 = nameObject;
-                break;
-            case 2:
-                username2 = nameObject;
-                break;
-            case 3:
-                username3 = nameObject;
-                break;
-            case 4:
-                username4 = nameObject;
-                break;
-            case 5:
-                username5 = nameObject;
-                break;
-            case 6:
-                username6 = nameObject;
-                break;
+            Debug.Log("AI Tick");
         }
+
+        //should always be at the end to ensure the server does all other required stuff before other scripts run with the AI tick
+        AITick?.Invoke();
+    }
+
+    private void ChangeTickRate()
+    {
+        float deltAsFPS = 1 / Time.deltaTime;
+
+        float percentage = deltAsFPS / 60;
+
+        serverTicksPerSecond = Mathf.Clamp((targetServerTicksPerSecond * percentage), minServerTicksPerSecond, targetServerTicksPerSecond);
+        aiTicksPerSecond = Mathf.Clamp((targetAiTicksPerSecond * percentage), minAiTicksPerSecond, targetAiTicksPerSecond);
+
+        timeBetweenServerTicks = 1 / serverTicksPerSecond;
+        timeBetweenAITicks = 1 / aiTicksPerSecond;
+    }
+
+    private void Update()
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        timeSinceLastAiTick += Time.deltaTime;
+        timeBetweenServerTicks += Time.deltaTime;
+
+        if (timeSinceLastServerTick > timeBetweenServerTicks)
+        {
+            InternalServerTick();
+        }
+        if (timeSinceLastAiTick > timeBetweenAITicks)
+        {
+            InternalAITick();
+        }
+
+        ChangeTickRate();
     }
 }
