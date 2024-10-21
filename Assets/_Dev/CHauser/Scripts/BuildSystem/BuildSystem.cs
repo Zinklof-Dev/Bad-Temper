@@ -70,7 +70,7 @@ public class BuildSystem : NetworkBehaviour
             if(Input.GetMouseButtonDown(1))
             {
                 if(CheckProposedPlacement(ghostObjects[1].transform.position))
-                    PlaceObjectInSceneRpc(ghostObjects[1].transform.position);
+                    PlaceObjectInSceneRpc(ghostObjects[1].transform.position, 1);
             }
         }
     }
@@ -98,9 +98,9 @@ public class BuildSystem : NetworkBehaviour
 
     private bool CheckProposedPlacement(Vector3 proposedPosition)
     {
-        foreach(GameObject in buildObjectsInScene)
+        foreach(GameObject gameObject in buildObjectsInScene)
         {
-            if(buildObjectsInScene.transform.position == proposedPosition)
+            if (gameObject.transform.position == proposedPosition)
                 return false;
         }
 
