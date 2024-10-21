@@ -12,7 +12,7 @@ public class BuildSystem : NetworkBehaviour
     [SerializeField] private GameObject[] placeableObjects;
     // Cole | Place the ghost objects in the scene in here
     [SerializeField] private GameObject[] ghostObjects;
-    // Cole | List of all game objects with a "Building
+    // Cole | List of all game objects with a "BuildingObjects" tag that are active in the scene
     [SerializeField] private GameObject[] buildObjectsInScene;
 
     [Header("Layer Masks")]
@@ -23,6 +23,7 @@ public class BuildSystem : NetworkBehaviour
 
     [SerializeField] private int currentObjectID;
     [SerializeField] private float playerReach;
+    [SerializeField] public bool isBuilding;
 
     private void Awake()
     {
@@ -31,12 +32,22 @@ public class BuildSystem : NetworkBehaviour
 
     void Update()
     {
-        /* if (Input.GetKeyDown(KeyCode.Mouse1))
-            FreePlace(currentObjectID);
-        */
+        // Cole | Will make sure code only executes if player is building
+        // Cole | Was going to reserve Object ID zero for this but thats dumb we can just use a bool that other scripts can edit 
+        // Cole | I need to add commands, I'm going to either add a class to this script or make a commands script, or try to figure out how to add them to this script.
+        if (!isBuilding)
+            return;
+        
+        // Cole | Probably need to change tag, will check later in Flowers
+        buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildingObject");
 
-        if (currentObjectID == 1)
-            CheckFloorPlace();
+        // Cole | Right now I have the floor object with an ID of one, but I will change it to zero in Flowers most likley.
+        switch (currentObjectID)
+        {
+            case 1:
+                CheckFloorPlace();
+                break;
+        }
     }
 
     private void CheckFloorPlace()
