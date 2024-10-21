@@ -45,12 +45,12 @@ public class BuildSystem : NetworkBehaviour
         switch (currentObjectID)
         {
             case 1:
-                CheckFloorPlace();
+                FloorPlace();
                 break;
         }
     }
 
-    private void CheckFloorPlace()
+    private void FloorPlace()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
@@ -68,20 +68,10 @@ public class BuildSystem : NetworkBehaviour
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
-                FloorPlace();
-        }
-    }
-
-    private void FloorPlace()
-    {
-
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
-        {
-            Vector3 gridPosition = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
-            PlaceObjectInSceneRpc(gridPosition, 1);
+            {
+                if(CheckProposedPlacement(ghostObjects[1].transform.position))
+                    PlaceObjectInSceneRpc(ghostObjects[1].transform.position);
+            }
         }
     }
 
@@ -104,6 +94,17 @@ public class BuildSystem : NetworkBehaviour
         {
             PlaceObjectInSceneRpc(hit.point, objectID);
         }
+    }
+
+    private bool CheckProposedPlacement(Vector3 proposedPosition)
+    {
+        foreach(GameObject in buildObjectsInScene)
+        {
+            if(buildObjectsInScene.transform.position == proposedPosition)
+                return false;
+        }
+
+        return true;
     }
 
     // Cole | Usually Mathf.Round rounds to the nearest whole number, but for the building grid system, I need to round to a multipule of certian values
