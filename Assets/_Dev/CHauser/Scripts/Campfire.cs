@@ -10,6 +10,7 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private GameObject campfirePrefab;
     [SerializeField] private GameObject healthBar;
     [SerializeField] private GameObject playerCamera;
+    [SerializeField] private Server server;
     [SerializeField] private float campfireHealthRefrence;
 
     [Space(10)]
@@ -43,10 +44,14 @@ public class Campfire : NetworkBehaviour
         Instantiate(campfirePrefab);
         healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        server = GameObject.FindGameObjectWithTag("server").GetComponent<Server>();
         campfireHealthRefrence = campfireHealth.Value;
 
         // Network variables have an event called "OnValueChanged" that allows the client to update their refrence to the Network variable
         campfireHealth.OnValueChanged += UpdateCampfireHealthValue;
+
+        // Makes it so that the function executes every server tick
+        server.ServerTick += HealCampfire;
 
         // Allows for base OnNetworkSpawn() function to do it's job, adds stuff back we overrided
 
@@ -68,14 +73,6 @@ public class Campfire : NetworkBehaviour
             return;
 
         HealthBarLookAtCamera();
-
-        // Makes it so that only the server runs the logic for healing the campfire 
-        if (!IsOwner)
-            return;
-        if (!IsServer) 
-            return;
-
-        HealCampfire();
     }
 
     private void HealCampfire()
@@ -93,7 +90,7 @@ public class Campfire : NetworkBehaviour
             }
             else
             {
-                healTimer -= healSpeed * Time.deltaTime;
+                healTimer -= healSpeed * Server.ServerDeltaTime;
             }
         }
     }

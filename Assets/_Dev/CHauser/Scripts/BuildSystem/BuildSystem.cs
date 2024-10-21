@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Testing;
 using System;
+using ZinklofDev.Console;
 
 public class BuildSystem : NetworkBehaviour
 {
@@ -21,30 +22,37 @@ public class BuildSystem : NetworkBehaviour
 
     [Header("Modifiable Variables")]
 
-    [SerializeField] private int currentObjectID;
+    [SerializeField] private static int currentObjectID;
     [SerializeField] private float playerReach;
-    [SerializeField] public bool isBuilding;
+    [SerializeField] public static bool isBuilding;
 
     private void Awake()
     {
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
     }
 
+    public override void OnNetworkSpawn()
+    {
+        Shell.RegisterCommand(IS_BUILDING);
+        Shell.RegisterCommand(CHANGE_BUILD_OBJECT_ID);
+
+        base.OnNetworkSpawn();
+    }
+
     void Update()
     {
         // Cole | Will make sure code only executes if player is building
         // Cole | Was going to reserve Object ID zero for this but thats dumb we can just use a bool that other scripts can edit 
-        // Cole | I need to add commands, I'm going to either add a class to this script or make a commands script, or try to figure out how to add them to this script.
+
         if (!isBuilding)
             return;
         
-        // Cole | Probably need to change tag, will check later in Flowers
-        buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildingObject");
+        buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildObjects");
 
         // Cole | Right now I have the floor object with an ID of one, but I will change it to zero in Flowers most likley.
         switch (currentObjectID)
         {
-            case 1:
+            case 0:
                 FloorPlace();
                 break;
         }
@@ -52,25 +60,27 @@ public class BuildSystem : NetworkBehaviour
 
     private void FloorPlace()
     {
+        // FLOOR IS ID 0
+
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
-        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+        GhostObject ghostObject = ghostObjects[0].GetComponent<GhostObject>();
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
+            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
         }
         else
         {
-            ghostObjects[1].transform.position = ghostObject.defaultPosition;
+            ghostObjects[0].transform.position = ghostObject.defaultPosition;
         }
 
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
             {
-                if(CheckProposedPlacement(ghostObjects[1].transform.position))
-                    PlaceObjectInSceneRpc(ghostObjects[1].transform.position, 1);
+                if(CheckProposedPlacement(ghostObjects[0].transform.position))
+                    PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
             }
         }
     }
@@ -157,5 +167,15 @@ public class BuildSystem : NetworkBehaviour
         x = RoundToMultipule(450, 420, 0.69f);
         RoundWithOffsetTest.Expect(x, 420.69f);
     });
-    
+
+    public static Command<bool> IS_BUILDING = new Command<bool>("0001x1500000003", "is_building", "Activates or deactivates build system.", false, (t1) =>
+    {
+        isBuilding = t1;
+    });
+
+    public static Command<int> CHANGE_BUILD_OBJECT_ID = new Command<int>("0001x1500000004", "change_build_object_id", "Changes the object you are placing in the scene", false, (t1) =>
+    {
+        currentObjectID = t1;
+    });
+
 }

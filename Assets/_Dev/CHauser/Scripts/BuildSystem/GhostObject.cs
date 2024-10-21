@@ -9,5 +9,7 @@ public class GhostObject : MonoBehaviour
     {
         if (transform.position == defaultPosition)
             isSpawnable = false;
+        else
+            isSpawnable = true;
     }
 }

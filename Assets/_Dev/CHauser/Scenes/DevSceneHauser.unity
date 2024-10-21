@@ -6673,6 +6673,7 @@ MonoBehaviour:
     type: 3}
   healthBar: {fileID: 0}
   playerCamera: {fileID: 0}
+  server: {fileID: 0}
   campfireHealthRefrence: 0
   healSpeed: 1
   healAmount: 1
@@ -9120,16 +9121,13 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   playerCamera: {fileID: 0}
   placeableObjects:
-  - {fileID: 6203676848952590560, guid: 8de2ab867838ae14994b493835a3be54, type: 3}
   - {fileID: 3171896432533926097, guid: 3cf0df2b888b0e840a162a0f2327a27a, type: 3}
-  - {fileID: 5503550110582270622, guid: 15cb99c967f14944db62a00055a56270, type: 3}
   ghostObjects:
-  - {fileID: 0}
   - {fileID: 858357169}
+  buildObjectsInScene: []
   layerMask:
     serializedVersion: 2
     m_Bits: 1
-  currentObjectID: 0
   playerReach: 100
 --- !u!4 &182077250
 Transform:
