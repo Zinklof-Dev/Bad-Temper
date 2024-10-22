@@ -8,15 +8,15 @@ public class GhostObject : MonoBehaviour
 
     private void Update()
     {
-        if (CheckForCollision())
-            isSpawnable = true;
-        else
-            isSpawnable = false;
-
         if (transform.position == defaultPosition)
             isSpawnable = false;
         else
-            isSpawnable = true;
+        {
+            if (CheckForCollision())
+                isSpawnable = true;
+            else
+                isSpawnable = false;
+        }
     }
 
     private bool CheckForCollision()
