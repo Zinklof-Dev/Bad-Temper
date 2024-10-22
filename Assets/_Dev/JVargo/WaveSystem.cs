@@ -11,6 +11,9 @@ public class WaveSystem : NetworkBehaviour
     public static event WaveSystemEventManager TestServerTick; // Cameron | I love how this keeps chucking a warning at me in editor because its still unused KEK
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
+    static bool isDay = false;
+    static float timeOfDay;
+    static string time;
  
     static bool waveChanged = false;
 
@@ -46,6 +49,7 @@ public class WaveSystem : NetworkBehaviour
         // Cameron | Wrong kind of too ya idiot.
 
         // wave.UpdateWaveCount(); <---
+        StartDay();
     }
 
     public override void OnNetworkSpawn()
@@ -56,9 +60,16 @@ public class WaveSystem : NetworkBehaviour
             isServerStatic = true;
 
         Shell.RegisterCommand(WAVESTART);
-        
+        Shell.RegisterCommand(CURRENTTIME);
         base.OnNetworkSpawn();
     }
+
+    public static void StartDay()
+    {
+        isDay = true;
+        Log.LogResponse("It is daytime " + isDay);
+    }
+
     public void Update()
     {
         if (waveChanged && IsServer)
@@ -67,6 +78,13 @@ public class WaveSystem : NetworkBehaviour
             waveChanged = false;
         }
 
+        if (isDay)
+        {
+            timeOfDay += Time.deltaTime;
+            int mins = Mathf.FloorToInt(timeOfDay / 60);
+            int secs = Mathf.FloorToInt(timeOfDay % 60);
+            time = string.Format("{0:00} : {1:00}", mins, secs);
+        }
 
         //Debug.Log(waveCount);
     }
@@ -82,4 +100,8 @@ public class WaveSystem : NetworkBehaviour
         WaveStart();
         Log.LogResponse("Force Started wave, now " + _waveCount);
     });
+
+    public static LegacyCommand CURRENTTIME = new LegacyCommand("0001x3700000001", "current_time", "this will tell us the current time of day", false, () =>
+        Log.LogResponse(time)
+    );
 }
