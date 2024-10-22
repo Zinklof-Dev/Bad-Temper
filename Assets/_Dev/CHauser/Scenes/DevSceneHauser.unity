@@ -9127,7 +9127,7 @@ MonoBehaviour:
   buildObjectsInScene: []
   layerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 4294967295
   playerReach: 100
 --- !u!4 &182077250
 Transform:
@@ -20592,7 +20592,7 @@ GameObject:
   - component: {fileID: 1010172075}
   - component: {fileID: 1010172074}
   - component: {fileID: 1010172073}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System;
 using UnityEngine;
 
 public class GhostObject : MonoBehaviour
@@ -5,6 +7,8 @@ public class GhostObject : MonoBehaviour
     public bool isSpawnable; 
     public Vector3 defaultPosition;
     public LayerMask layerMask;
+    public Material material;
+
 
     private void Update()
     {
@@ -17,15 +21,35 @@ public class GhostObject : MonoBehaviour
             else
                 isSpawnable = false;
         }
+
+        if (isSpawnable)
+            material.color = new Color(0, 1, 0, 0.4f);
+        else 
+            material.color = new Color(1, 0, 0, 0.4f);
+    }
+
+    private void OnApplicationQuit()
+    {
+        material.color = new Color(1, 1, 1, 0.4f);
     }
 
     private bool CheckForCollision()
     {
-        // Cameron | 10/22/2024 A.D 05:58 EST | Compiler error in the next line, Quaternion.Identity doesn't exist, fixed it for you. its a lowercase i :) 
-        Collider[] colliders = Physics.OverlapBox(gameObject.transform.position, transform.localScale / 2, Quaternion.identity, layerMask);
-        if (colliders[0] == null)
+        Collider[] colliders = Physics.OverlapBox(transform.position, transform.localScale / 2.01f, Quaternion.identity, layerMask);
+        bool collidersFound = false;
+
+        foreach (Collider collider in colliders)
+        {
+            collidersFound = true;
+        }
+
+        if (!collidersFound)
+        {
             return true;
+        }
         else
-            return false; 
+        {
+            return false;
+        }
     }
 }

@@ -108,10 +108,12 @@ public class BuildSystem : NetworkBehaviour
 
     private bool CheckProposedPlacement(Vector3 proposedPosition)
     {
-        foreach(GameObject gameObject in buildObjectsInScene)
+        foreach (GameObject gameObject in buildObjectsInScene)
         {
             if (gameObject.transform.position == proposedPosition)
+            { 
                 return false;
+            }
         }
 
         return true;
