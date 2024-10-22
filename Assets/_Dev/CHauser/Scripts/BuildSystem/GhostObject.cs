@@ -35,7 +35,7 @@ public class GhostObject : MonoBehaviour
 
     private bool CheckForCollision()
     {
-        Collider[] colliders = Physics.OverlapBox(transform.position, transform.localScale / 2.01f, Quaternion.identity, layerMask);
+        Collider[] colliders = Physics.OverlapBox(transform.position, new Vector3(transform.localScale.x / 2.01f, transform.localScale.y / 2, transform.localScale.z / 2.01f), Quaternion.identity, layerMask);
         bool collidersFound = false;
 
         foreach (Collider collider in colliders)
