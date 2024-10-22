@@ -20,12 +20,12 @@ public class NetworkCommands : MonoBehaviour
         Shell.RegisterCommand(ClientBackend.CHANGEUSERNAME);
     }
 
-    Command HOST =  new Command("0001x8800000000", "host", "starts server", false, ()=>
+    LegacyCommand HOST =  new LegacyCommand("0001x8800000000", "host", "starts server", false, ()=>
     {
         host();    
     });
 
-    Command<string> CONNECT = new Command<string>("0001x8800000001", "connect", "connects to server", false, (t1) =>
+    LegacyCommand<string> CONNECT = new LegacyCommand<string>("0001x8800000001", "connect", "connects to server", false, (t1) =>
     {
         Connect(t1);
     });

@@ -168,12 +168,12 @@ public class BuildSystem : NetworkBehaviour
         RoundWithOffsetTest.Expect(x, 420.69f);
     });
 
-    public static Command<bool> IS_BUILDING = new Command<bool>("0001x1500000003", "is_building", "Activates or deactivates build system.", false, (t1) =>
+    public static LegacyCommand<bool> IS_BUILDING = new LegacyCommand<bool>("0001x1500000003", "is_building", "Activates or deactivates build system.", false, (t1) =>
     {
         isBuilding = t1;
     });
 
-    public static Command<int> CHANGE_BUILD_OBJECT_ID = new Command<int>("0001x1500000004", "change_build_object_id", "Changes the object you are placing in the scene", false, (t1) =>
+    public static LegacyCommand<int> CHANGE_BUILD_OBJECT_ID = new LegacyCommand<int>("0001x1500000004", "change_build_object_id", "Changes the object you are placing in the scene", false, (t1) =>
     {
         currentObjectID = t1;
     });

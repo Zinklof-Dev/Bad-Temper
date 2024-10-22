@@ -50,7 +50,7 @@ namespace ZinklofDev.Console
             {
                 transformedLog = "<color=#FFEB04>" + log.log + "</color>";
             }
-            else if (log.type == ConsoleLogging.GSLogType.Command)
+            else if (log.type == ConsoleLogging.GSLogType.LegacyCommand)
             {
                 transformedLog = "<color=#0FFFFF>" + log.log + "</color>";
             }
@@ -120,12 +120,12 @@ namespace ZinklofDev.Console
         }
         public static void LogCommand(string message)
         {
-            var temp = new ConsoleLogging.GSLog(message, string.Empty, ConsoleLogging.GSLogType.Command);
+            var temp = new ConsoleLogging.GSLog(message, string.Empty, ConsoleLogging.GSLogType.LegacyCommand);
             HandleGSLog(temp);
         }
         public static void LogCommand(string message, string scriptNameAndLine)
         {
-            var temp = new ConsoleLogging.GSLog(message, scriptNameAndLine, ConsoleLogging.GSLogType.Command);
+            var temp = new ConsoleLogging.GSLog(message, scriptNameAndLine, ConsoleLogging.GSLogType.LegacyCommand);
             HandleGSLog(temp);
         }
         public static void LogResponse(string message)

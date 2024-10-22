@@ -76,7 +76,7 @@ public class WaveSystem : NetworkBehaviour
         Debug.LogWarning("EndWave(); not implimented yet");
     }
 
-    public static Command WAVESTART = new Command("0001x3700000000", "wave.force_start", "This starts the wave", true, () =>
+    public static LegacyCommand WAVESTART = new LegacyCommand("0001x3700000000", "wave.force_start", "This starts the wave", true, () =>
     {
         EndWave();
         WaveStart();

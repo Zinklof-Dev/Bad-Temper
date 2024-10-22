@@ -6,7 +6,7 @@ using ZinklofDev.Console;
 {
     public class BasicCommands : MonoBehaviour
     {
-        public static Command HELLOWORLD = new Command("0000x0000000000", "HelloWorld", "Prints HelloWorld", false, () =>
+        public static LegacyCommand HELLOWORLD = new LegacyCommand("0000x0000000000", "HelloWorld", "Prints HelloWorld", false, () =>
         {
             ZinklofDev.Console.BasicCommands.HelloWorld();
         });
@@ -17,22 +17,22 @@ using ZinklofDev.Console;
         }
 
         // 1 = on, 0 = off, everything else returns out of bounds
-        public static Command<byte> DEBUGCHEATS = new Command<byte>("0000x0000000001", "zd_cheats", "Turns on Cheats", false, (t1) =>
+        public static LegacyCommand<byte> DEBUGCHEATS = new LegacyCommand<byte>("0000x0000000001", "zd_cheats", "Turns on Cheats", false, (t1) =>
         {
             DebugCheats(t1);
         });
 
-        public static Command<int, int> ADDITION = new Command<int, int>("0000x0000000003", "zd_add", "Adds two values together (two ints)", false, (t1, t2) =>
+        public static LegacyCommand<int, int> ADDITION = new LegacyCommand<int, int>("0000x0000000003", "zd_add", "Adds two values together (two ints)", false, (t1, t2) =>
         {
             Addition(t1, t2);
         });
 
-        public static Command EXIT = new Command("0000x0000000004", "zd_exit", "Exits the program", false, () =>
+        public static LegacyCommand EXIT = new LegacyCommand("0000x0000000004", "zd_exit", "Exits the program", false, () =>
         {
             Exit();
         }); 
 
-        public static Command<int> HEX = new Command<int>("0000x0000000005", "zd_hex", "converts int to hex", false, (t1) => 
+        public static LegacyCommand<int> HEX = new LegacyCommand<int>("0000x0000000005", "zd_hex", "converts int to hex", false, (t1) => 
         {
             string hexValue = t1.ToString("X");
 

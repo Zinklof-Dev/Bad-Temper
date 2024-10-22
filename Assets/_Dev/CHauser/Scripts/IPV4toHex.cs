@@ -95,13 +95,13 @@ public class IPV4toHex : MonoBehaviour
         HexToIp.Expect(x, "255.0.15.164");
     });
 
-    // Command To Run Functions 
-    public static Command<string> IP_TO_HEX = new Command<string>(/*Command ID: first 4 letters 0001 for game command, first two letters developer ID (Cole Hauser is 15), last letters command number*/ "0001x1500000001", /* Command inputed into the consol*/ "ip_to_hex", /* Command Description*/ "Converts an IPV4 to Hexadecimal Format", /* Is it a cheat? */false, /*Variable that allows input of comand to be passed into method*/(t1) =>
+    // LegacyCommand To Run Functions 
+    public static LegacyCommand<string> IP_TO_HEX = new LegacyCommand<string>(/*LegacyCommand ID: first 4 letters 0001 for game command, first two letters developer ID (Cole Hauser is 15), last letters command number*/ "0001x1500000001", /* LegacyCommand inputed into the consol*/ "ip_to_hex", /* LegacyCommand Description*/ "Converts an IPV4 to Hexadecimal Format", /* Is it a cheat? */false, /*Variable that allows input of comand to be passed into method*/(t1) =>
     {
         IPV4ToHexadecimal(t1);
     });
 
-    public static Command<string> HEX_TO_IP = new Command<string>("0001x1500000002", "hex_to_ip", "Converts an IPV4 from Hexadecimal Format back to Standard Format", false, (t1) =>
+    public static LegacyCommand<string> HEX_TO_IP = new LegacyCommand<string>("0001x1500000002", "hex_to_ip", "Converts an IPV4 from Hexadecimal Format back to Standard Format", false, (t1) =>
     {
         HexadecimalToIPV4(t1);
     });
