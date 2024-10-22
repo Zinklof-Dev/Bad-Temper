@@ -21,7 +21,8 @@ public class GhostObject : MonoBehaviour
 
     private bool CheckForCollision()
     {
-        Collider[] colliders = Physics.OverlapBox(gameObject.transform.position, transform.localScale / 2, Quaternion.Identity, layerMask);
+        // Cameron | 10/22/2024 A.D 05:58 EST | Compiler error in the next line, Quaternion.Identity doesn't exist, fixed it for you. its a lowercase i :) 
+        Collider[] colliders = Physics.OverlapBox(gameObject.transform.position, transform.localScale / 2, Quaternion.identity, layerMask);
         if (colliders[0] == null)
             return true;
         else

@@ -90,7 +90,7 @@ public class Campfire : NetworkBehaviour
             }
             else
             {
-                healTimer -= healSpeed * Server.ServerDeltaTime;
+                healTimer -= healSpeed * Server.serverDeltaTime;
             }
         }
     }

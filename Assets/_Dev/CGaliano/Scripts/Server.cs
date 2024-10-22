@@ -32,8 +32,8 @@ public class Server : NetworkBehaviour
     float timeBetweenAITicks;
 
     //deltaTimes for the ticks
-    static public float ServerDeltaTime;
-    public static float AIDeltaTime;
+    static public float serverDeltaTime;
+    public static float aiDeltaTime;
 
     private void Awake()
     {
@@ -58,7 +58,7 @@ public class Server : NetworkBehaviour
 
     private void InternalServerTick()
     {
-        ServerDeltaTime = timeSinceLastServerTick;
+        serverDeltaTime = timeSinceLastServerTick;
 
         if (logTicks)
         {
@@ -87,7 +87,7 @@ public class Server : NetworkBehaviour
 
     private void InternalAITick()
     {
-        AIDeltaTime = timeSinceLastAiTick;
+        aiDeltaTime = timeSinceLastAiTick;
 
         if (logTicks)
         {
