@@ -219,15 +219,7 @@ public class BasicAgent : NetworkBehaviour
             return;
         }
 
-        if (Vectors.SqrDist3f(target.transform.position, transform.position) < Numbers.Sqr(playerDisengangeDistance))
-        {
-            AVL("setting desitination to player");
-            agent.SetDestination(target.transform.position);
-        }
-        else
-        {
-            AVL("best player is too far!");
-        }
+        AVL("setting desitination to player");
 
         if (Vectors.SqrDist3f(target.transform.position, transform.position) > Numbers.Sqr(playerDisengangeDistance))
         {
