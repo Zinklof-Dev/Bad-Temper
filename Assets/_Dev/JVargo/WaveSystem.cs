@@ -14,7 +14,12 @@ public class WaveSystem : NetworkBehaviour
     static bool isDay = false;
     static float timeOfDay;
     static string time;
- 
+    public int mins = Mathf.FloorToInt(timeOfDay / 60);
+    public int secs = Mathf.FloorToInt(timeOfDay % 60);
+    bool isDivisible;
+    bool hasDayBeenSet = false;
+    static int day = 0;
+
     static bool waveChanged = false;
 
     public static int _waveCount;
@@ -78,15 +83,28 @@ public class WaveSystem : NetworkBehaviour
             waveChanged = false;
         }
 
-        if (isDay)
-        {
-            timeOfDay += Time.deltaTime;
-            int mins = Mathf.FloorToInt(timeOfDay / 60);
-            int secs = Mathf.FloorToInt(timeOfDay % 60);
-            time = string.Format("{0:00} : {1:00}", mins, secs);
-        }
+        Debug.Log(day);
 
-        //Debug.Log(waveCount);
+        timeOfDay += Time.deltaTime;
+        
+        time = string.Format("{0:00} : {1:00}", mins, secs);
+
+        isDivisible = secs % 5 == 0;
+        
+        if (isDivisible && !hasDayBeenSet)
+            ChangeDay();
+        else if(!isDivisible)
+            hasDayBeenSet = false;
+    }
+
+    public void ChangeDay()
+    {
+        if (isDay)
+            isDay = false;
+        else
+            isDay = true;
+        hasDayBeenSet = true;
+        day += 1;
     }
 
     public static void EndWave()
