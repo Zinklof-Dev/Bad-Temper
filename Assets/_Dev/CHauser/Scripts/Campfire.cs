@@ -44,7 +44,7 @@ public class Campfire : NetworkBehaviour
         Instantiate(campfirePrefab);
         healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        server = GameObject.FindGameObjectWithTag("server").GetComponent<Server>();
+        server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
         campfireHealthRefrence = campfireHealth.Value;
 
         // Network variables have an event called "OnValueChanged" that allows the client to update their refrence to the Network variable

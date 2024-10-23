@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -9,8 +10,10 @@ using UnityEngine;
 public class Server : NetworkBehaviour
 {
     [Header("Tick Debug Display")]
-    [SerializeField] float serverTicksPerSecond;
-    [SerializeField] float aiTicksPerSecond;
+    [SerializeField] float targetedSTPS;
+    [SerializeField] float targetedATPS;
+    [SerializeField] float actualSTPS;
+    [SerializeField] float actualATPS;
     [Header("Tick Settings")]
     [SerializeField] int targetServerTicksPerSecond;
     [SerializeField] int targetAiTicksPerSecond;
@@ -35,6 +38,11 @@ public class Server : NetworkBehaviour
     static public float serverDeltaTime;
     public static float aiDeltaTime;
 
+    //to debug the actual TPS
+    int stps;
+    int atps;
+    float secondTracker; //will use time.delta time to tell when a second has passed
+
     private void Awake()
     {
         DontDestroyOnLoad(this);
@@ -54,6 +62,16 @@ public class Server : NetworkBehaviour
         //this should allow scripts runnning more often than server ticks to request the server does something next tick and still get all of them/it done
         //might go pretty unused
         ActionQueue.Add(action);
+    }
+
+    //this was not accurate enough for my use case, it also doesn't seem to save much compute time over my current solution (both report <1ms)
+    public static bool TestingModulusRateLimiting(int freq)
+    {
+        if (Time.frameCount % freq == 0)
+        {
+            return true;
+        }
+        return false;
     }
 
     private void InternalServerTick()
@@ -104,32 +122,61 @@ public class Server : NetworkBehaviour
 
         float percentage = deltAsFPS / 60;
 
-        serverTicksPerSecond = Mathf.Clamp((targetServerTicksPerSecond * percentage), minServerTicksPerSecond, targetServerTicksPerSecond);
-        aiTicksPerSecond = Mathf.Clamp((targetAiTicksPerSecond * percentage), minAiTicksPerSecond, targetAiTicksPerSecond);
+        targetedSTPS = Mathf.Clamp((targetServerTicksPerSecond * percentage), minServerTicksPerSecond, targetServerTicksPerSecond);
+        targetedATPS = Mathf.Clamp((targetAiTicksPerSecond * percentage), minAiTicksPerSecond, targetAiTicksPerSecond);
 
-        timeBetweenServerTicks = 1 / serverTicksPerSecond;
-        timeBetweenAITicks = 1 / aiTicksPerSecond;
+        timeBetweenServerTicks = 1 / targetedSTPS;
+        timeBetweenAITicks = 1 / targetedATPS;
     }
 
     private void Update()
     {
+        //DateTime start = DateTime.Now;
         if (!IsServer)
         {
             return;
         }
 
         timeSinceLastAiTick += Time.deltaTime;
-        timeBetweenServerTicks += Time.deltaTime;
+        timeSinceLastServerTick += Time.deltaTime;
+        secondTracker += Time.deltaTime;
+
+        if (secondTracker > 1f)
+        {
+            actualSTPS = secondTracker / serverDeltaTime;
+            actualATPS = secondTracker / aiDeltaTime;
+
+            atps = 0; stps = 0; secondTracker = 0;
+        }
 
         if (timeSinceLastServerTick > timeBetweenServerTicks)
         {
             InternalServerTick();
+            stps++;
+            timeSinceLastServerTick = 0;
         }
         if (timeSinceLastAiTick > timeBetweenAITicks)
         {
             InternalAITick();
+            atps++;
+            timeSinceLastAiTick = 0;
         }
 
+        /*if (TestingModulusRateLimiting(targetServerTicksPerSecond))
+        {
+            InternalServerTick();
+            stps++;
+            timeSinceLastServerTick = 0;
+        }
+        if (TestingModulusRateLimiting(targetAiTicksPerSecond))
+        {
+            InternalAITick();
+            atps++;
+            timeSinceLastAiTick = 0;
+        }*/
+
         ChangeTickRate();
+        //TimeSpan cost = DateTime.Now - start;
+        //Debug.Log(cost.TotalMilliseconds);
     }
 }

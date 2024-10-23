@@ -91,6 +91,208 @@
             <param name="b">changes when the falloff begins, higher = later</param>
             <returns>float[,] that you can subtract from an existing float[,] heightmap</returns>
         </member>
+        <member name="T:ZinklofDev.Utils.MathZ.Numbers">
+            <summary>
+            Doing math with El Numeros
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.Double)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.Single)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.Int32)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.Int64)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.Int16)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.UInt32)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.UInt64)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Sqr(System.UInt16)">
+            <summary>
+            Provides the Square Value of a number.
+            </summary>
+            <param name="x">Value to square</param>
+            <returns>Sqaured Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.Double)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.Single)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.Int32)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.Int64)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.Int16)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.UInt32)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.UInt64)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Cube(System.UInt16)">
+            <summary>
+            Provides the Cubed Value of a number.
+            </summary>
+            <param name="x">Value to cube</param>
+            <returns>Cubed Value of X</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Power(System.Double,System.Double)">
+            <summary>
+            Returns X to the Y power.
+            </summary>
+            <param name="x">Number to raise to Y power</param>
+            <param name="y">power to raise X to</param>
+            <returns>X^Y / X to the Y power</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Numbers.Power(System.Single,System.Single)">
+            <summary>
+            Returns X to the Y power.
+            </summary>
+            <param name="x">Number to raise to Y power</param>
+            <param name="y">power to raise X to</param>
+            <returns>X^Y / X to the Y power</returns>
+        </member>
+        <member name="T:ZinklofDev.Utils.MathZ.Vectors">
+            <summary>
+            Vectors? VECTOR MATH BABY!
+            </summary>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist1(System.Double,System.Double)">
+            <summary>
+            Provides the Sqaure Distance between two points in one Dimension. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist2(UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>
+            Provides the Sqaure Distance between two points in two Dimensions. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist3(UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Provides the Sqaure Distance between two points in three Dimensions. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist4(UnityEngine.Vector4,UnityEngine.Vector4)">
+            <summary>
+            Provides the Sqaure Distance between two points in four Dimensions. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist1f(System.Single,System.Single)">
+            <summary>
+            Provides the Sqaure Distance between two points in one Dimension. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist2f(UnityEngine.Vector2,UnityEngine.Vector2)">
+            <summary>
+            Provides the Sqaure Distance between two points in two Dimensions. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist3f(UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Provides the Sqaure Distance between two points in three Dimensions. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
+        <member name="M:ZinklofDev.Utils.MathZ.Vectors.SqrDist4f(UnityEngine.Vector4,UnityEngine.Vector4)">
+            <summary>
+            Provides the Sqaure Distance between two points in four Dimensions. (cheaper than sqrt distance)
+            </summary>
+            <param name="x">Point 1</param>
+            <param name="y">Point 2</param>
+            <returns>Square Distance between Point 1 and Point 2</returns>
+        </member>
         <member name="T:ZinklofDev.Utils.Testing.TestBasics">
             <summary>
             Base Class for tests, the main test class inherits from this, helps obscure some things you shouldn't touch

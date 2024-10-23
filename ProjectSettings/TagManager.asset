@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CampfireHealthBar
   - BuildObjects
+  - Server
   layers:
   - Default
   - TransparentFX
