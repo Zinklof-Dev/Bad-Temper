@@ -1,14 +1,12 @@
-using NUnit.Framework;
-using System;
 using UnityEngine;
 
 public class GhostObject : MonoBehaviour
 {
     public bool isSpawnable; 
     public Vector3 defaultPosition;
-    public LayerMask layerMask;
-    public Material material;
 
+    [SerializeField] private LayerMask layerMask;
+    [SerializeField]private Material material;
 
     private void Update()
     {

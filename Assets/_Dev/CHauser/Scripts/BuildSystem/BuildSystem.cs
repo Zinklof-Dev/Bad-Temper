@@ -13,9 +13,6 @@ public class BuildSystem : NetworkBehaviour
     [SerializeField] private GameObject[] placeableObjects;
     // Cole | Place the ghost objects in the scene in here
     [SerializeField] private GameObject[] ghostObjects;
-    // Cole | List of all game objects with a "BuildingObjects" tag that are active in the scene
-    // Cole | 10/23 | May not need anymore
-    /* [SerializeField] private GameObject[] buildObjectsInScene; */
 
     [Header("Layer Masks")]
 
@@ -27,15 +24,11 @@ public class BuildSystem : NetworkBehaviour
     [SerializeField] private float playerReach;
     [SerializeField] public static bool isBuilding;
 
-    private void Awake()
-    {
-        playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
-    }
-
     public override void OnNetworkSpawn()
     {
         Shell.RegisterCommand(IS_BUILDING);
         Shell.RegisterCommand(CHANGE_BUILD_OBJECT_ID);
+        playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
 
         base.OnNetworkSpawn();
     }
@@ -47,8 +40,6 @@ public class BuildSystem : NetworkBehaviour
 
         if (!isBuilding)
             return;
-        
-        // buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildObjects");
 
         switch (currentObjectID)
         {
@@ -79,9 +70,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                // Cole | 10/23 | May not need anymore 
-                /* if(CheckProposedPlacement(ghostObjects[0].transform.position)) */
-                /*Cole | 10/23 | Will need this*/PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
+                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
             }
         }
     }
@@ -109,22 +98,6 @@ public class BuildSystem : NetworkBehaviour
             PlaceObjectInSceneRpc(hit.point, objectID);
         }
     }
-
-    // Cole | 10/23 | May not need anymore
-    /*
-    private bool CheckProposedPlacement(Vector3 proposedPosition)
-    {
-        foreach (GameObject gameObject in buildObjectsInScene)
-        {
-            if (gameObject.transform.position == proposedPosition)
-            { 
-                return false;
-            }
-        }
-
-        return true;
-    }
-    */
 
     // Cole | Usually Mathf.Round rounds to the nearest whole number, but for the building grid system, I need to round to a multipule of certian values
     // Cole | Thank you to Bunny83 and dgoyette on Unity Discussions for the logic
