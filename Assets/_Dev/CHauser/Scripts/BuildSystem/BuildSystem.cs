@@ -14,7 +14,8 @@ public class BuildSystem : NetworkBehaviour
     // Cole | Place the ghost objects in the scene in here
     [SerializeField] private GameObject[] ghostObjects;
     // Cole | List of all game objects with a "BuildingObjects" tag that are active in the scene
-    [SerializeField] private GameObject[] buildObjectsInScene;
+    // Cole | 10/23 | May not need anymore
+    /* [SerializeField] private GameObject[] buildObjectsInScene; */
 
     [Header("Layer Masks")]
 
@@ -49,7 +50,6 @@ public class BuildSystem : NetworkBehaviour
         
         buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildObjects");
 
-        // Cole | Right now I have the floor object with an ID of one, but I will change it to zero in Flowers most likley.
         switch (currentObjectID)
         {
             case 0:
@@ -79,24 +79,28 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                if(CheckProposedPlacement(ghostObjects[0].transform.position))
-                    PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
+                // Cole | 10/23 | May not need anymore 
+                /* if(CheckProposedPlacement(ghostObjects[0].transform.position)) */
+                /*Cole | 10/23 | Will need this*/PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
             }
         }
     }
 
     private void RampPlace()
     {
-        
+        // RAMP ID IS 1
+        // Ramp Code
     }
 
     private void WallPlace()
     {
+        // WALL ID IS 2
         // Wall Code
     }
 
     private void FreePlace(int objectID)
     {
+        // FREE PLACE OBJECTS ARE ID 3+
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit; 
 
@@ -106,6 +110,8 @@ public class BuildSystem : NetworkBehaviour
         }
     }
 
+    // Cole | 10/23 | May not need anymore
+    /*
     private bool CheckProposedPlacement(Vector3 proposedPosition)
     {
         foreach (GameObject gameObject in buildObjectsInScene)
@@ -118,6 +124,7 @@ public class BuildSystem : NetworkBehaviour
 
         return true;
     }
+    */
 
     // Cole | Usually Mathf.Round rounds to the nearest whole number, but for the building grid system, I need to round to a multipule of certian values
     // Cole | Thank you to Bunny83 and dgoyette on Unity Discussions for the logic
