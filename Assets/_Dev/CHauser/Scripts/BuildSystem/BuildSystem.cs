@@ -48,7 +48,7 @@ public class BuildSystem : NetworkBehaviour
         if (!isBuilding)
             return;
         
-        buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildObjects");
+        // buildObjectsInScene = GameObject.FindGameObjectsWithTag("BuildObjects");
 
         switch (currentObjectID)
         {
