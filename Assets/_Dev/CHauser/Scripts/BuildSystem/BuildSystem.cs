@@ -1,7 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Testing;
-using System;
 using ZinklofDev.Console;
 
 public class BuildSystem : NetworkBehaviour
@@ -20,9 +19,10 @@ public class BuildSystem : NetworkBehaviour
 
     [Header("Modifiable Variables")]
 
-    [SerializeField] private static int currentObjectID;
     [SerializeField] private float playerReach;
-    [SerializeField] public static bool isBuilding;
+
+    private static int currentObjectID;
+    public static bool isBuilding;
 
     public override void OnNetworkSpawn()
     {
@@ -97,7 +97,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
+                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, transform.rotation, 0);
             }
         }
     }
@@ -112,6 +112,8 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
             ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
+    
+            ghostObject.rotation = Quaternion.Euler(-45, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
         }
         else
         {
@@ -122,7 +124,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, 1);
+                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, ghostObject.rotation, 1);
             }
         }
     }
@@ -141,7 +143,7 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            PlaceObjectInSceneRpc(hit.point, objectID);
+            PlaceObjectInSceneRpc(hit.point, transform.rotation, objectID);
         }
     }
 
@@ -161,10 +163,17 @@ public class BuildSystem : NetworkBehaviour
         return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * baseNumberOfMultipule + offset;
     }
 
-    [Rpc(SendTo.Server)]
+    /*[Rpc(SendTo.Server)]
     private void PlaceObjectInSceneRpc(Vector3 spawnPos, int objectID)
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
+        spawnedObject.GetComponent<NetworkObject>().Spawn(true);
+    }*/
+
+    [Rpc(SendTo.Server)]
+    private void PlaceObjectInSceneRpc(Vector3 spawnPos, Quaternion rotation, int objectID)
+    {
+        GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, rotation);
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 
