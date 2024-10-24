@@ -8,29 +8,29 @@ public class BuildSystem : NetworkBehaviour
 {
     [Header("Game Object Refrences")]
 
-    [SerializeField] private GameObject playerCamera;
+    [SerializeField] private GameObject playerCamera;
     // Cole | Place the buildable prefabs from the assets file into here
-    [SerializeField] private GameObject[] placeableObjects;
+    [SerializeField] private GameObject[] placeableObjects;
     // Cole | Place the ghost objects in the scene in here
-    [SerializeField] private GameObject[] ghostObjects;
+    [SerializeField] private GameObject[] ghostObjects;
 
     [Header("Layer Masks")]
 
-    [SerializeField] private LayerMask layerMask;
+    [SerializeField] private LayerMask layerMask;
 
     [Header("Modifiable Variables")]
 
-    [SerializeField] private static int currentObjectID;
-    [SerializeField] private float playerReach;
-    [SerializeField] public static bool isBuilding;
+    [SerializeField] private static int currentObjectID;
+    [SerializeField] private float playerReach;
+    [SerializeField] public static bool isBuilding;
 
     public override void OnNetworkSpawn()
     {
-        Shell.RegisterCommand(IS_BUILDING);
-        Shell.RegisterCommand(CHANGE_BUILD_OBJECT_ID);
-        playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        Shell.RegisterCommand(IS_BUILDING);
+        Shell.RegisterCommand(CHANGE_BUILD_OBJECT_ID);
+        playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
 
-        base.OnNetworkSpawn();
+        base.OnNetworkSpawn();
     }
 
     void Update()
@@ -43,7 +43,7 @@ public class BuildSystem : NetworkBehaviour
         {
             foreach(GameObject ghost in ghostObjects)
             {
-                    GhostObject ghostObject = ghost.GetComponent<GhostObject>();
+                GhostObject ghostObject = ghost.GetComponent<GhostObject>();
                     ghost.transform.position = ghostObject.defaultPosition;
             }
             
@@ -58,8 +58,8 @@ public class BuildSystem : NetworkBehaviour
         {
             if(i != currentObjectID)
             {
-                GhostObject ghostObject = ghost.GetComponent<GhostObject>();
-                ghost.transform.position = ghostObject.defaultPosition;
+                GhostObject ghostObject = ghost.GetComponent<GhostObject>();
+                ghost.transform.position = ghostObject.defaultPosition;
             }
 
             i++;
@@ -68,10 +68,10 @@ public class BuildSystem : NetworkBehaviour
         switch (currentObjectID)
         {
             case 0:
-                FloorPlace();
+                FloorPlace();
                 break;
             case 1:
-                RampPlace();
+                RampPlace();
                 break;
         }
     }
@@ -80,24 +80,24 @@ public class BuildSystem : NetworkBehaviour
     {
         // FLOOR IS ID 0
 
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit;
-        GhostObject ghostObject = ghostObjects[0].GetComponent<GhostObject>();
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[0].GetComponent<GhostObject>();
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
+            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
         }
         else
         {
-            ghostObjects[0].transform.position = ghostObject.defaultPosition;
+            ghostObjects[0].transform.position = ghostObject.defaultPosition;
         }
 
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
+                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, 0);
             }
         }
     }
@@ -105,24 +105,24 @@ public class BuildSystem : NetworkBehaviour
     private void RampPlace()
     {
         // RAMP ID IS 1
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
-        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
+            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
         }
         else
         {
-            ghostObjects[1].transform.position = ghostObject.defaultPosition;
+            ghostObjects[1].transform.position = ghostObject.defaultPosition;
         }
 
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, 1);
+                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, 1);
             }
         }
     }
@@ -136,12 +136,12 @@ public class BuildSystem : NetworkBehaviour
     private void FreePlace(int objectID)
     {
         // FREE PLACE OBJECTS ARE ID 3+
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit; 
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit; 
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            PlaceObjectInSceneRpc(hit.point, objectID);
+            PlaceObjectInSceneRpc(hit.point, objectID);
         }
     }
 
@@ -150,7 +150,7 @@ public class BuildSystem : NetworkBehaviour
     
     private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule)
     {
-        return Mathf.Round(inputValue / baseNumberOfMultipule) * baseNumberOfMultipule;
+        return Mathf.Round(inputValue / baseNumberOfMultipule) * baseNumberOfMultipule;
     }
 
 
@@ -158,14 +158,14 @@ public class BuildSystem : NetworkBehaviour
 
     private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule, float offset)
     {
-        return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * baseNumberOfMultipule + offset;
+        return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * baseNumberOfMultipule + offset;
     }
 
     [Rpc(SendTo.Server)]
     private void PlaceObjectInSceneRpc(Vector3 spawnPos, int objectID)
     {
-        GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
-        spawnedObject.GetComponent<NetworkObject>().Spawn(true);
+        GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
+        spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 
     // Tests and Commands
@@ -173,37 +173,37 @@ public class BuildSystem : NetworkBehaviour
 
     public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
     {
-        float x = RoundToMultipule(2.6f, 2.5f);
-        RoundToMultipuleTest.Expect(x, 2.5f);
+        float x = RoundToMultipule(2.6f, 2.5f);
+        RoundToMultipuleTest.Expect(x, 2.5f);
 
-        x = RoundToMultipule(69, 2.5f);
-        RoundToMultipuleTest.Expect(x, 70f);
+        x = RoundToMultipule(69, 2.5f);
+        RoundToMultipuleTest.Expect(x, 70f);
 
-        x = RoundToMultipule(420.69f, 8);
-        RoundToMultipuleTest.Expect(x, 424f);
+        x = RoundToMultipule(420.69f, 8);
+        RoundToMultipuleTest.Expect(x, 424f);
 
     });
 
     public static Test RoundWithOffsetTest = new Test("BuildSystem.cs", () =>
     {
-        float x = RoundToMultipule(0.1f, 5, 2.5f);
-        RoundWithOffsetTest.Expect(x, 2.5f);
+        float x = RoundToMultipule(0.1f, 5, 2.5f);
+        RoundWithOffsetTest.Expect(x, 2.5f);
 
-        x = RoundToMultipule(69, 6, 0.69f);
-        RoundWithOffsetTest.Expect(x, 66.69f);
+        x = RoundToMultipule(69, 6, 0.69f);
+        RoundWithOffsetTest.Expect(x, 66.69f);
 
-        x = RoundToMultipule(450, 420, 0.69f);
-        RoundWithOffsetTest.Expect(x, 420.69f);
+        x = RoundToMultipule(450, 420, 0.69f);
+        RoundWithOffsetTest.Expect(x, 420.69f);
     });
 
     public static LegacyCommand<bool> IS_BUILDING = new LegacyCommand<bool>("0001x1500000003", "is_building", "Activates or deactivates build system.", false, (t1) =>
     {
-        isBuilding = t1;
+        isBuilding = t1;
     });
 
     public static LegacyCommand<int> CHANGE_BUILD_OBJECT_ID = new LegacyCommand<int>("0001x1500000004", "change_build_object_id", "Changes the object you are placing in the scene", false, (t1) =>
     {
-        currentObjectID = t1;
+        currentObjectID = t1;
     });
 
 }
