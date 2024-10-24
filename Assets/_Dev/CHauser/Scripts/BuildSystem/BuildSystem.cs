@@ -36,15 +36,42 @@ public class BuildSystem : NetworkBehaviour
     void Update()
     {
         // Cole | Will make sure code only executes if player is building
+        // Cole | Will also make sure that all ghost objects are at default position if player is not building
         // Cole | Was going to reserve Object ID zero for this but thats dumb we can just use a bool that other scripts can edit 
 
         if (!isBuilding)
+        {
+            foreach(GameObject ghost in ghostObjects)
+            {
+                    GhostObject ghostObject = ghost.GetComponent<GhostObject>();
+                    ghost.transform.position = ghostObject.defaultPosition;
+            }
+            
             return;
+        }
+
+        // Cole | Makes sure that the ghost object is at it's default position if  that object ID is not selected
+        // Cole | Fixes bug that if you change your object ID while the ghost object is not at it's default position, the ghost object would stay in the open
+        
+        int i = 0;
+        foreach(GameObject ghost in ghostObjects)
+        {
+            if(i != currentObjectID)
+            {
+                GhostObject ghostObject = ghost.GetComponent<GhostObject>();
+                ghost.transform.position = ghostObject.defaultPosition;
+            }
+
+            i++;
+        }
 
         switch (currentObjectID)
         {
             case 0:
                 FloorPlace();
+                break;
+            case 1:
+                RampPlace();
                 break;
         }
     }
@@ -78,7 +105,26 @@ public class BuildSystem : NetworkBehaviour
     private void RampPlace()
     {
         // RAMP ID IS 1
-        // Ramp Code
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+
+        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        {
+            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
+        }
+        else
+        {
+            ghostObjects[1].transform.position = ghostObject.defaultPosition;
+        }
+
+        if(ghostObject.isSpawnable == true)
+        {
+            if(Input.GetMouseButtonDown(1))
+            {
+                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, 1);
+            }
+        }
     }
 
     private void WallPlace()
