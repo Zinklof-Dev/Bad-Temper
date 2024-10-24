@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
@@ -14,11 +15,12 @@ public class WaveSystem : NetworkBehaviour
     static bool isDay = false;
     static float timeOfDay;
     static string time;
-    public int mins = Mathf.FloorToInt(timeOfDay / 60);
-    public int secs = Mathf.FloorToInt(timeOfDay % 60);
+    
     bool isDivisible;
     bool hasDayBeenSet = false;
     static int day = 0;
+    static bool hasDayStarted = false;
+    
 
     static bool waveChanged = false;
 
@@ -73,6 +75,7 @@ public class WaveSystem : NetworkBehaviour
     {
         isDay = true;
         Log.LogResponse("It is daytime " + isDay);
+        hasDayStarted = true;
     }
 
     public void Update()
@@ -82,19 +85,29 @@ public class WaveSystem : NetworkBehaviour
             waveCount.Value = _waveCount;
             waveChanged = false;
         }
-
-        Debug.Log(day);
-
         timeOfDay += Time.deltaTime;
+        int mins = Mathf.FloorToInt(timeOfDay / 60);
+        int secs = Mathf.FloorToInt(timeOfDay % 60);
         
-        time = string.Format("{0:00} : {1:00}", mins, secs);
 
-        isDivisible = secs % 5 == 0;
-        
-        if (isDivisible && !hasDayBeenSet)
-            ChangeDay();
-        else if(!isDivisible)
-            hasDayBeenSet = false;
+        if (hasDayStarted)
+        {
+            
+
+            time = string.Format("{0:00} : {1:00}", mins, secs);
+
+            if (secs % 5 == 0)
+            {
+
+                day++;
+                if(!hasDayBeenSet)
+                ChangeDay();
+                
+            }
+            else
+                hasDayBeenSet = false;
+            Debug.Log(day);
+        }         
     }
 
     public void ChangeDay()
@@ -102,9 +115,8 @@ public class WaveSystem : NetworkBehaviour
         if (isDay)
             isDay = false;
         else
-            isDay = true;
+            isDay = true;   
         hasDayBeenSet = true;
-        day += 1;
     }
 
     public static void EndWave()
@@ -112,7 +124,7 @@ public class WaveSystem : NetworkBehaviour
         Debug.LogWarning("EndWave(); not implimented yet");
     }
 
-    public static LegacyCommand WAVESTART = new LegacyCommand("0001x3700000000", "wave.force_start", "This starts the wave", true, () =>
+    public static LegacyCommand WAVESTART = new LegacyCommand("0001x3700000000", "wave.force_start", "This starts the wave", false, () =>
     {
         EndWave();
         WaveStart();
