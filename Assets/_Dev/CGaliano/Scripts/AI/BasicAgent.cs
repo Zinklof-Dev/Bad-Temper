@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Unity.Mathematics;
 using Unity.Netcode;
 using Unity.VisualScripting;
@@ -7,6 +9,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
 using ZinklofDev.Utils.MathZ;
+using ZinklofDev.Utils.Testing;
 
 public class BasicAgent : NetworkBehaviour
 {
@@ -36,8 +39,11 @@ public class BasicAgent : NetworkBehaviour
     [SerializeField] debugShowState state = new debugShowState(0, "idle");
     [SerializeField] GameObject target;
     [SerializeField] bool VerboseLogging;
+    [SerializeField] Vector3 destination;
+    [SerializeField] Vector3 memoryPOS = Vector3.zero;
     [Header("Agent Settings")]
     [SerializeField] side team = BasicAgent.side.Hostile;
+    [SerializeField] AnimationCurve jumpCurve = new AnimationCurve();
     [Space(5)]
     [SerializeField] bool attacksCampfire = true;
     [SerializeField] bool attacksPlayer = true;
@@ -69,8 +75,6 @@ public class BasicAgent : NetworkBehaviour
     debugShowState idle = new debugShowState(4, "idle");
     debugShowState ai = new debugShowState(5, "ai");
     debugShowState pet = new debugShowState(6, "pet");
-
-    private Vector3 memoryPOS = Vector3.zero;
 
     private int AIN; //Agent Identification Number
 
@@ -108,7 +112,7 @@ public class BasicAgent : NetworkBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         if (VerboseLogging)
         AIN = UnityEngine.Random.Range(0, 999999);
@@ -123,23 +127,65 @@ public class BasicAgent : NetworkBehaviour
             Players.Add(obj);
         }
 
+        agent.autoTraverseOffMeshLink = false;
+        agent.destination = transform.position;
         server.AITick += AIUpdate; AVL("subscribing AIUpdate() to AITick event");
+    }
+
+    IEnumerator Start()
+    {
+        if (!IsServer)
+        {
+            yield return null;
+        }
+        while (true)
+        {
+            if (agent.isOnOffMeshLink)
+            {
+                yield return StartCoroutine(Curve(agent, 0.5f));
+                agent.CompleteOffMeshLink();
+            }
+            yield return null;
+        }
+    }
+
+    IEnumerator Curve(NavMeshAgent agent, float duration)
+    {
+        OffMeshLinkData data = agent.currentOffMeshLinkData;
+        Vector3 startPos = agent.transform.position;
+        Vector3 endPos = data.endPos + Vector3.up * agent.baseOffset;
+        float normalizedTime = 0.0f;
+        while (normalizedTime < 1.0f)
+        {
+            float yOffset = jumpCurve.Evaluate(normalizedTime);
+            agent.transform.position = Vector3.Lerp(startPos, endPos, normalizedTime) + yOffset * Vector3.up;
+            normalizedTime += Time.deltaTime / duration;
+            yield return null;
+        }
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, playerEngagementDistance);
+        //if (agent != null)
+        //Gizmos.DrawSphere(agent.destination, 0.25f);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, playerDisengangeDistance);
+        Gizmos.DrawSphere(memoryPOS, 0.20f);
         Gizmos.color = new Color(0.058f, 1, 1);
-        if (target != null)
-        Gizmos.DrawLine(transform.position, target.transform.position);
+        if (agent != null)
+        {
+            Gizmos.DrawLine(transform.position, agent.destination);
+            Gizmos.DrawSphere(agent.destination, 0.25f);
+        }
+        Gizmos.DrawWireSphere(new Vector3(transform.position.x, transform.position.y - 1, transform.position.z), Numbers.Sqr(.5f));
     }
 
     private void AIUpdate()
     {
         AVL("AI update function");
+
         switch (state.stateID)
         {
             case 0:
@@ -157,6 +203,8 @@ public class BasicAgent : NetworkBehaviour
             case 6: 
                 break;
         }
+
+        destination = agent.destination;
     }
 
     private void AVL(string input) //Agent Verbose Log, avoiding ambiguity with the verbose logging function from the test manager
@@ -220,6 +268,7 @@ public class BasicAgent : NetworkBehaviour
         }
 
         AVL("setting desitination to player");
+        agent.destination = target.transform.position;
 
         if (Vectors.SqrDist3f(target.transform.position, transform.position) > Numbers.Sqr(playerDisengangeDistance))
         {
@@ -234,9 +283,14 @@ public class BasicAgent : NetworkBehaviour
     {
         AVL("idle state");
         agent.destination = memoryPOS;
-        if (Vectors.SqrDist3f(agent.destination, transform.position) >= Numbers.Sqr(0.5f))
+        AVL(agent.destination + " VS " + new Vector3(transform.position.x, transform.position.y - 1, transform.position.z));
+        if (Vectors.SqrDist3f(agent.destination, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z)) >= Numbers.Sqr(0.5f))
         {
             AVL("still not at end of idle path");
+            if (VerboseLogging)// this might seem redundant given the AVL function already does this, but its to stop the math from even happening in the first place
+            {
+                AVL("" + Vectors.SqrDist3f(agent.destination, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z)) + " is not within " + Numbers.Sqr(0.5f) + " units");
+            }
             return;
         }
         else
@@ -250,12 +304,15 @@ public class BasicAgent : NetworkBehaviour
     {
         AVL("wander state");
         //checking if we need to exit our wander state
-        CheckForStateChanges();
+        if(CheckForStateChanges())
+        {
+            return;
+        }
 
         Vector3 wanderPoint = Vector3.zero;
         int fails = 0;
 
-        if (Vectors.SqrDist3f(agent.destination, transform.position) <= Numbers.Sqr(0.5f))
+        if (Vectors.SqrDist3f(agent.destination, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z)) <= Numbers.Sqr(0.5f))
         {
             AVL("finding new wander position");
             while (wanderPoint != Vector3.zero && fails <= 10)
@@ -337,4 +394,21 @@ public class BasicAgent : NetworkBehaviour
         target = bestTarget;
         AVL("Finished find new player");
     }
+
+    static public Test distanceFunction = new Test("BasicAgent.cs", ()=>
+    {
+        float x = 0;
+
+        x = Vectors.SqrDist3f(new Vector3(0,0,0), new Vector3(0,0,0));
+
+        distanceFunction.Expect(x, 0f);
+
+        x = Vectors.SqrDist3f(new Vector3(3,0,2), new Vector3(3,1,2));
+        
+        distanceFunction.Expect(x, 1f);
+
+        x = Vectors.SqrDist3f(new Vector3(100, 67, 8), new Vector3(0, 0, 0));
+
+        distanceFunction.Expect(x, 14553f);
+    });
 }
