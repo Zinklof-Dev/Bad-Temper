@@ -27,7 +27,7 @@ public class BuildSystem : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         Shell.RegisterCommand(IS_BUILDING);
-        Shell.RegisterCommand(CHANGE_BUILD_OBJECT_ID);
+        Shell.RegisterCommand(BUILD_ID);
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
 
         base.OnNetworkSpawn();
@@ -44,7 +44,7 @@ public class BuildSystem : NetworkBehaviour
             foreach(GameObject ghost in ghostObjects)
             {
                 GhostObject ghostObject = ghost.GetComponent<GhostObject>();
-                    ghost.transform.position = ghostObject.defaultPosition;
+                ghost.transform.position = ghostObject.defaultPosition;
             }
             
             return;
@@ -72,6 +72,11 @@ public class BuildSystem : NetworkBehaviour
                 break;
             case 1:
                 RampPlace();
+                break;
+            case 2:
+                WallPlace(); 
+                break;
+            case >= 3:
                 break;
         }
     }
@@ -131,8 +136,31 @@ public class BuildSystem : NetworkBehaviour
 
     private void WallPlace()
     {
-        // WALL ID IS 2
-        // Wall Code
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[2].GetComponent<GhostObject>();
+
+        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        {
+            ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
+
+            if(ghostObject.rotation.y == 0 || ghostObject.rotation.y == 180)
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5, 2.5f), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5, 2.5f));
+            else
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
+        }
+        else
+        {
+            ghostObjects[2].transform.position = ghostObject.defaultPosition;
+        }
+
+        if (ghostObject.isSpawnable == true)
+        {
+            if (Input.GetMouseButtonDown(1))
+            {
+                PlaceObjectInSceneRpc(ghostObjects[2].transform.position, ghostObject.rotation, 2);
+            }
+        }
     }
 
     private void FreePlace(int objectID)
@@ -210,7 +238,7 @@ public class BuildSystem : NetworkBehaviour
         isBuilding = t1;
     });
 
-    public static LegacyCommand<int> CHANGE_BUILD_OBJECT_ID = new LegacyCommand<int>("0001x1500000004", "change_build_object_id", "Changes the object you are placing in the scene", false, (t1) =>
+    public static LegacyCommand<int> BUILD_ID = new LegacyCommand<int>("0001x1500000004", "build_id", "Changes the object you are placing in the scene", false, (t1) =>
     {
         currentObjectID = t1;
     });
