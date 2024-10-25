@@ -10,19 +10,16 @@ public class WaveSystem : NetworkBehaviour
 {
     public delegate void WaveSystemEventManager();
     public static event WaveSystemEventManager TestServerTick; // Cameron | I love how this keeps chucking a warning at me in editor because its still unused KEK
+    [SerializeField] Server server;
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
     static bool isDay = false;
-    static float timeOfDay;
     static string time;
-    
-    bool isDivisible;
-    bool hasDayBeenSet = false;
-    static int day = 0;
-    static bool hasDayStarted = false;
-    
+    float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
 
+    static int day = 0;
     static bool waveChanged = false;
+    
 
     public static int _waveCount;
 
@@ -31,9 +28,20 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
         );
-    
+
+    private void Start()
+    {
+        server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
+        server.ServerTick += ServerUpdate;
+    }
+
     public static void WaveStart() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
     {
+        if (!isOwnerStatic)
+            return;
+        if (!isServerStatic)
+            return;
+
         waveChanged = true;
         // Cole | 10/18/24 | Compiler error here --->
         // Not how network variables work smh
@@ -44,11 +52,6 @@ public class WaveSystem : NetworkBehaviour
 
         // var wave = NetworkVariable<Int32>.waveCount; <---
 
-        if (!isOwnerStatic)
-            return;
-        if (!isServerStatic)
-            return;
-
         _waveCount += 1;
 
         // Cole | 10/18/24 | and here to --->
@@ -56,6 +59,9 @@ public class WaveSystem : NetworkBehaviour
         // Cameron | Wrong kind of too ya idiot.
 
         // wave.UpdateWaveCount(); <---
+
+
+
         StartDay();
     }
 
@@ -75,7 +81,12 @@ public class WaveSystem : NetworkBehaviour
     {
         isDay = true;
         Log.LogResponse("It is daytime " + isDay);
-        hasDayStarted = true;
+        //hasDayStarted = true;
+    }
+
+    public void ServerUpdate()
+    {
+
     }
 
     public void Update()
@@ -85,29 +96,14 @@ public class WaveSystem : NetworkBehaviour
             waveCount.Value = _waveCount;
             waveChanged = false;
         }
-        timeOfDay += Time.deltaTime;
-        int mins = Mathf.FloorToInt(timeOfDay / 60);
-        int secs = Mathf.FloorToInt(timeOfDay % 60);
-        
+        secs += Time.deltaTime; //Time.deltaTime is ALWAYS the ammount of seconds the last frame took. -camoron
 
-        if (hasDayStarted)
+        if (secs > 5)
         {
-            
-
-            time = string.Format("{0:00} : {1:00}", mins, secs);
-
-            if (secs % 5 == 0)
-            {
-
-                day++;
-                if(!hasDayBeenSet)
-                ChangeDay();
-                
-            }
-            else
-                hasDayBeenSet = false;
-            Debug.Log(day);
-        }         
+            //logik hr
+            ChangeDay();
+            secs = 0;
+        }
     }
 
     public void ChangeDay()
@@ -116,7 +112,6 @@ public class WaveSystem : NetworkBehaviour
             isDay = false;
         else
             isDay = true;   
-        hasDayBeenSet = true;
     }
 
     public static void EndWave()
