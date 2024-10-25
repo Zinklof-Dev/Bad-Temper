@@ -147,7 +147,7 @@ public class BuildSystem : NetworkBehaviour
             if(ghostObject.rotation.y == 0 || ghostObject.rotation.y == 180)
                 ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5, 2.5f), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5, 2.5f));
             else
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
         }
         else
         {
