@@ -1,1 +1,2 @@
 no assignments
+-Luigi: You put a function in the wave code (ServerUpdate) but never assigned it to do anything and I dont know what you want me to do with it. Also if you could update My ReadMe cause it could use some further clarification based on the progress of the game
