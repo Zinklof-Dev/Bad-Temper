@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -2, z: 0}
-  m_LocalScale: {x: 5.01, y: 0.11, z: 5.01}
+  m_LocalScale: {x: 2.505, y: 0.11, z: 2.505}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -123,9 +123,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSpawnable: 0
   defaultPosition: {x: 0, y: -2, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 0}
   layerMask:
     serializedVersion: 2
     m_Bits: 103
   material: {fileID: 2100000, guid: 37fd9c6a87a8715419c23622422ccedf, type: 2}
-  size: {x: 5, y: 0.1, z: 5}
-  rotation: {x: 0, y: 0, z: 0, w: 0}
+  size: {x: 2.5, y: 0.1, z: 2.5}

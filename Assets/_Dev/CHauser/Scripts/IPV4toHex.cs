@@ -22,7 +22,7 @@ public class IPV4toHex : MonoBehaviour
 
         foreach (string s in strings) 
         {
-            int decimalNumber = int.Parse(s); //Cameron | So i found out that string format error comes from here, not sure why? it doesn't break anything so like... probably ignorable?? we'll see down the line KEK.
+            int decimalNumber = int.Parse(s); //Cameron | So i found out that string format error comes from here, not sure why? it doesn't break anything so like... probably ignorable?? we'll see down the line KEK. // Cole | Fixed. You were passing this function into itself...
 
             // Converts an int decimal number into a string hex number
             // When converting an int into a string, there are diffrent formats you can use. The format, "X", is hexadecimal

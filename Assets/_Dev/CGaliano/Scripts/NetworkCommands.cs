@@ -33,7 +33,7 @@ public class NetworkCommands : MonoBehaviour
     public static void host()
     {
         NetworkManager.Singleton.StartHost();
-        Debug.Log(IPV4toHex.IPV4ToHexadecimal(IPV4toHex.IPV4ToHexadecimal(Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToString())));
+        Debug.Log(IPV4toHex.IPV4ToHexadecimal(Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToString()));
     }
 
     public static void Connect(string hostID)

@@ -91,7 +91,7 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5), RoundToMultipule(hit.point.z, 5));
+            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f), RoundToMultipule(hit.point.z, 2.5f));
         }
         else
         {
@@ -116,9 +116,9 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
+            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 1.25f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
     
-            ghostObject.rotation = Quaternion.Euler(-45, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
+            ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
         }
         else
         {
@@ -145,9 +145,9 @@ public class BuildSystem : NetworkBehaviour
             ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
 
             if(ghostObject.rotation.y == 0 || ghostObject.rotation.y == 180)
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5, 2.5f), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5, 2.5f));
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f, 1.55f), RoundToMultipule(hit.point.y, 2.5f, 1.55f), RoundToMultipule(hit.point.z, 2.5f, 1.55f));
             else
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 5), RoundToMultipule(hit.point.y, 5, 2.5f), RoundToMultipule(hit.point.z, 5));
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f, 1.55f), RoundToMultipule(hit.point.z, 2.5f));
         }
         else
         {
