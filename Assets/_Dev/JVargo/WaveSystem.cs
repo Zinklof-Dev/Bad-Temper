@@ -14,9 +14,10 @@ public class WaveSystem : NetworkBehaviour
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
     static bool isDay = false;
+    [SerializeField] bool daytime;
     static string time;
-    float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
-
+    [SerializeField] float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
+    [SerializeField] float dayLength;
     static int day = 0;
     static bool waveChanged = false;
     
@@ -42,6 +43,7 @@ public class WaveSystem : NetworkBehaviour
         if (!isServerStatic)
             return;
 
+        isDay = false;
         waveChanged = true;
         // Cole | 10/18/24 | Compiler error here --->
         // Not how network variables work smh
@@ -59,10 +61,6 @@ public class WaveSystem : NetworkBehaviour
         // Cameron | Wrong kind of too ya idiot.
 
         // wave.UpdateWaveCount(); <---
-
-
-
-        StartDay();
     }
 
     public override void OnNetworkSpawn()
@@ -74,29 +72,40 @@ public class WaveSystem : NetworkBehaviour
 
         Shell.RegisterCommand(WAVESTART);
         Shell.RegisterCommand(CURRENTTIME);
+        Shell.RegisterCommand(ENDWAVE);
         base.OnNetworkSpawn();
-    }
-
-    public static void StartDay()
-    {
-        isDay = true;
-        Log.LogResponse("It is daytime " + isDay);
-        //hasDayStarted = true;
     }
 
     public void ServerUpdate()
     {
+        daytime = isDay;
 
+        if (waveChanged && IsServer)
+        {
+            waveCount.Value = _waveCount;
+            waveChanged = false;
+        }
+
+        if (isDay)
+        {
+            secs += Server.serverDeltaTime;
+            if (secs >= dayLength)
+            {
+                WaveStart();
+                secs = 0;
+            }
+        }
     }
 
-    public void Update()
+
+    /*public void Update() //Cameron || no no use update funvtion.
     {
         if (waveChanged && IsServer)
         {
             waveCount.Value = _waveCount;
             waveChanged = false;
         }
-        secs += Time.deltaTime; //Time.deltaTime is ALWAYS the ammount of seconds the last frame took. -camoron
+        ; //Time.deltaTime is ALWAYS the ammount of seconds the last frame took. -camoron
 
         if (secs > 5)
         {
@@ -104,29 +113,27 @@ public class WaveSystem : NetworkBehaviour
             ChangeDay();
             secs = 0;
         }
-    }
-
-    public void ChangeDay()
-    {
-        if (isDay)
-            isDay = false;
-        else
-            isDay = true;   
-    }
+    }*/
 
     public static void EndWave()
     {
         Debug.LogWarning("EndWave(); not implimented yet");
+        isDay = true;
     }
 
-    public static LegacyCommand WAVESTART = new LegacyCommand("0001x3700000000", "wave.force_start", "This starts the wave", false, () =>
+    
+
+    public static LegacyCommand WAVESTART = new LegacyCommand("0001x3700000000", "wave.force_start", "This starts the wave", true, () =>
     {
-        EndWave();
         WaveStart();
         Log.LogResponse("Force Started wave, now " + _waveCount);
     });
 
-    public static LegacyCommand CURRENTTIME = new LegacyCommand("0001x3700000001", "current_time", "this will tell us the current time of day", false, () =>
+    public static LegacyCommand CURRENTTIME = new LegacyCommand("0001x3700000001", "current_time", "this will tell us the current time of day", true, () =>
         Log.LogResponse(time)
+    );
+
+    public static LegacyCommand ENDWAVE = new LegacyCommand("0001x3700000002", "wave.force_end", "This will force end the wave and turn it to day", true, () =>
+        EndWave()
     );
 }
