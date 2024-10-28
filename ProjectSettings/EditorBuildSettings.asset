@@ -17,5 +17,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Dev/JVargo/Wave_System.unity
     guid: c4a8c63644e061d4e9ea6849ffdf9a0f
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: b0aae96adace33848b69ac8905552583,
+      type: 2}
   m_UseUCBPForAssetBundles: 0

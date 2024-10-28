@@ -1,7 +1,5 @@
 You are assigned as a modeler, and programmer.
 
-Please email the models you made to zinklofbusiness@gmail.com
-
 I'd offer the day(s) off for a bit, but you take them off anyways so heres something else to do
 
 using the zinklofdev.utils library place a bunch of cubes randomly in a scene, and ensure they do not clip.
