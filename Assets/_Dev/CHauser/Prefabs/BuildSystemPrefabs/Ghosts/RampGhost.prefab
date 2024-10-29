@@ -128,4 +128,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 103
   material: {fileID: 2100000, guid: 37fd9c6a87a8715419c23622422ccedf, type: 2}
-  size: {x: 2.5, y: 0.1, z: 3.4}
+  size: {x: 2.5, y: 0.1, z: 3.3}

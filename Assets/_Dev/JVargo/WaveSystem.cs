@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -14,11 +16,9 @@ public class WaveSystem : NetworkBehaviour
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
     static bool isDay = false;
-    [SerializeField] bool daytime;
     static string time;
     [SerializeField] float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
     [SerializeField] float dayLength;
-    static int day = 0;
     static bool waveChanged = false;
     
 
@@ -30,10 +30,32 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableWritePermission.Server
         );
 
-    private void Start()
+        // Cole | You were checking if the client was a host before the network was even created, I fixed it for you by rearranging your Start function to execute in the OnNetworkSpawn function.
+
+        public override void OnNetworkSpawn()
     {
-        server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
-        server.ServerTick += ServerUpdate;
+        if (IsOwner)
+            isOwnerStatic = true;
+            
+        if (IsServer)
+        {
+            isServerStatic = true;
+            server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
+            server.ServerTick += ServerUpdate;
+        }
+
+        waveCount.OnValueChanged += OnWaveChangeVariableChange;
+
+        Shell.RegisterCommand(WAVESTART);
+        Shell.RegisterCommand(CURRENTTIME);
+        Shell.RegisterCommand(ENDWAVE);
+        base.OnNetworkSpawn();
+    }
+
+    void OnWaveChangeVariableChange(Int32 previousValue, Int32 newValue)
+    {
+        // Cole | Clients can't write to this variable, should probably create a local Int32 that the client can use. We will write to this variable only on the host.
+        waveCount.Value = newValue;
     }
 
     public static void WaveStart() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
@@ -63,23 +85,8 @@ public class WaveSystem : NetworkBehaviour
         // wave.UpdateWaveCount(); <---
     }
 
-    public override void OnNetworkSpawn()
-    {
-        if (IsOwner)
-            isOwnerStatic = true;
-        if (IsServer)
-            isServerStatic = true;
-
-        Shell.RegisterCommand(WAVESTART);
-        Shell.RegisterCommand(CURRENTTIME);
-        Shell.RegisterCommand(ENDWAVE);
-        base.OnNetworkSpawn();
-    }
-
     public void ServerUpdate()
     {
-        daytime = isDay;
-
         if (waveChanged && IsServer)
         {
             waveCount.Value = _waveCount;
@@ -95,6 +102,7 @@ public class WaveSystem : NetworkBehaviour
                 secs = 0;
             }
         }
+        
     }
 
 
