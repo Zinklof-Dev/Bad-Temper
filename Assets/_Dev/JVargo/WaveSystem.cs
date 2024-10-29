@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -14,11 +16,9 @@ public class WaveSystem : NetworkBehaviour
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
     static bool isDay = false;
-    [SerializeField] bool daytime;
     static string time;
     [SerializeField] float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
     [SerializeField] float dayLength;
-    static int day = 0;
     static bool waveChanged = false;
     
 
@@ -32,8 +32,18 @@ public class WaveSystem : NetworkBehaviour
 
     private void Start()
     {
-        server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
-        server.ServerTick += ServerUpdate;
+        waveCount.OnValueChanged += OnWaveChangeVariableChange;
+
+        if (IsServer)
+        {
+            server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
+            server.ServerTick += ServerUpdate;
+        }
+    }
+
+    void OnWaveChangeVariableChange(Int32 previousValue, Int32 newValue)
+    {
+        waveCount.Value = newValue;
     }
 
     public static void WaveStart() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
@@ -78,8 +88,6 @@ public class WaveSystem : NetworkBehaviour
 
     public void ServerUpdate()
     {
-        daytime = isDay;
-
         if (waveChanged && IsServer)
         {
             waveCount.Value = _waveCount;
@@ -95,6 +103,7 @@ public class WaveSystem : NetworkBehaviour
                 secs = 0;
             }
         }
+        
     }
 
 
