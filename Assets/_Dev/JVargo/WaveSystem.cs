@@ -30,19 +30,31 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableWritePermission.Server
         );
 
-    private void Start()
-    {
-        waveCount.OnValueChanged += OnWaveChangeVariableChange;
+        // Cole | You were checking if the client was a host before the network was even created, I fixed it for you by rearranging your Start function to execute in the OnNetworkSpawn function.
 
+        public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+            isOwnerStatic = true;
+            
         if (IsServer)
         {
+            isServerStatic = true;
             server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
             server.ServerTick += ServerUpdate;
         }
+
+        waveCount.OnValueChanged += OnWaveChangeVariableChange;
+
+        Shell.RegisterCommand(WAVESTART);
+        Shell.RegisterCommand(CURRENTTIME);
+        Shell.RegisterCommand(ENDWAVE);
+        base.OnNetworkSpawn();
     }
 
     void OnWaveChangeVariableChange(Int32 previousValue, Int32 newValue)
     {
+        // Cole | Clients can't write to this variable, should probably create a local Int32 that the client can use. We will write to this variable only on the host.
         waveCount.Value = newValue;
     }
 
@@ -71,19 +83,6 @@ public class WaveSystem : NetworkBehaviour
         // Cameron | Wrong kind of too ya idiot.
 
         // wave.UpdateWaveCount(); <---
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        if (IsOwner)
-            isOwnerStatic = true;
-        if (IsServer)
-            isServerStatic = true;
-
-        Shell.RegisterCommand(WAVESTART);
-        Shell.RegisterCommand(CURRENTTIME);
-        Shell.RegisterCommand(ENDWAVE);
-        base.OnNetworkSpawn();
     }
 
     public void ServerUpdate()
