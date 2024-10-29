@@ -78,7 +78,7 @@ public class WaveSystem : NetworkBehaviour
             return;
 
         _isDay = false;
-        waveChanged = false;
+        waveChanged = true;
 
         _waveCount += 1;
     }
