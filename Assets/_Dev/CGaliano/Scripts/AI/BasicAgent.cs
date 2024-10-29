@@ -35,12 +35,15 @@ public class BasicAgent : NetworkBehaviour
         Custom
     }
 
-    [Header("Debug Display")]
+    [Header("Debug Display (DONT TOUCH YOURSELF)")]
     [SerializeField] debugShowState state = new debugShowState(0, "idle");
     [SerializeField] GameObject target;
-    [SerializeField] bool VerboseLogging;
-    [SerializeField] Vector3 destination;
+    [SerializeField] Vector3 destination = Vector3.zero;
     [SerializeField] Vector3 memoryPOS = Vector3.zero;
+    [Header("Debug Settings")]
+    [SerializeField] bool verboseLogging = false;
+    [SerializeField] bool drawGizmos = false;
+    [Space(5)]
     [Header("Agent Settings")]
     [SerializeField] side team = BasicAgent.side.Hostile;
     [SerializeField] AnimationCurve jumpCurve = new AnimationCurve();
@@ -53,6 +56,13 @@ public class BasicAgent : NetworkBehaviour
     [SerializeField] bool attacksNeutralAI = false;
     [SerializeField] bool attacksPassiveAI = false;
     [Space(5)]
+    [SerializeField] bool handleAgentDrifting;
+    [Space(15)]
+    [Header("Wander Settings")]
+    [SerializeField] float wanderDistance = 25;
+    [SerializeField] bool wanderAroundLastPlayerPOS = true;
+    [SerializeField] bool setDefaultWanderPointToSpawn = true;
+    [SerializeField] Vector3 defaultWanderPoint;
     [Header("Player Engagement Settings")]
     [SerializeField] float playerMaxPriority;
     [SerializeField] float playerMinPriority;
@@ -63,6 +73,7 @@ public class BasicAgent : NetworkBehaviour
     [Space(5)]
     [SerializeField] bool playerOverrideMovespeed = false;
     [SerializeField] float playerMovespeed;
+    [Space(15)]
     [Header("References (set by themselves, don't touch)")]
     [SerializeField] NavMeshAgent agent;
     [SerializeField] Server server;
@@ -110,11 +121,16 @@ public class BasicAgent : NetworkBehaviour
             attacksNeutralAI = false;
             attacksPassiveAI = false;
         }
+
+        if (handleAgentDrifting)
+        {
+            Debug.LogWarning("Handle Agent Drifting is a patchwork solution to prevent faster agents from drifitng without having to mess with NV agent settings yourself, this will force lock the agent acceleration to max, solving the issue but making it so your AI reach top speed immedietly.");
+        }
     }
 
     private void Awake()
     {
-        if (VerboseLogging)
+        if (verboseLogging)
         AIN = UnityEngine.Random.Range(0, 999999);
         AVL("Hi i am an AI Agent from the BasicAgent class! i have assigned my ID as " + AIN + ", please note that this ID is not stored anywhere and two agents can share the same ID");
 
@@ -128,8 +144,15 @@ public class BasicAgent : NetworkBehaviour
         }
 
         agent.autoTraverseOffMeshLink = false;
+        agent.acceleration = 999f;
         agent.destination = transform.position;
         server.AITick += AIUpdate; AVL("subscribing AIUpdate() to AITick event");
+
+        if (setDefaultWanderPointToSpawn)
+        {
+            defaultWanderPoint = transform.position;
+        }
+        memoryPOS = defaultWanderPoint;
     }
 
     IEnumerator Start()
@@ -166,12 +189,17 @@ public class BasicAgent : NetworkBehaviour
 
     private void OnDrawGizmos()
     {
+        if (!drawGizmos)
+        {
+            return;
+        }
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, playerEngagementDistance);
         //if (agent != null)
         //Gizmos.DrawSphere(agent.destination, 0.25f);
-        Gizmos.color = Color.yellow;
+        Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, playerDisengangeDistance);
+        Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(memoryPOS, 0.20f);
         Gizmos.color = new Color(0.058f, 1, 1);
         if (agent != null)
@@ -180,11 +208,17 @@ public class BasicAgent : NetworkBehaviour
             Gizmos.DrawSphere(agent.destination, 0.25f);
         }
         Gizmos.DrawWireSphere(new Vector3(transform.position.x, transform.position.y - 1, transform.position.z), Numbers.Sqr(.5f));
+        Gizmos.color = new Color(0f, 0f, 1f, 0.25f);
+        Gizmos.DrawCube(defaultWanderPoint, new Vector3(wanderDistance * 2, 1000, wanderDistance * 2));
+        Gizmos.DrawSphere(defaultWanderPoint, 0.25f);
+        Gizmos.DrawLine(transform.position, defaultWanderPoint);
     }
 
     private void AIUpdate()
     {
         AVL("AI update function");
+
+        UnreachablePathSaver();
 
         switch (state.stateID)
         {
@@ -209,7 +243,7 @@ public class BasicAgent : NetworkBehaviour
 
     private void AVL(string input) //Agent Verbose Log, avoiding ambiguity with the verbose logging function from the test manager
     {
-        if (!VerboseLogging) return;
+        if (!verboseLogging) return;
         else Debug.Log("[" + AIN + "] " + input);
     }
 
@@ -252,6 +286,16 @@ public class BasicAgent : NetworkBehaviour
         }
     }
 
+    private void UnreachablePathSaver()
+    {
+        if (agent.pathPending && agent.isPathStale)
+        {
+            AVL("Agent Could not reach path, reseting to wander and clearing last wander path attempt");
+            agent.destination = transform.position;
+            ChangeState(0);
+        }
+    }
+
     private void PlayerState()
     {
         AVL("player state");
@@ -282,12 +326,15 @@ public class BasicAgent : NetworkBehaviour
     private void IdleState()
     {
         AVL("idle state");
-        agent.destination = memoryPOS;
+        if (agent.destination == memoryPOS)
+        {
+            agent.destination = memoryPOS;
+        }
         AVL(agent.destination + " VS " + new Vector3(transform.position.x, transform.position.y - 1, transform.position.z));
         if (Vectors.SqrDist3f(agent.destination, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z)) >= Numbers.Sqr(0.5f))
         {
             AVL("still not at end of idle path");
-            if (VerboseLogging)// this might seem redundant given the AVL function already does this, but its to stop the math from even happening in the first place
+            if (verboseLogging)// this might seem redundant given the AVL function already does this, but its to stop the math from even happening in the first place
             {
                 AVL("" + Vectors.SqrDist3f(agent.destination, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z)) + " is not within " + Numbers.Sqr(0.5f) + " units");
             }
@@ -296,7 +343,7 @@ public class BasicAgent : NetworkBehaviour
         else
         {
             AVL("reached end of path for idle state");
-            CheckForStateChanges();
+            ChangeState(0);
         }
     }
 
@@ -308,6 +355,10 @@ public class BasicAgent : NetworkBehaviour
         {
             return;
         }
+        if (wanderAroundLastPlayerPOS && defaultWanderPoint != memoryPOS)
+        {
+            defaultWanderPoint = memoryPOS;
+        }
 
         Vector3 wanderPoint = Vector3.zero;
         int fails = 0;
@@ -315,14 +366,14 @@ public class BasicAgent : NetworkBehaviour
         if (Vectors.SqrDist3f(agent.destination, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z)) <= Numbers.Sqr(0.5f))
         {
             AVL("finding new wander position");
-            while (wanderPoint != Vector3.zero && fails <= 10)
+            while (wanderPoint == Vector3.zero && fails <= 10)
             {
-                float x = UnityEngine.Random.Range(-5, 5);
-                float z = UnityEngine.Random.Range(-5, 5);
+                float x = UnityEngine.Random.Range(-wanderDistance, wanderDistance);
+                float z = UnityEngine.Random.Range(-wanderDistance, wanderDistance);
 
                 //Saving private Y
                 RaycastHit hit;
-                if (Physics.Raycast(new Vector3(transform.position.x + x, 500, transform.position.z + z), new Vector3(0, -90, 0), out hit, 1000))
+                if (Physics.Raycast(new Vector3(defaultWanderPoint.x + x, 500, defaultWanderPoint.z + z), new Vector3(0, -90, 0), out hit, 1000))
                 {
                     AVL("found point, trying to path to point now");
                     wanderPoint = hit.point;
@@ -336,7 +387,10 @@ public class BasicAgent : NetworkBehaviour
             }
         }
 
-        agent.destination = wanderPoint;
+        if(wanderPoint != Vector3.zero)
+        {
+            agent.destination = wanderPoint;
+        }
     }
 
     private bool CheckForStateChanges()
@@ -353,7 +407,7 @@ public class BasicAgent : NetworkBehaviour
             AVL("decided to try to change to player");
             target = null;
             FindNewPlayer();
-            if (target != null)
+            if (target != null && Vectors.SqrDist3f(target.transform.position, transform.position) <= Numbers.Sqr(playerEngagementDistance))
             {
                 ChangeState(2);
                 return true;
