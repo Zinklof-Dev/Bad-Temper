@@ -146,9 +146,9 @@ public class BuildSystem : NetworkBehaviour
             ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
 
             if(ghostObject.rotation.y == 0 || ghostObject.rotation.y == 180)
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f) + 1.25f, RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f) + 1.25f);
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f) + 1.25f, RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
             else
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f) + 1.25f);
         }
         else
         {
