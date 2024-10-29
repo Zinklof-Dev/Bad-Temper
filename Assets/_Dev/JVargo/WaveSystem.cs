@@ -1,38 +1,44 @@
 using System;
-using System.Collections;
-using Unity.Collections;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
 using ZinklofDev.Console;
 
 public class WaveSystem : NetworkBehaviour
 {
+    // Unused
     public delegate void WaveSystemEventManager();
     public static event WaveSystemEventManager TestServerTick; // Cameron | I love how this keeps chucking a warning at me in editor because its still unused KEK
+
+    [Header("Client Side Refrences")]
+    [SerializeField] public bool clientRefIsDay;
+    [SerializeField] public Int32 clientRefWaveCount;
+
+    [Header("Only Needed With Server")]
     [SerializeField] Server server;
-    static bool isOwnerStatic = false;
-    static bool isServerStatic = false;
-    static bool isDay = false;
-    static string time;
     [SerializeField] float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
     [SerializeField] float dayLength;
-    static bool waveChanged = false;
-    
 
-    public static int _waveCount;
-
+    [Header("Network Varibles")]
     public NetworkVariable<Int32> waveCount = new NetworkVariable<Int32>(
         value: 0,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
         );
 
-        // Cole | You were checking if the client was a host before the network was even created, I fixed it for you by rearranging your Start function to execute in the OnNetworkSpawn function.
+    public NetworkVariable <bool> isDay = new NetworkVariable<bool>(
+        value: false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+        );
 
-        public override void OnNetworkSpawn()
+    static bool waveChanged = false;
+    static bool isOwnerStatic = false;
+    static bool isServerStatic = false;
+    static bool _isDay = false;
+    static string time;
+    static Int32 _waveCount;
+
+    public override void OnNetworkSpawn()
     {
         if (IsOwner)
             isOwnerStatic = true;
@@ -44,7 +50,9 @@ public class WaveSystem : NetworkBehaviour
             server.ServerTick += ServerUpdate;
         }
 
-        waveCount.OnValueChanged += OnWaveChangeVariableChange;
+        waveCount.OnValueChanged += OnWaveCountChange;
+        isDay.OnValueChanged += OnIsDayChange;
+
 
         Shell.RegisterCommand(WAVESTART);
         Shell.RegisterCommand(CURRENTTIME);
@@ -52,10 +60,14 @@ public class WaveSystem : NetworkBehaviour
         base.OnNetworkSpawn();
     }
 
-    void OnWaveChangeVariableChange(Int32 previousValue, Int32 newValue)
+    void OnWaveCountChange(Int32 previousValue, Int32 newValue)
     {
-        // Cole | Clients can't write to this variable, should probably create a local Int32 that the client can use. We will write to this variable only on the host.
-        waveCount.Value = newValue;
+        clientRefWaveCount = newValue;
+    }
+
+    void OnIsDayChange(bool previousValue, bool newValue)
+    {
+        clientRefIsDay = newValue;
     }
 
     public static void WaveStart() //Cameron || we don't need an increment for this to be honest, in run time it should only ever increase by one.
@@ -65,41 +77,29 @@ public class WaveSystem : NetworkBehaviour
         if (!isServerStatic)
             return;
 
-        isDay = false;
-        waveChanged = true;
-        // Cole | 10/18/24 | Compiler error here --->
-        // Not how network variables work smh
-
-        // where is singapore - Lucas
-
-        // Cameron | I thought i removed lucas's access to the repository when he left the team? (i also fixed these all being misaligned by one space)
-
-        // var wave = NetworkVariable<Int32>.waveCount; <---
+        _isDay = false;
+        waveChanged = false;
 
         _waveCount += 1;
-
-        // Cole | 10/18/24 | and here to --->
-
-        // Cameron | Wrong kind of too ya idiot.
-
-        // wave.UpdateWaveCount(); <---
     }
 
     public void ServerUpdate()
     {
-        if (waveChanged && IsServer)
+        if (waveChanged)
         {
             waveCount.Value = _waveCount;
             waveChanged = false;
+            EndWave();
         }
 
-        if (isDay)
+        if (!_isDay)
         {
             secs += Server.serverDeltaTime;
             if (secs >= dayLength)
             {
                 WaveStart();
                 secs = 0;
+                waveChanged = true;
             }
         }
         
@@ -126,7 +126,7 @@ public class WaveSystem : NetworkBehaviour
     public static void EndWave()
     {
         Debug.LogWarning("EndWave(); not implimented yet");
-        isDay = true;
+        _isDay = true;
     }
 
     
