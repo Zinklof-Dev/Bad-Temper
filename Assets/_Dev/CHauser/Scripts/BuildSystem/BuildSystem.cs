@@ -76,7 +76,8 @@ public class BuildSystem : NetworkBehaviour
             case 2:
                 WallPlace(); 
                 break;
-            case >= 3:
+            default:
+                FreePlace(currentObjectID);
                 break;
         }
     }
@@ -145,9 +146,9 @@ public class BuildSystem : NetworkBehaviour
             ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
 
             if(ghostObject.rotation.y == 0 || ghostObject.rotation.y == 180)
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f, 1.55f), RoundToMultipule(hit.point.y, 2.5f, 1.55f), RoundToMultipule(hit.point.z, 2.5f, 1.55f));
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f) + 1.25f, RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f) + 1.25f);
             else
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f, 1.55f), RoundToMultipule(hit.point.z, 2.5f));
+                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
         }
         else
         {
@@ -167,11 +168,25 @@ public class BuildSystem : NetworkBehaviour
     {
         // FREE PLACE OBJECTS ARE ID 3+
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit; 
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[objectID].GetComponent<GhostObject>();
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            PlaceObjectInSceneRpc(hit.point, transform.rotation, objectID);
+            ghostObjects[objectID].transform.position = hit.point;
+            ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+        }
+        else
+        {
+            ghostObjects[objectID].transform.position = ghostObject.defaultPosition;
+        }
+
+        if (ghostObject.isSpawnable == true)
+        {
+            if (Input.GetMouseButtonDown(1))
+            {
+                PlaceObjectInSceneRpc(ghostObjects[objectID].transform.position, ghostObject.rotation, objectID);
+            }
         }
     }
 
