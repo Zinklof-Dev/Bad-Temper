@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Testing;
@@ -16,6 +17,7 @@ public class BuildSystem : NetworkBehaviour
     [Header("Layer Masks")]
 
     [SerializeField] private LayerMask layerMask;
+    [SerializeField] private LayerMask floorLayerMask;
 
     [Header("Modifiable Variables")]
 
@@ -145,10 +147,48 @@ public class BuildSystem : NetworkBehaviour
         {
             ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
 
-            if(ghostObject.rotation.z == 0 || ghostObject.rotation.z == 180)
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f) + 1.25f, RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
-            else
-                ghostObjects[2].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
+            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
+
+            int i = 0;
+            float shortestDistance = 0;
+            int closestID = 0;
+            foreach(Collider collider in floorColliders)
+            {
+                float distance = Vector3.Distance(hit.point, collider.transform.position);
+                if(i  == 0)
+                {
+                    shortestDistance = distance;
+                }
+                else if(distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    closestID = i;
+                }
+                i++;
+            }
+
+            FloorObject floorObject = floorColliders[closestID].gameObject.GetComponent<FloorObject>();
+            List<WallPoint> wallPoints = floorObject.GetWallPoints();
+
+            int i2 = 0;
+            float shortestDistance2 = 0;
+            int closestID2 = 0;
+            foreach (WallPoint wallPoint in wallPoints)
+            {
+                float distance = Vector3.Distance(hit.point, floorColliders[closestID].transform.position - wallPoint.pos);
+                if (i2 == 0)
+                {
+                    shortestDistance = distance;
+                }
+                else if (distance < shortestDistance)
+                {
+                    shortestDistance2 = distance;
+                    closestID2 = i2;
+                }
+                i2++;
+            }
+
+            ghostObjects[2].transform.position = wallPoints[closestID2].pos;
         }
         else
         {

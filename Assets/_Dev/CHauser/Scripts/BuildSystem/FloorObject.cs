@@ -28,10 +28,8 @@ public class FloorObject : MonoBehaviour
         {
             
             Gizmos.color = Color.blue;
-            Gizmos.DrawSphere(point.pos, 0.25f);
-            //Gizmos.DrawLine(point.pos, )
-            //this is commented because i ran out of time, you'll need to use the euler rotation to find another point infront of the wallpoint in the direction your quaternion rotation points
-            //Then you'll have a debug view of the points and where they are facing which is mostly for QOL and later usage.
+            Gizmos.DrawSphere(point.pos, 0.15f);
+            //Gizmos.DrawLine(point.pos,);
         }
     }
 
