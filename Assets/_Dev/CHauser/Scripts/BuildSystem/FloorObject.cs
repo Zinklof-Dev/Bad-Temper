@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -19,14 +20,14 @@ public struct WallPoint
 
 public class FloorObject : MonoBehaviour
 {
-    [SerializeField] List<WallPoint> inpsectorWallPoints = new List<WallPoint>;
+    [SerializeField] List<WallPoint> inspectorWallPoints = new List<WallPoint>();
 
     private void OnDrawGizmos()
     {
         foreach(WallPoint point in inspectorWallPoints)
         {
             
-            Gizmos.color = Color.Blue;
+            Gizmos.color = Color.blue;
             Gizmos.DrawSphere(point.pos, 0.25f);
             //Gizmos.DrawLine(point.pos, )
             //this is commented because i ran out of time, you'll need to use the euler rotation to find another point infront of the wallpoint in the direction your quaternion rotation points
@@ -34,9 +35,9 @@ public class FloorObject : MonoBehaviour
         }
     }
 
-    public List<WallPoint> GetWallPoints();
+    public List<WallPoint> GetWallPoints()
     {
-        List<WallPoint> tempWallPointList = new List<WallPoints>;
+        List<WallPoint> tempWallPointList = new List<WallPoint>();
         
         //this is simple logic, you can tell why we use this func
         
