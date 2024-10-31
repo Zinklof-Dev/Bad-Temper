@@ -146,8 +146,6 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
-
             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
             if(CheckColliderArray(floorColliders))
             {
@@ -155,6 +153,11 @@ public class BuildSystem : NetworkBehaviour
 
                 FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
                 List<WallPoint> wallPoints = floorObject.GetWallPoints();
+
+                WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit)
+
+                ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
+                ghostObject.rotation = closestWallPoint.quaternionRotation;
             }
         }
         else
@@ -191,7 +194,7 @@ public class BuildSystem : NetworkBehaviour
                 closestCollider = collider;
             else
             {
-                if(Vectors.SqrDist3f(hit.point, collider.transform.position) < Vectors.SqrDist3f(hit.point, closestCollider.transform.position))
+                if(Vectors.SqrDist3f(hit.point, collider.gameObject.transform.position) < Vectors.SqrDist3f(hit.point, closestCollider.gameObject.transform.position))
                 {
                      closestCollider = collider;
                 }
@@ -200,6 +203,27 @@ public class BuildSystem : NetworkBehaviour
         }
 
         return closestCollider;
+    }
+
+    private WallPoint FindClosestWallPoint(List<WallPoint> wallPoints, GameObject closestFloor, RaycastHit hit)
+    {
+        WallPoint closestWallPoint;
+        int i = 0;
+        foreach(WallPoint wallPoint in wallPoints)
+        {
+            if(i == 0)
+                closestWallPoint = wallPoint;
+            else
+            {
+                if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint))
+                {
+                    closestWallPoint = wallPoint;
+                }
+            }
+            i++;
+        }
+
+        return closestWallPoint;
     }
 
     private void FreePlace(int objectID)
