@@ -9145,6 +9145,9 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 55
+  floorLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
   playerReach: 100
 --- !u!4 &182077250
 Transform:

@@ -24,9 +24,9 @@ public class FloorObject : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        foreach(WallPoint point in inspectorWallPoints)
+        foreach (WallPoint point in inspectorWallPoints)
         {
-            
+
             Gizmos.color = Color.blue;
             Gizmos.DrawSphere(point.pos, 0.15f);
             Gizmos.color = Color.red;
@@ -36,11 +36,7 @@ public class FloorObject : MonoBehaviour
 
     public List<WallPoint> GetWallPoints()
     {
-        List<WallPoint> tempWallPointList = new List<WallPoint>();
-        
-        //this is simple logic, you can tell why we use this func
-        
-        return tempWallPointList;
+        return inspectorWallPoints;
     }
 }
     

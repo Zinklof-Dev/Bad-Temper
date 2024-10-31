@@ -126,6 +126,6 @@ MonoBehaviour:
   rotation: {x: 0, y: 0, z: 0, w: 0}
   layerMask:
     serializedVersion: 2
-    m_Bits: 103
+    m_Bits: 231
   material: {fileID: 2100000, guid: 37fd9c6a87a8715419c23622422ccedf, type: 2}
   size: {x: 2.5, y: 0.1, z: 2.5}

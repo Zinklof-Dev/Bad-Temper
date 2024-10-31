@@ -154,10 +154,13 @@ public class BuildSystem : NetworkBehaviour
                 FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
                 List<WallPoint> wallPoints = floorObject.GetWallPoints();
 
-                WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
+                if (CheckWallPointList(wallPoints))
+                {
+                    WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
 
-                ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
-                ghostObject.rotation = closestWallPoint.quaternionRotation;
+                    ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
+                    ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
+                }
             }
         }
         else
@@ -181,6 +184,7 @@ public class BuildSystem : NetworkBehaviour
         {
             isNotNull = true;
         }
+
         return isNotNull;
     }
 
@@ -207,7 +211,7 @@ public class BuildSystem : NetworkBehaviour
 
     private WallPoint FindClosestWallPoint(List<WallPoint> wallPoints, GameObject closestFloor, RaycastHit hit)
     {
-        WallPoint closestWallPoint = wallPoints[1];
+        WallPoint closestWallPoint = wallPoints[0];
         int i = 0;
         foreach(WallPoint wallPoint in wallPoints)
         {
@@ -224,6 +228,16 @@ public class BuildSystem : NetworkBehaviour
         }
 
         return closestWallPoint;
+    }
+
+    private bool CheckWallPointList(List<WallPoint> wallPoints)
+    {
+        bool isNotNull = false;
+        foreach (WallPoint wallPoint in wallPoints)
+        {
+            isNotNull = true;
+        }
+        return isNotNull;
     }
 
     private void FreePlace(int objectID)
