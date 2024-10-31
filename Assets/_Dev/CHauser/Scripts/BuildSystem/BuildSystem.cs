@@ -3,7 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
-using ZinklofDev.Utils.Mathz;
+using ZinklofDev.Utils.MathZ;
 
 public class BuildSystem : NetworkBehaviour
 {
