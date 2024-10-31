@@ -186,7 +186,7 @@ public class BuildSystem : NetworkBehaviour
 
     private Collider ClosestCollider(Collider[] colliders, RaycastHit hit)
     {
-        Collider closestCollider;
+        Collider closestCollider = colliders[1];
         int i = 0;
         foreach(Collider collider in colliders)
         {
@@ -207,7 +207,7 @@ public class BuildSystem : NetworkBehaviour
 
     private WallPoint FindClosestWallPoint(List<WallPoint> wallPoints, GameObject closestFloor, RaycastHit hit)
     {
-        WallPoint closestWallPoint;
+        WallPoint closestWallPoint = wallPoints[1];
         int i = 0;
         foreach(WallPoint wallPoint in wallPoints)
         {
@@ -215,7 +215,7 @@ public class BuildSystem : NetworkBehaviour
                 closestWallPoint = wallPoint;
             else
             {
-                if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint))
+                if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint.pos) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint.pos))
                 {
                     closestWallPoint = wallPoint;
                 }
