@@ -154,7 +154,7 @@ public class BuildSystem : NetworkBehaviour
                 FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
                 List<WallPoint> wallPoints = floorObject.GetWallPoints();
 
-                WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit)
+                WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
 
                 ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
                 ghostObject.rotation = closestWallPoint.quaternionRotation;
