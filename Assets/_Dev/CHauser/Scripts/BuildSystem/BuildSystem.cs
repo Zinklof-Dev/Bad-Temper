@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
+using ZinklofDev.Utils.Mathz;
 
 public class BuildSystem : NetworkBehaviour
 {
@@ -148,47 +149,13 @@ public class BuildSystem : NetworkBehaviour
             ghostObject.rotation = Quaternion.Euler(90, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
 
             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
-
-            int i = 0;
-            float shortestDistance = 0;
-            int closestID = 0;
-            foreach(Collider collider in floorColliders)
+            if(CheckColliderArray(floorColliders))
             {
-                float distance = Vector3.Distance(hit.point, collider.transform.position);
-                if(i  == 0)
-                {
-                    shortestDistance = distance;
-                }
-                else if(distance < shortestDistance)
-                {
-                    shortestDistance = distance;
-                    closestID = i;
-                }
-                i++;
+                Collider closestFloor = ClosestCollider(floorColliders, hit);
+
+                FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
+                List<WallPoint> wallPoints = floorObject.GetWallPoints();
             }
-
-            FloorObject floorObject = floorColliders[closestID].gameObject.GetComponent<FloorObject>();
-            List<WallPoint> wallPoints = floorObject.GetWallPoints();
-
-            int i2 = 0;
-            float shortestDistance2 = 0;
-            int closestID2 = 0;
-            foreach (WallPoint wallPoint in wallPoints)
-            {
-                float distance = Vector3.Distance(hit.point, floorColliders[closestID].transform.position - wallPoint.pos);
-                if (i2 == 0)
-                {
-                    shortestDistance = distance;
-                }
-                else if (distance < shortestDistance)
-                {
-                    shortestDistance2 = distance;
-                    closestID2 = i2;
-                }
-                i2++;
-            }
-
-            ghostObjects[2].transform.position = wallPoints[closestID2].pos;
         }
         else
         {
@@ -202,6 +169,37 @@ public class BuildSystem : NetworkBehaviour
                 PlaceObjectInSceneRpc(ghostObjects[2].transform.position, ghostObject.rotation, 2);
             }
         }
+    }
+
+    private bool CheckColliderArray(Collider[] colliders)
+    {
+        bool isNotNull = false;
+        foreach(Collider collider in colliders)
+        {
+            isNotNull = true;
+        }
+        return isNotNull;
+    }
+
+    private Collider ClosestCollider(Collider[] colliders, RaycastHit hit)
+    {
+        Collider closestCollider;
+        int i = 0;
+        foreach(Collider collider in colliders)
+        {
+            if(i == 0)
+                closestCollider = collider;
+            else
+            {
+                if(Vectors.SqrDist3f(hit.point, collider.transform.position) < Vectors.SqrDist3f(hit.point, closestCollider.transform.position))
+                {
+                     closestCollider = collider;
+                }
+            }
+            i++;
+        }
+
+        return closestCollider;
     }
 
     private void FreePlace(int objectID)
