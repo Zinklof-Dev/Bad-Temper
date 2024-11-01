@@ -8,11 +8,12 @@ using ZinklofDev.Utils.MathZ;
 public class BuildSystem : NetworkBehaviour
 {
     [Header("Game Object Refrences")]
-
+    // Cole | Don't touch yourself, refrence gets assigned in the OnNetworkSpawn function
     [SerializeField] private GameObject playerCamera;
     // Cole | Place the buildable prefabs from the assets file into here
     [SerializeField] private GameObject[] placeableObjects;
     // Cole | Place the ghost objects in the scene in here
+    // Cole | I have the ghost objects as prefabs right now just so I can have them persist beyond being scene dependent, but when we put this in the actual game scene we'll unpack them and put them here.
     [SerializeField] private GameObject[] ghostObjects;
 
     [Header("Layer Masks")]
@@ -21,7 +22,7 @@ public class BuildSystem : NetworkBehaviour
     [SerializeField] private LayerMask floorLayerMask;
 
     [Header("Modifiable Variables")]
-
+    
     [SerializeField] private float playerReach;
 
     private static int currentObjectID;
@@ -29,10 +30,12 @@ public class BuildSystem : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        // Cole | All commands must be registered with the shell
         Shell.RegisterCommand(IS_BUILDING);
         Shell.RegisterCommand(BUILD_ID);
+        // Cole | Assigns the player camera refrence
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
-
+        // Cole | Allows for the function to execute what it needs to do because of the ovveride.
         base.OnNetworkSpawn();
     }
 
@@ -67,7 +70,7 @@ public class BuildSystem : NetworkBehaviour
 
             i++;
         }
-
+        
         switch (currentObjectID)
         {
             case 0:
@@ -120,9 +123,13 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 1.25f) + 1.25f, RoundToMultipule(hit.point.z, 2.5f));
-    
-            ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
+             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
+             if(CheckColliderArray(floorColliders))
+            {
+                Collider closestFloor = ClosestCollider(floorColliders, hit);
+                ghostObjects[1].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
+                ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
+            }
         }
         else
         {
@@ -150,14 +157,12 @@ public class BuildSystem : NetworkBehaviour
             if(CheckColliderArray(floorColliders))
             {
                 Collider closestFloor = ClosestCollider(floorColliders, hit);
-
                 FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
                 List<WallPoint> wallPoints = floorObject.GetWallPoints();
 
                 if (CheckWallPointList(wallPoints))
                 {
                     WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
-
                     ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
                     ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
                 }
@@ -205,7 +210,6 @@ public class BuildSystem : NetworkBehaviour
             }
             i++;
         }
-
         return closestCollider;
     }
 
@@ -274,20 +278,12 @@ public class BuildSystem : NetworkBehaviour
         return Mathf.Round(inputValue / baseNumberOfMultipule) * baseNumberOfMultipule;
     }
 
-
     // Cole | Also thank you to Bunny83, this allows for the function to also take in an offset value for rounding
 
     private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule, float offset)
     {
         return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * baseNumberOfMultipule + offset;
     }
-
-    /*[Rpc(SendTo.Server)]
-    private void PlaceObjectInSceneRpc(Vector3 spawnPos, int objectID)
-    {
-        GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, transform.rotation);
-        spawnedObject.GetComponent<NetworkObject>().Spawn(true);
-    }*/
 
     [Rpc(SendTo.Server)]
     private void PlaceObjectInSceneRpc(Vector3 spawnPos, Quaternion rotation, int objectID)
@@ -296,8 +292,7 @@ public class BuildSystem : NetworkBehaviour
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 
-    // Tests and Commands
-    // Right now it's just tests but maybe commands coming soon idk
+    // Tests and (Legacy) Commands
 
     public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
     {
