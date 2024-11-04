@@ -103,25 +103,8 @@ public class WaveSystem : NetworkBehaviour
             }
         }
         
+        time = secs.ToString();
     }
-
-
-    /*public void Update() //Cameron || no no use update funvtion.
-    {
-        if (waveChanged && IsServer)
-        {
-            waveCount.Value = _waveCount;
-            waveChanged = false;
-        }
-        ; //Time.deltaTime is ALWAYS the ammount of seconds the last frame took. -camoron
-
-        if (secs > 5)
-        {
-            //logik hr
-            ChangeDay();
-            secs = 0;
-        }
-    }*/
 
     public static void EndWave()
     {
