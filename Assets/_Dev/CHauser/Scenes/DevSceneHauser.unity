@@ -13989,8 +13989,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 469608487}
-  - component: {fileID: 469608486}
   - component: {fileID: 469608485}
+  - component: {fileID: 469608486}
   m_Layer: 0
   m_Name: WaveManager
   m_TagString: Untagged
