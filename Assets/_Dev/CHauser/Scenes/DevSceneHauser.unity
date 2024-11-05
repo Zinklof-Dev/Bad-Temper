@@ -14040,7 +14040,9 @@ MonoBehaviour:
   clientRefWaveCount: 0
   server: {fileID: 0}
   secs: 0
-  dayLength: 0
+  dayLength: 30
+  enemies: []
+  enemyCount: 0
   waveCount:
     m_InternalValue: 0
   isDay:
