@@ -17,6 +17,8 @@ public class WaveSystem : NetworkBehaviour
     [SerializeField] Server server;
     [SerializeField] float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
     [SerializeField] float dayLength;
+    GameObject[] enemies;
+    Int32 enemyCount;
 
     [Header("Network Varibles")]
     public NetworkVariable<Int32> waveCount = new NetworkVariable<Int32>(
@@ -104,6 +106,9 @@ public class WaveSystem : NetworkBehaviour
         }
         
         time = secs.ToString();
+        // Currently enemies don't have a tag, will add when enemies have tags
+        // ememies = FindGameObjectsWithTag("");
+        // enemyCount = enemies.Length;
     }
 
     public static void EndWave()
