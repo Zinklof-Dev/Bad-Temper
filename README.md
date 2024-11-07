@@ -1,8 +1,10 @@
-<h1>
+<h1 align="center">
     Project Bad Temper
 </h1>
 
-<img src="https://github.com/HauserCGearSpin/HauserCGearSpin/blob/main/Assets/ZDEV%20PNGs/1000x135_FullLogo_T.png"/>
+<p align="center">
+    <img src="https://github.com/HauserCGearSpin/HauserCGearSpin/blob/main/Assets/ZDEV%20PNGs/1000x135_FullLogo_T.png"/>
+</p>
 
 <h3>
     General Idea
