@@ -28,7 +28,7 @@ public class FloorObject : MonoBehaviour
         {
 
             Gizmos.color = Color.blue;
-            Gizmos.DrawSphere(point.pos, 0.15f);
+            Gizmos.DrawSphere(transform.position + point.pos, 0.15f);
             Gizmos.color = Color.red;
             // Gizmos.DrawLine(point.pos, point.pos * point.eulerRotation);
         }

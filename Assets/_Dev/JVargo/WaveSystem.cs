@@ -109,7 +109,7 @@ public class WaveSystem : NetworkBehaviour
         // Currently enemies don't have a tag, will add when enemies have tags
         // enemies = GameObject.FindGameObjectsWithTag("");
         enemyCount = enemies.Length;
-        Debug.Log(enemyCount);
+        //Debug.Log(enemyCount);
     }
 
     public static void EndWave()
