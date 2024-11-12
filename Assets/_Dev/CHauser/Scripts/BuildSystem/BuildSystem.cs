@@ -124,12 +124,14 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
              Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
-             if(CheckColliderArray(floorColliders))
-            {
+             if(floorColliders.Length >= 1)
+             {
                 Collider closestFloor = ClosestCollider(floorColliders, hit);
                 ghostObjects[1].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
                 ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
-            }
+             }
+             else
+                ghostObjects[1].transform.position = ghostObject.defaultPosition;
         }
         else
         {
@@ -154,19 +156,23 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
-            if(CheckColliderArray(floorColliders))
+            if(floorColliders.Length >= 1)
             {
                 Collider closestFloor = ClosestCollider(floorColliders, hit);
                 FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
                 List<WallPoint> wallPoints = floorObject.GetWallPoints();
 
-                if (CheckWallPointList(wallPoints))
+                if (wallPoints.Count >= 1)
                 {
                     WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
                     ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
                     ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
                 }
+                else
+                    ghostObjects[2].transform.position = ghostObject.defaultPosition;
             }
+            else
+                ghostObjects[2].transform.position = ghostObject.defaultPosition;
         }
         else
         {
@@ -180,17 +186,6 @@ public class BuildSystem : NetworkBehaviour
                 PlaceObjectInSceneRpc(ghostObjects[2].transform.position, ghostObject.rotation, 2);
             }
         }
-    }
-
-    private bool CheckColliderArray(Collider[] colliders)
-    {
-        bool isNotNull = false;
-        foreach(Collider collider in colliders)
-        {
-            isNotNull = true;
-        }
-
-        return isNotNull;
     }
 
     private Collider ClosestCollider(Collider[] colliders, RaycastHit hit)
@@ -232,16 +227,6 @@ public class BuildSystem : NetworkBehaviour
         }
 
         return closestWallPoint;
-    }
-
-    private bool CheckWallPointList(List<WallPoint> wallPoints)
-    {
-        bool isNotNull = false;
-        foreach (WallPoint wallPoint in wallPoints)
-        {
-            isNotNull = true;
-        }
-        return isNotNull;
     }
 
     private void FreePlace(int objectID)
