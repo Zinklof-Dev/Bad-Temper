@@ -155,24 +155,26 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
-            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
-            if(floorColliders.Length >= 1)
+            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, floorLayerMask);
+            if (floorColliders.Length <= 1)
             {
-                Collider closestFloor = ClosestCollider(floorColliders, hit);
-                FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
-                List<WallPoint> wallPoints = floorObject.GetWallPoints();
-
-                if (wallPoints.Count >= 1)
-                {
-                    WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
-                    ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
-                    ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
-                }
-                else
-                    ghostObjects[2].transform.position = ghostObject.defaultPosition;
-            }
-            else
                 ghostObjects[2].transform.position = ghostObject.defaultPosition;
+                return;
+            }
+
+            Collider closestFloor = ClosestCollider(floorColliders, hit);
+            FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
+            List<WallPoint> wallPoints = floorObject.GetWallPoints();
+
+            if (wallPoints.Count <= 1)
+            {
+                ghostObjects[2].transform.position = ghostObject.defaultPosition;
+                return;
+            }
+
+            WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
+            ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
+            ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
         }
         else
         {
@@ -194,15 +196,18 @@ public class BuildSystem : NetworkBehaviour
         int i = 0;
         foreach(Collider collider in colliders)
         {
-            if(i == 0)
-                closestCollider = collider;
-            else
+            if (i == 0)
             {
-                if(Vectors.SqrDist3f(hit.point, collider.gameObject.transform.position) < Vectors.SqrDist3f(hit.point, closestCollider.gameObject.transform.position))
-                {
-                     closestCollider = collider;
-                }
+                closestCollider = collider;
+                i++;
+                continue;
             }
+
+            if (Vectors.SqrDist3f(hit.point, collider.gameObject.transform.position) < Vectors.SqrDist3f(hit.point, closestCollider.gameObject.transform.position))
+            {
+                closestCollider = collider;
+            }
+
             i++;
         }
         return closestCollider;
@@ -214,15 +219,18 @@ public class BuildSystem : NetworkBehaviour
         int i = 0;
         foreach(WallPoint wallPoint in wallPoints)
         {
-            if(i == 0)
-                closestWallPoint = wallPoint;
-            else
+            if (i == 0)
             {
-                if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint.pos) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint.pos))
-                {
-                    closestWallPoint = wallPoint;
-                }
+                closestWallPoint = wallPoint;
+                i++;
+                continue;
             }
+            
+            if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint.pos) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint.pos))
+            {
+                closestWallPoint = wallPoint;
+            }
+
             i++;
         }
 
