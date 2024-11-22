@@ -124,14 +124,15 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
              Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
-             if(floorColliders.Length >= 1)
+             if(floorColliders.Length <= 0)
              {
-                Collider closestFloor = ClosestCollider(floorColliders, hit);
-                ghostObjects[1].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
-                ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
-             }
-             else
                 ghostObjects[1].transform.position = ghostObject.defaultPosition;
+                return;
+             }
+
+            Collider closestFloor = ClosestCollider(floorColliders, hit);
+            ghostObjects[1].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
+            ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
         }
         else
         {
