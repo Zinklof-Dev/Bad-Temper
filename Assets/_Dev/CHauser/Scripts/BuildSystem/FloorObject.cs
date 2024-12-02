@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ZinklofDev.Utils.MathZ;
 
 [Serializable]
 public struct WallPoint
@@ -30,7 +31,8 @@ public class FloorObject : MonoBehaviour
             Gizmos.color = Color.blue;
             Gizmos.DrawSphere(transform.position + point.pos, 0.15f);
             Gizmos.color = Color.red;
-            // Gizmos.DrawLine(point.pos, point.pos * point.eulerRotation);
+            Gizmos.DrawLine(transform.position + point.pos, transform.position + Vectors.DirPoint(point.pos, point.eulerRotation, 0.5f, true));
+            // Debug.Log(Vectors.DirPoint(point.pos, point.eulerRotation, 0.5f));
         }
     }
 
