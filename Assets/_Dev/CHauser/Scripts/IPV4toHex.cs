@@ -36,8 +36,6 @@ public class IPV4toHex : MonoBehaviour
 
             IPConverted += hexValue;
         }
-
-        Log.LogResponse(IPConverted);
         return IPConverted;
     }
 
@@ -75,9 +73,7 @@ public class IPV4toHex : MonoBehaviour
 
                 section++;
             }
-        }
-
-        Log.LogResponse(IPConverted); 
+        } 
         return IPConverted;
     }
 
@@ -98,12 +94,14 @@ public class IPV4toHex : MonoBehaviour
     // LegacyCommand To Run Functions 
     public static LegacyCommand<string> IP_TO_HEX = new LegacyCommand<string>(/*LegacyCommand ID: first 4 letters 0001 for game command, first two letters developer ID (Cole Hauser is 15), last letters command number*/ "0001x1500000001", /* LegacyCommand inputed into the consol*/ "ip_to_hex", /* LegacyCommand Description*/ "Converts an IPV4 to Hexadecimal Format", /* Is it a cheat? */false, /*Variable that allows input of comand to be passed into method*/(t1) =>
     {
-        IPV4ToHexadecimal(t1);
+        string IPConverted = IPV4ToHexadecimal(t1);
+        Log.LogResponse(IPConverted);
     });
 
     public static LegacyCommand<string> HEX_TO_IP = new LegacyCommand<string>("0001x1500000002", "hex_to_ip", "Converts an IPV4 from Hexadecimal Format back to Standard Format", false, (t1) =>
     {
-        HexadecimalToIPV4(t1);
+        string IPConverted = HexadecimalToIPV4(t1);
+        Log.LogResponse(IPConverted);
     });
 
 }
