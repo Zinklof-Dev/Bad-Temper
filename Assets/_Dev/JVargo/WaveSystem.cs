@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using ZinklofDev.Console;
 
@@ -16,7 +17,11 @@ public class WaveSystem : NetworkBehaviour
     [Header("Only Needed With Server")]
     [SerializeField] Server server;
     [SerializeField] float secs; // Luigi | I did this because i wanted it to be pronounced like you know what.
-    [SerializeField] float dayLength;
+    [SerializeField] float dayLength = 10;
+    [SerializeField] float dayStartRotation = -15;
+    [SerializeField] float dayEndRotation = 180;
+    [SerializeField] float lightRotationPercent;
+    [SerializeField] float lightRotation;
     [SerializeField] GameObject[] enemies;
     [SerializeField] Int32 enemyCount;
 
@@ -32,13 +37,15 @@ public class WaveSystem : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
         );
-
+     
     static bool waveChanged = false;
     static bool isOwnerStatic = false;
     static bool isServerStatic = false;
     static bool _isDay = false;
     static string time;
     static Int32 _waveCount;
+
+    public GameObject Light;
 
     public override void OnNetworkSpawn()
     {
@@ -83,6 +90,7 @@ public class WaveSystem : NetworkBehaviour
         waveChanged = true;
 
         _waveCount += 1;
+        
     }
 
     public void ServerUpdate()
@@ -91,7 +99,7 @@ public class WaveSystem : NetworkBehaviour
         {
             waveCount.Value = _waveCount;
             waveChanged = false;
-            EndWave();
+            secs = 0;
         }
 
         if (!_isDay)
@@ -99,11 +107,18 @@ public class WaveSystem : NetworkBehaviour
             secs += Server.serverDeltaTime;
             if (secs >= dayLength)
             {
-                WaveStart();
-                secs = 0;
+                EndWave();
                 waveChanged = true;
             }
+            
         }
+        lightRotationPercent = (secs / dayLength);
+
+        lightRotation = ((dayEndRotation - dayStartRotation) * lightRotationPercent) + dayStartRotation;
+
+        Quaternion rotation = Quaternion.Euler(lightRotation, 0,0);
+
+        Light.transform.rotation = rotation;
         
         time = secs.ToString();
         // Currently enemies don't have a tag, will add when enemies have tags
