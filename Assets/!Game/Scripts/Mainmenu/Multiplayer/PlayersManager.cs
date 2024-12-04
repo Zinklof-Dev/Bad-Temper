@@ -5,30 +5,82 @@ using UnityEngine;
 
 public class PlayersManager : NetworkBehaviour
 {
-    NetworkVariable<FixedString32Bytes> username = new NetworkVariable<FixedString32Bytes>();
-    [SerializeField] TextMeshProUGUI usernameText;
+    [SerializeField] ulong[] slots = new ulong[6];
+    [SerializeField] FixedString32Bytes[6] usernames;
+    [SerializeField] ulong clientId;
 
-    public override void OnNetworkSpawn()
+    private void Start()
     {
-        username.OnValueChanged += OnPlayerNameChanged;
+        if (IsServer)
+        {
+            for(int i = 0; i <6; i++)
+            {
+                slots[i] = (ulong)0;
+            }
+            for(int i = 0; i <6; ++i)
+            {
+                usernames[i] = (FixedString32Bytes)"NoPlAyEr";
+            }
+        }
 
         if (IsOwner)
         {
-            username.Value = ClientBackend.playerUsername;
+            AskForIdRpc();
         }
-
-        if (IsServer)
-        {
-            GameObject temp = GameObject.FindGameObjectWithTag("PlayerScreen");
-            transform.SetParent(temp.transform);
-        }
-
-        base.OnNetworkSpawn();
     }
 
-    private void OnPlayerNameChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
+    [Rpc(SendTo.Server)]
+    void AskForIdRpc(ServerRpcParams serverRpcParams = default)
     {
-        username.Value = newValue;
-        usernameText.text = newValue.Value.ToString();
+        clientId = serverRpcParams.Receive.SenderClientId;
+
+        foreach (var slot in slots)
+        {
+            if (slots[slot] != 0)
+            {
+                slots[slot] = clientId;
+            }
+        }
+
+        ReturnIdtoClientRpc(clientId, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+    }
+
+    [Rpc(SendTo.Server)]
+    void GiveServerUsernameRpc(FixedString32Bytes username, ServerRpcParams ServerRpcParams)
+    {
+        clientId = ServerRpcParams.Receive.SenderClientId;
+        bool nameSaved = false;
+
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (slots[i] == clientId)
+            {
+                usernames[i] = username;
+                nameSaved = true;
+            }
+
+            if (nameSaved == false)
+            {
+                Debug.LogError("failed to save username, canceling RPC");
+                return;
+            }
+            else
+            {
+
+            }
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    void SendUsernameAcrossNetworkRpc(FixedString32Bytes username, int index)
+    {
+        //need logic
+    }
+
+    [Rpc(SendTo.SpecifiedInParams]
+    void ReturnIdtoClientRpc(ulong returnedId, RpcParams rpcParams = default) 
+    {
+        clientId = returnedId;
     }
 }
