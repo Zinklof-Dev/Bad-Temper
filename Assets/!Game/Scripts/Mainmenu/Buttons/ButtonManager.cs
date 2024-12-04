@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class ButtonManager : MonoBehaviour
 {
-    public GameObject[] Menus;
+    public GameObject[] menus;
+    public GameObject[] screens;
 
     private void Start()
     {
@@ -12,12 +13,23 @@ public class ButtonManager : MonoBehaviour
 
     public void EnableMenu(int menuIndex)
     {
-        Menus[menuIndex].SetActive(true);
+        closeAllMenus();
+        menus[menuIndex].SetActive(true);
     }
 
     public void DisableMenu(int menuIndex)
     {
-        Menus[menuIndex].SetActive(false);
+        menus[menuIndex].SetActive(false);
+    }
+
+    public void EnableScreen(int index)
+    {
+        screens[index].SetActive(true);
+    }
+
+    public void DisableScreen(int index)
+    {
+        screens[index].SetActive(false);
     }
 
     public void ExitApplication()
@@ -27,9 +39,19 @@ public class ButtonManager : MonoBehaviour
 
     private void closeAllMenus()
     {
-        foreach (var menu in Menus)
+        foreach (var menu in menus)
         {
             menu.SetActive(false);
         }
+    }
+
+    public void StartHostingLAN()
+    {
+        NetworkCommands.host();
+    }
+
+    public void ConnectViaLan(string joinCode)
+    {
+        NetworkCommands.Connect(joinCode);
     }
 }
