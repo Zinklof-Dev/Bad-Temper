@@ -11,16 +11,21 @@ public class TreeGeneration : NetworkBehaviour
 {
     // Invisible variables
     // Provides a static bool to determine if the player is the server, allowing us to do commands later down the line that involve networking
-    static bool _IsServer;
+    private static bool _IsServer;
     // Value that is calculated and stored as the max perlin value that trees can be placed.
     private float maxPerlinValue;
 
     // Settings for the Gizmos
     [Header("Debug Gizmos Settings")]
     [SerializeField] private bool drawGizmos;
+
+    // Settings for the Poisson Disc Sampling that generates the points where trees will be placed. 
+    [Header("Poisson Disc Sampling Settings")]
+    [SerializeField] private bool useDefalutValuesPoisson;
     
     // Settings for the perlin noise that cuts out tress that have been placed from the Poisson Disc Sampling function
     [Header("Perlin Noise Cutout Settings")]
+    [SerializeField] private bool useDefalutValuesPerlin;
     [SerializeField] private float perlinScale;
     [SerializeField] private float perlinCuttoffPercent; // Perlin Cuttof sweet spot is just between 50 and 51 percent.
     
@@ -46,7 +51,7 @@ public class TreeGeneration : NetworkBehaviour
         _IsServer = IsServer;
         //if (!_IsServer)
         //  return;
-
+        SetVariableDefaultValues();
         float fails = 0;
         bool success = false;
 
@@ -100,6 +105,12 @@ public class TreeGeneration : NetworkBehaviour
                 }
             }
         }
+    }
+
+    private void SetVariableDefaultValues()
+    {
+        // For each variable group, this checks if we have the use default values bool checked, an it sets the correspnding variables to the hard coded default amounts
+        
     }
 
     private void OnDrawGizmos()
