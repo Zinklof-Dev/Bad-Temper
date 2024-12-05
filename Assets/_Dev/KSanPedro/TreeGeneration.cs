@@ -1,24 +1,43 @@
 using System.Collections.Generic;
+// using System.Collections;
+// using System.IO;
+using UnityEngine;
 using Unity.Netcode;
 using Unity.VisualScripting;
-using UnityEngine;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 
 public class TreeGeneration : NetworkBehaviour
 {
+    // Invisible variables
+    // Provides a static bool to determine if the player is the server, allowing us to do commands later down the line that involve networking
     static bool _IsServer;
+    // Value that is calculated and stored as the max perlin value that trees can be placed.
     private float maxPerlinValue;
-    
+
+    // Settings for the Gizmos
+    [Header("Debug Gizmos Settings")]
     [SerializeField] private bool drawGizmos;
+    
+    // Settings for the perlin noise that cuts out tress that have been placed from the Poisson Disc Sampling function
+    [Header("Perlin Noise Cutout Settings")]
     [SerializeField] private float perlinScale;
     [SerializeField] private float perlinCuttoffPercent; // Perlin Cuttof sweet spot is just between 50 and 51 percent.
+    
+    // Allows us to view the perlin noise generated in order to dubug
+    [Header("Perlin Noise Texture")]
+    [SerializeField] private Texture2D perlinTexture;
+    
+    // These are all settings that remove trees from being placed independently from the perlin noise system that cuts out where the trees are that we get.
+    [Header("Manual Exclusion Settings")]
     [SerializeField] private float campfireExclusionRaduis;
     [SerializeField] private float minimumTreeCount;
-    [SerializeField] private float maximuimFails;
+    [SerializeField] private float maximuimTreePlacementFails;
     [SerializeField] private Vector2 mapSize;
-    [SerializeField] private GameObject Cube;
-    [SerializeField] private Texture2D perlinTexture;
+    
+    // Where we input any refrences to prefabs or in scene Game Objects that we need refrences to, like the tree prefab.
+    [Header("Game Object Refrences")]
+    [SerializeField] private GameObject treePrefab;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     // Probably going to move to OnNetworkSpawn function in the future
@@ -53,7 +72,7 @@ public class TreeGeneration : NetworkBehaviour
 
             fails++;
 
-            if(fails >= maximumFails)
+            if(fails >= maximuimTreePlacementFails)
                 break;
         }
     }
@@ -76,7 +95,7 @@ public class TreeGeneration : NetworkBehaviour
 
                 if (value <= maxPerlinValue && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
                 {
-                    GameObject temp = GameObject.Instantiate(Cube, hit.point, new Quaternion(0, 0, 0, 0));
+                    GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                 }
             }
@@ -109,5 +128,9 @@ public class TreeGeneration : NetworkBehaviour
         perlinTexture.wrapMode = TextureWrapMode.Clamp;
         perlinTexture.SetPixels(colorMap);
         perlinTexture.Apply();
+        /*
+        byte[] bytes = perlinTexture.EncodeToPNG();
+        File.WriteAllBytes(Application.dataPath + "/../", bytes); WRITE PATH LATER
+        */
     }
 }
