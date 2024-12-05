@@ -3,7 +3,6 @@ using System.Collections.Generic;
 // using System.IO;
 using UnityEngine;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 
@@ -67,9 +66,9 @@ public class TreeGeneration : NetworkBehaviour
     
             PlaceTrees(points, perlinMap);
 
-            GameObject[] treeCounter = FindGameObjectsWithTag("Tree"); // Have to add a "Tree" tag to the tree prefab in Flower's
+            GameObject[] treeCounter = GameObject.FindGameObjectsWithTag("Tree"); // Have to add a "Tree" tag to the tree prefab in Flower's
 
-            if(treeCounter.length >= minimumTreeCount)
+            if(treeCounter.Length >= minimumTreeCount)
             {
                 success = true;
                 break;
