@@ -8,33 +8,54 @@ using ZinklofDev.Utils.MathZ;
 public class TreeGeneration : NetworkBehaviour
 {
     static bool _IsServer;
-    [SerializeField] bool drawGizmos;
     private float maxPerlinValue;
+    
+    [SerializeField] private bool drawGizmos;
     [SerializeField] private float perlinScale;
     [SerializeField] private float perlinCuttoffPercent; // Perlin Cuttof sweet spot is just between 50 and 51 percent.
-    [SerializeField] private float campfireExclusionRaduis =50;
+    [SerializeField] private float campfireExclusionRaduis;
+    [SerializeField] private float minimumTreeCount;
+    [SerializeField] private float maximuimFails;
     [SerializeField] private Vector2 mapSize;
     [SerializeField] private GameObject Cube;
     [SerializeField] private Texture2D perlinTexture;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // Probably going to move to OnNetworkSpawn function in the future
     private void Start()
     {
         _IsServer = IsServer;
-
         //if (!_IsServer)
         //  return;
 
-        List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
-        int tempSeed = Random.Range(0, 99999);
-        PerlinMap perlinMap = Noise.GenPerlinMap(4096, 4096, tempSeed, perlinScale, 3, 3, 3, new Vector2(0,0));
+        float fails = 0;
+        bool success = false;
 
-        maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
-        Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
+        while(!success)
+        {
+            List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
+            int tempSeed = Random.Range(0, 99999);
+            PerlinMap perlinMap = Noise.GenPerlinMap(4096, 4096, tempSeed, perlinScale, 3, 3, 3, new Vector2(0,0));
+    
+            maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
+            // Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
+            PerlinToTexture(perlinMap);
+    
+            PlaceTrees(points, perlinMap);
 
-        PlaceTrees(points, perlinMap);
+            GameObject[] treeCounter = FindGameObjectsWithTag("Tree"); // Have to add a "Tree" tag to the tree prefab in Flower's
 
-        PerlinToTexture(perlinMap);
+            if(treeCounter.length >= minimumTreeCount)
+            {
+                success = true;
+                break;
+            }
+
+            fails++;
+
+            if(fails >= maximumFails)
+                break;
+        }
     }
 
     private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
