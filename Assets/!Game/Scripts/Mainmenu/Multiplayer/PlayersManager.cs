@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayersManager : NetworkBehaviour
 {
     [SerializeField] ulong[] slots = new ulong[6];
-    [SerializeField] FixedString32Bytes[6] usernames;
+    [SerializeField] FixedString32Bytes[] usernames = new FixedString32Bytes[6];
     [SerializeField] ulong clientId;
 
     private void Start()
@@ -30,9 +30,9 @@ public class PlayersManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    void AskForIdRpc(ServerRpcParams serverRpcParams = default)
+    void AskForIdRpc(ServerRpcParams rpcParams = default)
     {
-        clientId = serverRpcParams.Receive.SenderClientId;
+        clientId = rpcParams.Receive.SenderClientId;
 
         foreach (var slot in slots)
         {
@@ -46,9 +46,9 @@ public class PlayersManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    void GiveServerUsernameRpc(FixedString32Bytes username, ServerRpcParams ServerRpcParams)
+    void GiveServerUsernameRpc(FixedString32Bytes username, RpcParams rpcParams)
     {
-        clientId = ServerRpcParams.Receive.SenderClientId;
+        clientId = rpcParams.Receive.SenderClientId;
         bool nameSaved = false;
 
 
@@ -78,7 +78,7 @@ public class PlayersManager : NetworkBehaviour
         //need logic
     }
 
-    [Rpc(SendTo.SpecifiedInParams]
+    [Rpc(SendTo.SpecifiedInParams)]
     void ReturnIdtoClientRpc(ulong returnedId, RpcParams rpcParams = default) 
     {
         clientId = returnedId;
