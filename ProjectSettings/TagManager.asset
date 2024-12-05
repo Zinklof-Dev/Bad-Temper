@@ -8,6 +8,7 @@ TagManager:
   - BuildObjects
   - Server
   - PlayerScreen
+  - Tree
   layers:
   - Default
   - TransparentFX

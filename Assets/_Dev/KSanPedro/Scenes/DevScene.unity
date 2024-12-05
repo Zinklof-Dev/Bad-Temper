@@ -175,12 +175,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   drawGizmos: 1
-  perlinScale: 0.8
+  useDefalutValuesPoisson: 0
+  useDefalutValuesPerlin: 0
+  perlinScale: 10000
   perlinCuttoffPercent: 0.506
-  campfireExclusionRaduis: 20
-  mapSize: {x: 1000, y: 1000}
-  Cube: {fileID: 7803448073008630953, guid: 0d49d05b806abb442a3947b4ac848962, type: 3}
   perlinTexture: {fileID: 0}
+  campfireExclusionRaduis: 20
+  minimumTreeCount: 200
+  maximuimTreePlacementFails: 20
+  mapSize: {x: 1000, y: 1000}
+  treePrefab: {fileID: 7803448073008630953, guid: 0d49d05b806abb442a3947b4ac848962,
+    type: 3}
 --- !u!4 &45186444
 Transform:
   m_ObjectHideFlags: 0

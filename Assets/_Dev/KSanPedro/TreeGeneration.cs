@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-// using System.Collections;
-// using System.IO;
+using System.Collections;
+using System.IO;
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
@@ -58,7 +58,7 @@ public class TreeGeneration : NetworkBehaviour
         {
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
             int tempSeed = Random.Range(0, 99999);
-            PerlinMap perlinMap = Noise.GenPerlinMap(4096, 4096, tempSeed, perlinScale, 3, 3, 3, new Vector2(0,0));
+            PerlinMap perlinMap = Noise.GenPerlinMap(4096, 4096, tempSeed, perlinScale, 3, 1, 5, new Vector2(0,0));
     
             maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
             // Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
@@ -67,6 +67,7 @@ public class TreeGeneration : NetworkBehaviour
             PlaceTrees(points, perlinMap);
 
             GameObject[] treeCounter = GameObject.FindGameObjectsWithTag("Tree"); // Have to add a "Tree" tag to the tree prefab in Flower's
+            Debug.Log("Attempted Trees Spawned: " + treeCounter.Length);
 
             if(treeCounter.Length >= minimumTreeCount)
             {
@@ -76,8 +77,13 @@ public class TreeGeneration : NetworkBehaviour
 
             fails++;
 
-            if(fails >= maximuimTreePlacementFails)
+            if (fails >= maximuimTreePlacementFails)
                 break;
+
+            foreach(GameObject tree in treeCounter)
+            {
+                GameObject.Destroy(tree);
+            }
         }
     }
 
@@ -129,8 +135,13 @@ public class TreeGeneration : NetworkBehaviour
         {
             for(int x = 0; x < 4096; x++)
             {
-                colorMap[y * 4096 + x] = Color.Lerp(Color.black, Color.white, (perlinMap.Map[x, y] - perlinMap.MinMapHeight) / (perlinMap.MaxMapHeight - perlinMap.MinMapHeight));
+                colorMap[y * 4096 + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
             }
+        }
+
+        for (int y = 0; y < 200; y++)
+        {
+            Debug.Log(colorMap[y]);
         }
 
         perlinTexture = new Texture2D(4096, 4096);
@@ -138,9 +149,8 @@ public class TreeGeneration : NetworkBehaviour
         perlinTexture.wrapMode = TextureWrapMode.Clamp;
         perlinTexture.SetPixels(colorMap);
         perlinTexture.Apply();
-        /*
+        
         byte[] bytes = perlinTexture.EncodeToPNG();
-        File.WriteAllBytes(Application.dataPath + "/../", bytes); WRITE PATH LATER
-        */
+        File.WriteAllBytes(Application.dataPath + "perlinDebugView.png", bytes);
     }
 }
