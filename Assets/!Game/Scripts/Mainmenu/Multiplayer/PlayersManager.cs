@@ -16,7 +16,7 @@ public class PlayersManager : NetworkBehaviour
         {
             for(int i = 0; i <6; i++)
             {
-                slots[i] = (ulong)0;
+                slots[i] = (ulong)69420;
             }
             for(int i = 0; i <6; ++i)
             {
@@ -39,7 +39,7 @@ public class PlayersManager : NetworkBehaviour
 
             if (go == null) // null case, shouldn't happen but you never know
             {
-                go = GameObject.Find("Player" + i); // find the object
+                go = GameObject.Find("PlayerName" + i); // find the object
                 
                 if (go == null) // if that failed skip this itteration of the loop
                 {
@@ -51,11 +51,18 @@ public class PlayersManager : NetworkBehaviour
                 playerObjects[i] = go;
             }
 
-            if (go.activeSelf == false && usernames[i] != "NoPlAyEr") // if the object is inactive but the slot doesn't have the no player keyword, then enable it
-            go.SetActive(true);
+            GameObject goParent = go.GetComponentInParent<GameObject>();
+
+            if (goParent.activeSelf == false && usernames[i] != "NoPlAyEr") // if the object is inactive but the slot doesn't have the no player keyword, then enable it
+            {
+                goParent = go.GetComponentInParent<GameObject>();
+                goParent.SetActive(true);
+            }
+
             else // otherwise set it false (to be sure)
             {
-                go.SetActive(false); //redundant call but just making absolute sure.
+                goParent = go.GetComponentInParent<GameObject>();
+                goParent.SetActive(false); //redundant call but just making absolute sure.
                 continue;
             }
             
@@ -71,6 +78,8 @@ public class PlayersManager : NetworkBehaviour
     void AskForIdRpc(RpcParams rpcParams = default)
     {
         clientId = rpcParams.Receive.SenderClientId;
+
+        Debug.Log(clientId);
 
         foreach (var slot in slots)
         {
