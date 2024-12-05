@@ -1,23 +1,26 @@
 using System;
+using System.IO;
+using System.Text;
 using UnityEngine;
+using Unity.Collections;
 using ZinklofDev.Utils;
 using Newtonsoft.Json;
 
 public class Profile
 {
     string profVers { get; set; }
-    FixedString32Byte username { get; set; }
+    FixedString32Bytes username { get; set; }
 
 }
 
 public static class ProfileSystem
 {
     public static Profile profile = null;
-    public static string saveLoc = Application.persistantDataPath + "/profile.zdf"
+    public static string saveLoc = Application.persistentDataPath + "/profile.zdf";
     
     public static Profile FetchProfile()
     {
-        if (profile = null)
+        if (profile == null)
         {
             FileStream fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
@@ -27,25 +30,31 @@ public static class ProfileSystem
                 contents = sr.ReadToEnd();
             }
 
-            if (contents == null || contents = "") // make new file
+            if (contents == null || contents == "") // make new file
             {
-                debug.log("no saved profile found, making new file");
-                string contents = NewProfileJson();
+                Debug.Log("no saved profile found, making new file");
+                contents = NewProfileJson();
 
-                Encoding unicode = Encoding.unicode;
-                Bytes[] contentAsBytes = unicode.GetBytes(contents);
+                Encoding unicode = Encoding.Unicode;
+                Byte[] contentAsBytes = unicode.GetBytes(contents);
                 
-                using (StreamWriter sw = new StreamWriter(fs, false))
+                using (StreamWriter sw = new StreamWriter(fs))
                 {
-                    sr.write(contentAsBytes);
+                    sw.Write(contentAsBytes);
                 }
             }
 
-            
-          
-            JsonConvert.DeserializeObject<profile>(contents)
+
+
+            JsonConvert.DeserializeObject<Profile>(contents);
+
+            return profile;
         }
+        return null;
     }
 
     private static string NewProfileJson()
+    {
+        return null;
+    }
 }

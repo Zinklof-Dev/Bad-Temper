@@ -7,7 +7,7 @@ public class PlayersManager : NetworkBehaviour
 {
     [SerializeField] ulong[] slots = new ulong[6];
     [SerializeField] FixedString32Bytes[] usernames = new FixedString32Bytes[6];
-    [SerializeField} GameObject[] playerObjects = new GameObject[6];
+    [SerializeField] GameObject[] playerObjects = new GameObject[6];
     [SerializeField] ulong clientId;
 
     private void Start()
@@ -27,7 +27,7 @@ public class PlayersManager : NetworkBehaviour
         if (IsOwner)
         {
             AskForIdRpc();
-            GiveServerUsernameRpc((FixedString32Bytes)ClientBackend.playerUsername) 
+            GiveServerUsernameRpc((FixedString32Bytes)ClientBackend.playerUsername);
         }
     }
 
@@ -43,7 +43,7 @@ public class PlayersManager : NetworkBehaviour
                 
                 if (go == null) // if that failed skip this itteration of the loop
                 {
-                    debug.logError("couldn't find player HUD object, error not fatal, user experience may be harmed though");
+                    Debug.LogError("couldn't find player HUD object, error not fatal, user experience may be harmed though");
                     continue;
                 }
 
@@ -51,7 +51,7 @@ public class PlayersManager : NetworkBehaviour
                 playerObjects[i] = go;
             }
 
-            if (go.activeSelff == false && usernames[i] != "NoPlAyEr") // if the object is inactive but the slot doesn't have the no player keyword, then enable it
+            if (go.activeSelf == false && usernames[i] != "NoPlAyEr") // if the object is inactive but the slot doesn't have the no player keyword, then enable it
             go.SetActive(true);
             else // otherwise set it false (to be sure)
             {
@@ -63,7 +63,7 @@ public class PlayersManager : NetworkBehaviour
 
             // add null case soon
             
-            tmp.text = (string)usernames[i]; // change tmp text to username text
+            tmp.text = usernames[i].ToString(); // change tmp text to username text
         }
     }
 
@@ -88,7 +88,7 @@ public class PlayersManager : NetworkBehaviour
     {
         clientId = rpcParams.Receive.SenderClientId;
         bool nameSaved = false;
-
+        int finalIndex = 0;
 
         for (int i = 0; i < 6; i++)
         {
@@ -96,6 +96,8 @@ public class PlayersManager : NetworkBehaviour
             {
                 usernames[i] = username;
                 nameSaved = true;
+                finalIndex = i;
+                break;
             }
         }
 
@@ -106,7 +108,7 @@ public class PlayersManager : NetworkBehaviour
         }
         else
         {
-            SendUsernameAcrossNetworkRpc(usernames[i], i);
+            SendUsernameAcrossNetworkRpc(usernames[finalIndex], finalIndex);
             return;
         }
     }
