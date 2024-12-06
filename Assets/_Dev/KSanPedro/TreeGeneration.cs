@@ -324,7 +324,7 @@ public class TreeGeneration : NetworkBehaviour
         perlinTexture.SetPixels(colorMap); // take the color array and set the pixels of our texture2d (for anyone unsure how this works as a 1d array for a 2d texture, check unity documentation :D)
         perlinTexture.Apply(); // apply all changes
 
-        perlinMaterial.SetTexture("_MainTex", perlinTexture); // set the _MainTex value (desiganted in the HLSL on the materials shader) to the new texture2d.
+        perlinMaterial.mainTexture = perlinTexture; // set the _MainTex value (desiganted in the HLSL on the materials shader) to the new texture2d.
         
         //byte[] bytes = perlinTexture.EncodeToPNG(); // this turns the texture 2d into bytes that work in the png format
         //File.WriteAllBytes(Application.dataPath + "perlinDebugView.png", bytes); // this saves the bytes, though i think its actually an entirely wrong way to do this... FileStream and StreamWriter would likley be the best method, no worries as we wont be using this again.
