@@ -16,7 +16,7 @@ public class PlayersManager : NetworkBehaviour
         {
             for(int i = 0; i <6; i++)
             {
-                slots[i] = (ulong)69420;
+                slots[i] = (ulong)99999999;
             }
             for(int i = 0; i <6; ++i)
             {
@@ -37,19 +37,20 @@ public class PlayersManager : NetworkBehaviour
         {
             GameObject go = playerObjects[i]; // fetch object from the array
 
-            if (go == null) // null case, shouldn't happen but you never know
+            /*if (go is null) // null case, shouldn't happen but you never know
             {
                 go = GameObject.Find("PlayerName" + i); // find the object
                 
-                if (go == null) // if that failed skip this itteration of the loop
+                if (go is null) // if that failed skip this itteration of the loop
                 {
                     Debug.LogError("couldn't find player HUD object, error not fatal, user experience may be harmed though");
                     continue;
                 }
-
                 else // otherwise save the object for later use
                 playerObjects[i] = go;
-            }
+            }*/
+
+            // skipped null case just to see what happens, having issue with the null case being triggered even when it has a reference to the gameobject, maybe to do with it being inactive?? 
 
             GameObject goParent = go.GetComponentInParent<GameObject>();
 
@@ -81,11 +82,12 @@ public class PlayersManager : NetworkBehaviour
 
         Debug.Log(clientId);
 
-        foreach (var slot in slots)
+        for(int i = 0; i < 6; i++)
         {
-            if (slots[slot] != 0)
+            if (slots[i] != 99999999)
             {
-                slots[slot] = clientId;
+                slots[i] = clientId;
+                break;
             }
         }
 
@@ -117,15 +119,15 @@ public class PlayersManager : NetworkBehaviour
         }
         else
         {
-            SendUsernameAcrossNetworkRpc(usernames[finalIndex], finalIndex);
+            SendUsernamesAcrossNetworkRpc(usernames);
             return;
         }
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    void SendUsernameAcrossNetworkRpc(FixedString32Bytes username, int index, RpcParams rpcParams = default)
+    void SendUsernamesAcrossNetworkRpc(FixedString32Bytes[] newUsernames, RpcParams rpcParams = default)
     {
-        usernames[index] = username;
+        usernames = newUsernames;
         ReconfigurePlayerScreen();
     }
 
