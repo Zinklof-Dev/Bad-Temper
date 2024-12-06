@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 
 public class Profile
 {
-    string profVers { get; set; }
-    FixedString32Bytes username { get; set; }
+    public string profVers { get; set; }
+    public FixedString32Bytes username { get; set; }
 }
 
 public static class ProfileSystem
@@ -25,20 +25,16 @@ public static class ProfileSystem
 
             string content;
             Byte[] contentAsBytes;
-            using(var sr = new StreamReader(fs))
-            {
-                contentAsBytes = sr.ReadToEnd();
-                Encoding unicode = Encoding.Unicode;
-                content = unicode.GetString(contentAsBytes);
-            }
+            contentAsBytes = System.IO.File.ReadAllBytes(saveLoc);
+            Encoding unicode = Encoding.Unicode;
+            content = unicode.GetString(contentAsBytes);
 
-            if (content == null || contents == "") // make new file
+            if (content == null || content == "") // make new file
             {
                 Debug.Log("no saved profile found, making new file");
                 content = NewProfileJson();
 
-                Encoding unicode = Encoding.Unicode;
-                contentAsBytes = unicode.GetBytes(contents);
+                contentAsBytes = unicode.GetBytes(content);
                 
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
@@ -60,7 +56,7 @@ public static class ProfileSystem
         string content = JsonConvert.SerializeObject(newProfile);
 
         Encoding unicode = Encoding.Unicode;
-        Byte[] contentAsBytes = unicode.GetBytes(contents);
+        Byte[] contentAsBytes = unicode.GetBytes(content);
         
         using (StreamWriter sw = new StreamWriter(fs))
         {
@@ -70,7 +66,7 @@ public static class ProfileSystem
 
     private static string NewProfileJson()
     {
-        Profile returnProfile = new Profile()
+        Profile returnProfile = new Profile();
         returnProfile.profVers = "0.1";
         returnProfile.username = (FixedString32Bytes)"New Player";
 

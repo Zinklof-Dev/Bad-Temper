@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeOf(TreeGeneration))]
-Public Class TreeGenerationEditor : Editor
+[CustomEditor(typeof(TreeGeneration))]
+public class TreeGenerationEditor : Editor
 {
     public override void OnInspectorGUI()
     {
@@ -30,7 +30,7 @@ Public Class TreeGenerationEditor : Editor
         {
             tg.GenTreesEditor();
         }
-        if(GUILayout.Button("Re Compute Hidden Trees")
+        if(GUILayout.Button("Re Compute Hidden Trees"))
         {
             tg.TreeHiderEditor();
         }

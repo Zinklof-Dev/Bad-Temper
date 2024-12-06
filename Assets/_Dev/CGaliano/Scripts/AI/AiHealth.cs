@@ -1,7 +1,8 @@
 using System;
-using Unity;
+using Unity.Netcode;
+using UnityEngine;
 
-public class AiHealth : NetworkBehavior
+public class AiHealth : NetworkBehaviour
 {
     [SerializeField] float maxHP;
     [SerializeField] float currentHP;
@@ -33,7 +34,7 @@ public class AiHealth : NetworkBehavior
     [Rpc(SendTo.ClientsAndHost)]
     void DamageAiRpc(float dmg, RpcParams rpcParams = default)
     {
-        if (rpcParams.Receive.ClientId != 0)
+        if (rpcParams.Receive.SenderClientId != 0)
         {
             return;
         }

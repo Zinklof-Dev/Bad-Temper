@@ -5,8 +5,9 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
+using UnityEngine.ProBuilder.MeshOperations;
 
-public static enum TreePerlinDisplay {
+public enum TreePerlinDisplay {
     None,
     WhiteHot,
     BlackHot,
@@ -65,12 +66,12 @@ public class TreeGeneration : NetworkBehaviour
     [Header("Perlin Noise Editor Settings")]
     [SerializeField] bool overrideRandSeed;
     [SerializeField] int setSeed;
-    [SerializeField] bool autoUpdateInEditor;
+    [SerializeField] public bool autoUpdateInEditor;
     
     // Allows interfacing with the custom editor for this class, related to trees and memory.
     [Header("EDITOR ONLY trees (ENSURE CLEAR BEFORE BUILD FOR MEMORY REASONS)")]
-    [SerializeField] bool autoUpdateTreeVisibility;
-    [SerializeField] list<GameObject> trees = new list<GameObject>();
+    [SerializeField] public bool autoUpdateTreeVisibility;
+    [SerializeField] List<GameObject> trees = new List<GameObject>();
     [SerializeField] PerlinMap editorPerlinMap;
     [SerializeField] Material passMat;
     [SerializeField] Material failMat;
@@ -128,7 +129,7 @@ public class TreeGeneration : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
-                if (CheckIfPlaceable(hit.position, perlinMap))
+                if (CheckIfPlaceable(hit.point, perlinMap))
                 {
                     GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
@@ -137,15 +138,15 @@ public class TreeGeneration : NetworkBehaviour
         }
     }
 
-    private bool CheckIfPlaceable(vector3 treePos, PerlinMap perlinMap)
+    private bool CheckIfPlaceable(Vector3 treePos, PerlinMap perlinMap)
     {
-        float multiple = imgSize / mapSize;
+        float multiple = imgSize / mapSize.x;
     
-        Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+        Vector2 pointToPerlinSpace = new Vector2(treePos.x * multiple, treePos.y * multiple);
 
         float value = perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y];
 
-        if (value <= maxPerlinValue && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+        if (value <= maxPerlinValue && Vectors.SqrDist3f(new Vector3(0, 0, 0), treePos) > Numbers.Sqr(campfireExclusionRaduis))
         {
             return true;
         }
@@ -153,21 +154,24 @@ public class TreeGeneration : NetworkBehaviour
         return false;
     }
 
-    private void DrawPerlinEditor()
+    public void DrawPerlinEditor()
     {
+        PerlinMap perlinMap;
         if (!overrideRandSeed)
         {
             int tempSeed = Random.Range(0, 99999);
-            PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
+            perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
         }
         else
-            PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, setSeed, perlinScale, octaves, persistance, lacunarity, offset);
+        {
+            perlinMap = Noise.GenPerlinMap(imgSize, imgSize, setSeed, perlinScale, octaves, persistance, lacunarity, offset);
+        }
 
-        editorPerlinMap = perlinMap
-        PerlnToTexture(perlinMap)
+        editorPerlinMap = perlinMap;
+        PerlinToTexture(perlinMap);
     }
 
-    private void GenTreesEditor()
+    public void GenTreesEditor()
     {
         if (editorPerlinMap == null)
         {
@@ -177,9 +181,7 @@ public class TreeGeneration : NetworkBehaviour
     
         List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
 
-        foreach(Vector2 point in points)
-        {
-                    float multiple = imgSize / 1000;
+        float multiple = imgSize / 1000;
 
         foreach (Vector2 point in points)
         {
@@ -191,14 +193,14 @@ public class TreeGeneration : NetworkBehaviour
             {
                 GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
                 temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                trees.add(temp);
+                trees.Add(temp);
             }
-        }
 
-        TreeHiderEditor();
+            TreeHiderEditor();
+        }
     }   
 
-    private void TreeHiderEditor()
+    public void TreeHiderEditor()
     {
         foreach (GameObject tree in trees)
         {
@@ -214,10 +216,10 @@ public class TreeGeneration : NetworkBehaviour
         }
     }
 
-    private void ClearEditorOnlyVariables()
+    public void ClearEditorOnlyVariables()
     {
         trees = null;
-        perlinMap = null;
+        editorPerlinMap = null;
     }
     
     private void SetVariableDefaultValues()
@@ -256,18 +258,18 @@ public class TreeGeneration : NetworkBehaviour
                 colorMap[y * imgSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
             }
         }
-        else if (treePerlinDisplayOptions == TreePerlinDisplay.PassFail) // if we have pass fail, any pixels that are below cutoff, make green, any above cutoff make red.
+        else if (treePerlinDisplayOptions == TreePerlinDisplay.PassFail)
         for(int y = 0; y < imgSize; y++)
         {
             for(int x = 0; x < imgSize; x++)
             {
-                if (perlinMap.Map[x,y] > perlinCutoffPercent);
-                colorMap[y * imgSize + x] = Color.Red;
+                if (perlinMap.Map[x,y] > perlinCuttoffPercent)
+                colorMap[y * imgSize + x] = Color.red;
                 else
-                colorMap[y * imgSize + x] = Color.Green;
+                colorMap[y * imgSize + x] = Color.green;
             }
         }
-        else if (treeperlinDisplayOptions == TreePerlinDisplay.PassFailWhiteHot) // if we have pass fail white hot, generate white hot, then apply a faint pass fail on top.
+        else if (treePerlinDisplayOptions == TreePerlinDisplay.PassFailWhiteHot) // if we have pass fail white hot, generate white hot, then apply a faint pass fail on top.
         {
             for(int y = 0; y < imgSize; y++)
             {
@@ -280,10 +282,10 @@ public class TreeGeneration : NetworkBehaviour
             {
                 for(int x = 0; x < imgSize; x++)
                 {
-                    if (perlinMap.Map[x,y] > perlinCutoffPercent);
-                    colorMap[y * imgSize + x] -= New Color(0, 0.25f, 0.25f, 0;
+                    if (perlinMap.Map[x,y] > perlinCuttoffPercent)
+                    colorMap[y * imgSize + x] -= new Color(0, 0.25f, 0.25f, 0);
                     else
-                    colorMap[y * imgSize + x] -= New Color(0.25f, 0, 0.25f, 0);
+                    colorMap[y * imgSize + x] -= new Color(0.25f, 0, 0.25f, 0);
                 }
             } 
         }
@@ -300,10 +302,10 @@ public class TreeGeneration : NetworkBehaviour
             {
                 for(int x = 0; x < imgSize; x++)
                 {
-                    if (perlinMap.Map[x,y] > perlinCutoffPercent);
-                    colorMap[y * imgSize + x] -= New Color(0, 0.25f, 0.25f, 0;
+                    if (perlinMap.Map[x,y] > perlinCuttoffPercent)
+                    colorMap[y * imgSize + x] -= new Color(0, 0.25f, 0.25f, 0);
                     else
-                    colorMap[y * imgSize + x] -= New Color(0.25f, 0, 0.25f, 0);
+                    colorMap[y * imgSize + x] -= new Color(0.25f, 0, 0.25f, 0);
                 }
             } 
         }

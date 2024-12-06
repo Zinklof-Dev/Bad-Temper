@@ -1,5 +1,6 @@
 using System;
-using Unity;
+using UnityEngine;
+using Unity.Netcode;
 
 public class Sword : NetworkBehaviour
 {
@@ -7,7 +8,7 @@ public class Sword : NetworkBehaviour
     [SerializeField] float dmg;
     [SerializeField] float cooldown;
 
-    private float actualCoodown;
+    private float actualCooldown;
     private Server server;
 
     public void Start()
@@ -29,46 +30,46 @@ public class Sword : NetworkBehaviour
     { 
         if (actualCooldown > 0)
         {
-            actualCooldown -= server.ServerDeltaTime;
+            actualCooldown -= Server.serverDeltaTime;
         }
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private AttackRpc()
+    private void AttackRpc()
     {
         //code to run the animation of attacking
     }
 
     [Rpc(SendTo.Server)]
-    private bool AskServerToAttackRpc(RpcParams rpcParams = default)
+    private void AskServerToAttackRpc(RpcParams rpcParams = default)
     {
         if (OwnerClientId != rpcParams.Receive.SenderClientId)
         {
-            return false;
+            return;
         }
         else if (actualCooldown <= 0)
         {
             AttackRpc();
             actualCooldown = cooldown;
-            return true;
+            return;
         }
         else 
         {
-            return false;
+            return;
         }
     }
     
-    [Rpc(SendTo.Server)
-    private bool AskServerForOwnershipRpc(RpcParams rpcParams = default)
+    [Rpc(SendTo.Server)]
+    private void AskServerForOwnershipRpc(RpcParams rpcParams = default)
     {
         if (OwnerClientId != 0)
         {
-            return false;
+            return;
         }
         
         ulong clientId = rpcParams.Receive.SenderClientId;
 
-        ChangeOwnership(clientId);
-        return true;
+        NetworkObject.ChangeOwnership(clientId);
+        return;
     }
 }
