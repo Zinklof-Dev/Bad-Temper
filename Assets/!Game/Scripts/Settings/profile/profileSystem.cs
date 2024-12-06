@@ -10,13 +10,12 @@ public class Profile
 {
     string profVers { get; set; }
     FixedString32Bytes username { get; set; }
-
 }
 
 public static class ProfileSystem
 {
-    public static Profile profile = null;
-    public static string saveLoc = Application.persistentDataPath + "/profile.zdf";
+    private static Profile profile = null;
+    private static string saveLoc = Application.persistentDataPath + "/profile.zdf";
     
     public static Profile FetchProfile()
     {
@@ -24,37 +23,59 @@ public static class ProfileSystem
         {
             FileStream fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-            string contents;
+            string content;
+            Byte[] contentAsBytes;
             using(var sr = new StreamReader(fs))
             {
-                contents = sr.ReadToEnd();
+                contentAsBytes = sr.ReadToEnd();
+                Encoding unicode = Encoding.Unicode;
+                content = unicode.GetString(contentAsBytes);
             }
 
-            if (contents == null || contents == "") // make new file
+            if (content == null || contents == "") // make new file
             {
                 Debug.Log("no saved profile found, making new file");
-                contents = NewProfileJson();
+                content = NewProfileJson();
 
                 Encoding unicode = Encoding.Unicode;
-                Byte[] contentAsBytes = unicode.GetBytes(contents);
+                contentAsBytes = unicode.GetBytes(contents);
                 
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
                     sw.Write(contentAsBytes);
                 }
             }
-
-
-
-            JsonConvert.DeserializeObject<Profile>(contents);
+            
+            Profile profile = JsonConvert.DeserializeObject<Profile>(content);
 
             return profile;
         }
         return null;
     }
 
+    public static void SaveProfileChanges(Profile newProfile)
+    {
+        FileStream fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+        string content = JsonConvert.SerializeObject(newProfile);
+
+        Encoding unicode = Encoding.Unicode;
+        Byte[] contentAsBytes = unicode.GetBytes(contents);
+        
+        using (StreamWriter sw = new StreamWriter(fs))
+        {
+            sw.Write(contentAsBytes);
+        }
+    }
+
     private static string NewProfileJson()
     {
-        return null;
+        Profile returnProfile = new Profile()
+        returnProfile.profVers = "0.1";
+        returnProfile.username = (FixedString32Bytes)"New Player";
+
+        string json = JsonConvert.SerializeObject(returnProfile);
+
+        return json;
     }
 }
