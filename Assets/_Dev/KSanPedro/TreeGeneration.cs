@@ -33,7 +33,7 @@ public class TreeGeneration : NetworkBehaviour
     
     // Settings for the perlin noise that cuts out tress that have been placed from the Poisson Disc Sampling function
     [Header("Perlin Noise Settings")]
-    [SerializeField] private bool useDefalutValuesPerlin;
+    //[SerializeField] private bool useDefalutValuesPerlin;
     [SerializeField] private float perlinScale;
     [SerializeField] private int imgSize = 4096;
     [SerializeField] private int octaves = 3;
@@ -48,12 +48,6 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private TreePerlinDisplay treePerlinDisplayOptions;
     [SerializeField] private bool debugColors;
     [SerializeField] private Material perlinMaterial;
-
-    // Allows interfacing with the custom editor for this class that then makes debugging easier
-    [Header("Perlin Noise Editor Settings")]
-    [SerializeField] bool overrideRandSeed;
-    [SerializeField] int setSeed;
-    [SerializeField] bool autoUpdateInEditor;
     
     // These are all settings that remove trees from being placed independently from the perlin noise system that cuts out where the trees are that we get.
     [Header("Manual Exclusion Settings")]
@@ -65,6 +59,21 @@ public class TreeGeneration : NetworkBehaviour
     // Where we input any refrences to prefabs or in scene Game Objects that we need refrences to, like the tree prefab.
     [Header("Game Object Refrences")]
     [SerializeField] private GameObject treePrefab;
+
+    [Space(15)]
+    // Allows interfacing with the custom editor for this class that then makes debugging easier
+    [Header("Perlin Noise Editor Settings")]
+    [SerializeField] bool overrideRandSeed;
+    [SerializeField] int setSeed;
+    [SerializeField] bool autoUpdateInEditor;
+    
+    // Allows interfacing with the custom editor for this class, related to trees and memory.
+    [Header("EDITOR ONLY trees (ENSURE CLEAR BEFORE BUILD FOR MEMORY REASONS)")]
+    [SerializeField] bool autoUpdateTreeVisibility;
+    [SerializeField] list<GameObject> trees = new list<GameObject>();
+    [SerializeField] PerlinMap editorPerlinMap;
+    [SerializeField] Material passMat;
+    [SerializeField] Material failMat;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     // Probably going to move to OnNetworkSpawn function in the future
@@ -80,15 +89,8 @@ public class TreeGeneration : NetworkBehaviour
         while(!success)
         {
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
-            
-            if (!overrideRandSeed)
-            {
-                int tempSeed = Random.Range(0, 99999);
-                PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
-            }
-            else
-                PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, setSeed, perlinScale, octaves, persistance, lacunarity, offset);
-    
+            int tempSeed = Random.Range(0, 99999);
+            PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
             maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
             // Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
             PerlinToTexture(perlinMap);
@@ -118,7 +120,66 @@ public class TreeGeneration : NetworkBehaviour
 
     private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
     {
-        float multiple = imgSize / 1000;
+        foreach (Vector2 point in points)
+        {
+            float x = point.x - 500;
+            float y = point.y - 500;
+
+            RaycastHit hit;
+            if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
+            {
+                if (CheckIfPlaceable(hit.position, perlinMap))
+                {
+                    GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
+                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                }
+            }
+        }
+    }
+
+    private bool CheckIfPlaceable(vector3 treePos, PerlinMap perlinMap)
+    {
+        float multiple = imgSize / mapSize;
+    
+        Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+
+        float value = perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y];
+
+        if (value <= maxPerlinValue && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+        {
+            return true;
+        }
+        else
+        return false;
+    }
+
+    private void DrawPerlinEditor()
+    {
+        if (!overrideRandSeed)
+        {
+            int tempSeed = Random.Range(0, 99999);
+            PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
+        }
+        else
+            PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, setSeed, perlinScale, octaves, persistance, lacunarity, offset);
+
+        editorPerlinMap = perlinMap
+        PerlnToTexture(perlinMap)
+    }
+
+    private void GenTreesEditor()
+    {
+        if (editorPerlinMap == null)
+        {
+            Debug.LogError("Attempting to gen editor trees when there is no editorPerlinMap!");
+            return;
+        }
+    
+        List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
+
+        foreach(Vector2 point in points)
+        {
+                    float multiple = imgSize / 1000;
 
         foreach (Vector2 point in points)
         {
@@ -128,19 +189,37 @@ public class TreeGeneration : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
-                Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+                GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
+                temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                trees.add(temp);
+            }
+        }
 
-                float value = perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y];
+        TreeHiderEditor();
+    }   
 
-                if (value <= maxPerlinValue && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
-                {
-                    GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
-                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                }
+    private void TreeHiderEditor()
+    {
+        foreach (GameObject tree in trees)
+        {
+            Renderer renderer = tree.GetComponent<Renderer>();
+            if (CheckIfPlaceable(tree.transform.position, editorPerlinMap))
+            {
+                renderer.material = passMat;
+            }
+            else
+            {
+                renderer.material = failMat;
             }
         }
     }
 
+    private void ClearEditorOnlyVariables()
+    {
+        trees = null;
+        perlinMap = null;
+    }
+    
     private void SetVariableDefaultValues()
     {
         // For each variable group, this checks if we have the use default values bool checked, an it sets the correspnding variables to the hard coded default amounts
