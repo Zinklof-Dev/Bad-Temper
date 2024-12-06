@@ -10,6 +10,8 @@ public class PlayersManager : NetworkBehaviour
     [SerializeField] GameObject[] playerObjects = new GameObject[6];
     [SerializeField] ulong clientId;
 
+    private Profile userProfile
+
     private void Start()
     {
         if (IsServer)
@@ -26,8 +28,10 @@ public class PlayersManager : NetworkBehaviour
 
         if (IsOwner)
         {
+            userProfile = ProfileSystem.FetchProfile();
+        
             AskForIdRpc();
-            GiveServerUsernameRpc((FixedString32Bytes)ClientBackend.playerUsername);
+            GiveServerUsernameRpc(profile.username);
         }
     }
 
