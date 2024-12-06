@@ -6,6 +6,15 @@ using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 
+public static enum TreePerlinDisplay {
+    None,
+    WhiteHot,
+    BlackHot,
+    PassFail,
+    PassFailWhiteHot,
+    PassFailBlackHot
+}
+
 public class TreeGeneration : NetworkBehaviour
 {
     // Invisible variables
@@ -23,14 +32,28 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private bool useDefalutValuesPoisson;
     
     // Settings for the perlin noise that cuts out tress that have been placed from the Poisson Disc Sampling function
-    [Header("Perlin Noise Cutout Settings")]
+    [Header("Perlin Noise Settings")]
     [SerializeField] private bool useDefalutValuesPerlin;
     [SerializeField] private float perlinScale;
+    [SerializeField] private int imgSize = 4096;
+    [SerializeField] private int octaves = 3;
+    [SerializeField] private float persistance = 1;
+    [SerializeField] private float lacunarity = 5;
+    [SerializeField] private Vector2 offset;
     [SerializeField] private float perlinCuttoffPercent; // Perlin Cuttof sweet spot is just between 50 and 51 percent.
     
     // Allows us to view the perlin noise generated in order to dubug
     [Header("Perlin Noise Texture")]
     [SerializeField] private Texture2D perlinTexture;
+    [SerializeField] private TreePerlinDisplay treePerlinDisplayOptions;
+    [SerializeField] private bool debugColors;
+    [SerializeField] private Material perlinMaterial;
+
+    // Allows interfacing with the custom editor for this class that then makes debugging easier
+    [Header("Perlin Noise Editor Settings")]
+    [SerializeField] bool overrideRandSeed;
+    [SerializeField] int setSeed;
+    [SerializeField] bool autoUpdateInEditor;
     
     // These are all settings that remove trees from being placed independently from the perlin noise system that cuts out where the trees are that we get.
     [Header("Manual Exclusion Settings")]
@@ -57,8 +80,14 @@ public class TreeGeneration : NetworkBehaviour
         while(!success)
         {
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
-            int tempSeed = Random.Range(0, 99999);
-            PerlinMap perlinMap = Noise.GenPerlinMap(4096, 4096, tempSeed, perlinScale, 3, 1, 5, new Vector2(0,0));
+            
+            if (!overrideRandSeed)
+            {
+                int tempSeed = Random.Range(0, 99999);
+                PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
+            }
+            else
+                PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, setSeed, perlinScale, octaves, persistance, lacunarity, offset);
     
             maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
             // Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
@@ -89,7 +118,7 @@ public class TreeGeneration : NetworkBehaviour
 
     private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
     {
-        float multiple = 4096 / 1000;
+        float multiple = imgSize / 1000;
 
         foreach (Vector2 point in points)
         {
@@ -128,29 +157,95 @@ public class TreeGeneration : NetworkBehaviour
         Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(mapSize.x, 100, mapSize.y));
     }
 
-    private void PerlinToTexture(PerlinMap perlinMap)
+    private void PerlinToTexture(PerlinMap perlinMap) // Authored: Cameron
     {
-        Color[] colorMap = new Color[4096 * 4096];
-        for(int y = 0; y < 4096; y++)
+        Color[] colorMap = new Color[imgSize * imgSize]; // Creating a color array with the same number of pixels as a imgSize imgSize image, knowing our texture is a 4k texture
+
+        if (treePerlinDisplayOptions == TreePerlinDisplay.WhiteHot) // if we have the white hot setting on, make the larger values aproach white, and the smaller ones aproach black
+        for(int y = 0; y < imgSize; y++)
         {
-            for(int x = 0; x < 4096; x++)
+            for(int x = 0; x < imgSize; x++)
             {
-                colorMap[y * 4096 + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
+                colorMap[y * imgSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
+            }
+        }
+        else if (treePerlinDisplayOptions == TreePerlinDisplay.BlackHot) // if instead we have black hot, make larger values aproach black, smaller values aproach white
+        for(int y = 0; y < imgSize; y++)
+        {
+            for(int x = 0; x < imgSize; x++)
+            {
+                colorMap[y * imgSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
+            }
+        }
+        else if (treePerlinDisplayOptions == TreePerlinDisplay.PassFail) // if we have pass fail, any pixels that are below cutoff, make green, any above cutoff make red.
+        for(int y = 0; y < imgSize; y++)
+        {
+            for(int x = 0; x < imgSize; x++)
+            {
+                if (perlinMap.Map[x,y] > perlinCutoffPercent);
+                colorMap[y * imgSize + x] = Color.Red;
+                else
+                colorMap[y * imgSize + x] = Color.Green;
+            }
+        }
+        else if (treeperlinDisplayOptions == TreePerlinDisplay.PassFailWhiteHot) // if we have pass fail white hot, generate white hot, then apply a faint pass fail on top.
+        {
+            for(int y = 0; y < imgSize; y++)
+            {
+                for(int x = 0; x < imgSize; x++)
+                {
+                    colorMap[y * imgSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
+                }
+            }
+            for(int y = 0; y < imgSize; y++)
+            {
+                for(int x = 0; x < imgSize; x++)
+                {
+                    if (perlinMap.Map[x,y] > perlinCutoffPercent);
+                    colorMap[y * imgSize + x] -= New Color(0, 0.25f, 0.25f, 0;
+                    else
+                    colorMap[y * imgSize + x] -= New Color(0.25f, 0, 0.25f, 0);
+                }
+            } 
+        }
+        else // the only other scenario would be pass fail black hot, so generate black hot then apply a faint pass fail.
+        {
+            for(int y = 0; y < imgSize; y++)
+            {
+                for(int x = 0; x < imgSize; x++)
+                {
+                    colorMap[y * imgSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
+                }
+            }
+            for(int y = 0; y < imgSize; y++)
+            {
+                for(int x = 0; x < imgSize; x++)
+                {
+                    if (perlinMap.Map[x,y] > perlinCutoffPercent);
+                    colorMap[y * imgSize + x] -= New Color(0, 0.25f, 0.25f, 0;
+                    else
+                    colorMap[y * imgSize + x] -= New Color(0.25f, 0, 0.25f, 0);
+                }
+            } 
+        }
+        
+        if (debugColors) // if we have debug colors on, log the first 200 colors so we can see them
+        {
+            for (int y = 0; y < 200; y++)
+            {
+                Debug.Log(colorMap[y]);
             }
         }
 
-        for (int y = 0; y < 200; y++)
-        {
-            Debug.Log(colorMap[y]);
-        }
+        perlinTexture = new Texture2D(imgSize, imgSize); // turn the null texture2d object into a new texture2d
+        perlinTexture.filterMode = FilterMode.Point; // set the filter to point to see exact points
+        perlinTexture.wrapMode = TextureWrapMode.Clamp; // clamp to avoid repeating
+        perlinTexture.SetPixels(colorMap); // take the color array and set the pixels of our texture2d (for anyone unsure how this works as a 1d array for a 2d texture, check unity documentation :D)
+        perlinTexture.Apply(); // apply all changes
 
-        perlinTexture = new Texture2D(4096, 4096);
-        perlinTexture.filterMode = FilterMode.Point;
-        perlinTexture.wrapMode = TextureWrapMode.Clamp;
-        perlinTexture.SetPixels(colorMap);
-        perlinTexture.Apply();
+        perlinMaterial.SetTexture("_MainTex", perlinTexture); // set the _MainTex value (desiganted in the HLSL on the materials shader) to the new texture2d.
         
-        byte[] bytes = perlinTexture.EncodeToPNG();
-        File.WriteAllBytes(Application.dataPath + "perlinDebugView.png", bytes);
+        //byte[] bytes = perlinTexture.EncodeToPNG(); // this turns the texture 2d into bytes that work in the png format
+        //File.WriteAllBytes(Application.dataPath + "perlinDebugView.png", bytes); // this saves the bytes, though i think its actually an entirely wrong way to do this... FileStream and StreamWriter would likley be the best method, no worries as we wont be using this again.
     }
 }
