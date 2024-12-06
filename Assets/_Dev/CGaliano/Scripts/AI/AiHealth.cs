@@ -3,8 +3,8 @@ using Unity;
 
 public class AiHealth : NetworkBehavior
 {
-    [SerializeField] maxHP;
-    [SerializeField] currentHP;
+    [SerializeField] float maxHP;
+    [SerializeField] float currentHP;
     
     private bool runServerCode = true;
     
@@ -27,9 +27,7 @@ public class AiHealth : NetworkBehavior
         if (collision.gameObject.tag == "Weapon")
         {
             collision.gameObject.GetComponent<Sword>();
-        }
-
-        
+        }    
     }
 
     [Rpc(SendTo.ClientsAndHost)]
