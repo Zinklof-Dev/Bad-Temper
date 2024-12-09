@@ -12,14 +12,14 @@ public class TreeGenerationEditor : Editor
 
         if (DrawDefaultInspector())
         {
-            if (tg.autoUpdateInEditor)
+            /*if (tg.autoUpdateInEditor)
             {
                 tg.DrawPerlinEditor();
             }
             if (tg.autoUpdateTreeVisibility)
             {
                 tg.TreeHiderEditor();
-            }
+            }*/
         }
 
         if(GUILayout.Button("Generate Perlin"))
