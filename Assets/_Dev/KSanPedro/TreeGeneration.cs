@@ -155,7 +155,7 @@ public class TreeGeneration : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
-                if (CheckIfPlaceable(hit.point, perlinMap))
+                if (CheckIfPlaceable(new Vector3(point.x, hit.point.y, point.y), perlinMap))
                 {
                     GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
@@ -169,6 +169,9 @@ public class TreeGeneration : NetworkBehaviour
         float multiple = imgSize / mapSize.x;
     
         Vector2 pointToPerlinSpace = new Vector2(treePos.x * multiple, treePos.y * multiple);
+
+        Debug.Log((int)pointToPerlinSpace.y);
+        Debug.Log((int)pointToPerlinSpace.x);
 
         float value = perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y];
 
@@ -204,7 +207,8 @@ public class TreeGeneration : NetworkBehaviour
             Debug.LogError("Attempting to gen editor trees when there is no editorPerlinMap!");
             return;
         }
-    
+
+        trees = new List<GameObject>();
         List<Vector2> points = Noise.PoissonDiscSamplingVector2(editorDist, mapSize, 30);
 
         float multiple = imgSize / 1000;
