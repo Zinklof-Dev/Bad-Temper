@@ -74,16 +74,16 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] public bool autoUpdateTreeVisibility;
     [SerializeField] List<GameObject> trees = new List<GameObject>();
     [SerializeField] float editorDist = 100;
-    [SerializeField] vector3 editorScale;
+    [SerializeField] Vector3 editorScale;
     [SerializeField] PerlinMap editorPerlinMap;
     [SerializeField] Material passMat;
     [SerializeField] Material failMat;
 
     private void OnValidate()
     {
-        if (autoDrawTextureInEdtior && !autoComputeInEditor)
+        if (autoDrawTextureInEditor && !autoComputeInEditor)
         {
-            Debug.LogWarning("AutoDrawTexture is on, this is gonna get laggy"):
+            Debug.LogWarning("AutoDrawTexture is on, this is gonna get laggy");
             PerlinToTexture(editorPerlinMap);
         }
         else if(autoComputeInEditor)
@@ -219,7 +219,7 @@ public class TreeGeneration : NetworkBehaviour
             {
                 GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
                 temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                temp.transform.scale = editorScale;
+                temp.transform.localScale = editorScale;
                 trees.Add(temp);
             }
 
