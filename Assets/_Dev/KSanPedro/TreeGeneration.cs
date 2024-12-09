@@ -66,20 +66,46 @@ public class TreeGeneration : NetworkBehaviour
     [Header("Perlin Noise Editor Settings")]
     [SerializeField] bool overrideRandSeed;
     [SerializeField] int setSeed;
-    [SerializeField] public bool autoUpdateInEditor;
+    [SerializeField] public bool autoComputeInEditor;
+    [SerializeField] public bool autoDrawTextureInEditor;
     
     // Allows interfacing with the custom editor for this class, related to trees and memory.
     [Header("EDITOR ONLY trees (ENSURE CLEAR BEFORE BUILD FOR MEMORY REASONS)")]
     [SerializeField] public bool autoUpdateTreeVisibility;
     [SerializeField] List<GameObject> trees = new List<GameObject>();
+    [SerializeField] float editorDist = 100;
+    [SerializeField] vector3 editorScale;
     [SerializeField] PerlinMap editorPerlinMap;
     [SerializeField] Material passMat;
     [SerializeField] Material failMat;
 
+    private void OnValidate()
+    {
+        if (autoDrawTextureInEdtior && !autoComputeInEditor)
+        {
+            Debug.LogWarning("AutoDrawTexture is on, this is gonna get laggy"):
+            PerlinToTexture(editorPerlinMap);
+        }
+        else if(autoComputeInEditor)
+        {
+            Debug.LogWarning("AutoCompute is on, this is gonna get extra laggy");
+            DrawPerlinEditor();
+        }
+
+        if (autoUpdateTreeVisibility)
+        {
+            Debug.LogWarning("AutoUpdateVisibility is on this might get a little laggy");
+            TreeHiderEditor();
+        }
+    }
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     // Probably going to move to OnNetworkSpawn function in the future
     private void Start()
     {
+        autoDrawTextureInEditor = false;
+        autoComputeInEditor = false;
+        autoUpdateTreeVisibility = false;
         _IsServer = IsServer;
         //if (!_IsServer)
         //  return;
@@ -179,7 +205,7 @@ public class TreeGeneration : NetworkBehaviour
             return;
         }
     
-        List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
+        List<Vector2> points = Noise.PoissonDiscSamplingVector2(editorDist, mapSize, 30);
 
         float multiple = imgSize / 1000;
 
@@ -193,6 +219,7 @@ public class TreeGeneration : NetworkBehaviour
             {
                 GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
                 temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                temp.transform.scale = editorScale;
                 trees.Add(temp);
             }
 
