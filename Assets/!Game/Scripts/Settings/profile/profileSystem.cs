@@ -21,24 +21,29 @@ public static class ProfileSystem
     {
         if (profile == null)
         {
-            FileStream fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            FileStream fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite); // prevents no file issues, always ensure files exists even if blank
+            fs.Close();
 
             string content;
-            Byte[] contentAsBytes;
-            contentAsBytes = System.IO.File.ReadAllBytes(saveLoc);
-            Encoding unicode = Encoding.Unicode;
-            content = unicode.GetString(contentAsBytes);
+
+            using (StreamReader sr = new StreamReader(saveLoc))
+            {
+                content = sr.ReadToEnd();
+                sr.Close();
+            }
 
             if (content == null || content == "") // make new file
             {
+                fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+
                 Debug.Log("no saved profile found, making new file");
                 content = NewProfileJson();
 
-                contentAsBytes = unicode.GetBytes(content);
-                
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
-                    sw.Write(contentAsBytes);
+                    sw.Write(content);
+                    sw.Close();
+                    fs.Close();
                 }
             }
             
@@ -54,13 +59,12 @@ public static class ProfileSystem
         FileStream fs = new FileStream(saveLoc, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
         string content = JsonConvert.SerializeObject(newProfile);
-
-        Encoding unicode = Encoding.Unicode;
-        Byte[] contentAsBytes = unicode.GetBytes(content);
         
         using (StreamWriter sw = new StreamWriter(fs))
         {
-            sw.Write(contentAsBytes);
+            sw.Write(content);
+            sw.Close();
+            fs.Close();
         }
     }
 

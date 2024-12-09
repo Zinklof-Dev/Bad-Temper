@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 
 public class ButtonManager : MonoBehaviour
@@ -50,8 +51,15 @@ public class ButtonManager : MonoBehaviour
         NetworkCommands.host();
     }
 
-    public void ConnectViaLan(string joinCode)
+    public void ConnectViaLan(TextMeshProUGUI joinCode)
     {
-        NetworkCommands.Connect(joinCode);
+        try
+        {
+            NetworkCommands.Connect(joinCode.text);
+        }
+        catch
+        {
+
+        }
     }
 }

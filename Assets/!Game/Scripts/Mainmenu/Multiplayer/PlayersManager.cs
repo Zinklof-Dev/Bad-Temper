@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
@@ -9,30 +10,28 @@ public class PlayersManager : NetworkBehaviour
     [SerializeField] FixedString32Bytes[] usernames = new FixedString32Bytes[6];
     [SerializeField] GameObject[] playerObjects = new GameObject[6];
     [SerializeField] ulong clientId;
+    [SerializeField] DataPersistanceManager dataPersistanceManager;
 
-    private Profile userProfile;
+    FixedString32Bytes localUsername;
 
-    private void Start()
+
+
+    public override void OnNetworkSpawn()
     {
-        if (IsServer)
+        localUsername = dataPersistanceManager.GetData().username;
+
+        Debug.Log("start OnNetworkSpawn");
+        for(int i = 0; i <6; i++)
         {
-            for(int i = 0; i <6; i++)
-            {
-                slots[i] = (ulong)99999999;
-            }
-            for(int i = 0; i <6; ++i)
-            {
-                usernames[i] = (FixedString32Bytes)"NoPlAyEr";
-            }
+            Debug.Log("for loop itteration " + i);
+            slots[i] = (ulong)99999999;
+            usernames[i] = (FixedString32Bytes)"NoPlAyEr";
         }
 
-        if (IsOwner)
-        {
-            userProfile = ProfileSystem.FetchProfile();
-        
-            AskForIdRpc();
-            GiveServerUsernameRpc(userProfile.username);
-        }
+        AskForIdRpc();
+        GiveServerUsernameRpc(localUsername);
+
+        base.OnNetworkSpawn();
     }
 
     void ReconfigurePlayerScreen() // run locally on each client after they receive a new name. this will update all names on hud that are active, and activate any that dont have the keyword for no player. this isn't the best solution but its a solution for now. the biggest issue is the no player keyword that a player connecting with their name being that wont be shown on the main menu.
@@ -56,22 +55,22 @@ public class PlayersManager : NetworkBehaviour
 
             // skipped null case just to see what happens, having issue with the null case being triggered even when it has a reference to the gameobject, maybe to do with it being inactive?? 
 
-            GameObject goParent = go.GetComponentInParent<GameObject>();
-
-            if (goParent.activeSelf == false && usernames[i] != "NoPlAyEr") // if the object is inactive but the slot doesn't have the no player keyword, then enable it
+            if (usernames[i] != "NoPlAyEr") // if the slot doesn't have the no player keyword, then enable it
             {
-                goParent = go.GetComponentInParent<GameObject>();
-                goParent.SetActive(true);
+                go.SetActive(true);
             }
 
             else // otherwise set it false (to be sure)
             {
-                goParent = go.GetComponentInParent<GameObject>();
-                goParent.SetActive(false); //redundant call but just making absolute sure.
+                go.SetActive(false); //redundant call but just making absolute sure.
                 continue;
             }
+
+            Debug.Log("go transformCount: " + go.transform.childCount);
+
+            GameObject goChild = go.transform.GetChild(go.transform.childCount-1).gameObject;
             
-            TextMeshProUGUI tmp = go.GetComponent<TextMeshProUGUI>(); // fetch the tmp component
+            TextMeshProUGUI tmp = goChild.GetComponent<TextMeshProUGUI>(); // fetch the tmp component
 
             // add null case soon
             
@@ -88,7 +87,7 @@ public class PlayersManager : NetworkBehaviour
 
         for(int i = 0; i < 6; i++)
         {
-            if (slots[i] != 99999999)
+            if (slots[i] == 99999999)
             {
                 slots[i] = clientId;
                 break;
@@ -131,6 +130,11 @@ public class PlayersManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void SendUsernamesAcrossNetworkRpc(FixedString32Bytes[] newUsernames, RpcParams rpcParams = default)
     {
+        for (int i = 0; i < 6; i++)
+        {
+            Debug.Log("name[" + i + "]: " + newUsernames[i]);
+        }
+
         usernames = newUsernames;
         ReconfigurePlayerScreen();
     }
