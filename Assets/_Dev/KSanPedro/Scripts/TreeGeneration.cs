@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
 public enum TreePerlinDisplay {
     None,
@@ -30,16 +31,25 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private bool useDefalutValuesPoisson;
     
     // Settings for the perlin noise that cuts out tress that have been placed from the Poisson Disc Sampling function
-    [Header("Perlin Noise Settings")]
+    [Header("Tree Perlin Noise Settings")]
     //[SerializeField] private bool useDefalutValuesPerlin;
-    [SerializeField] private float perlinScale;
-    [SerializeField] private int imgSize = 4096;
-    [SerializeField] private int octaves = 3;
+    [SerializeField] private float perlinScale = 3000;
+    [SerializeField] private int imgSize = 500;
+    [SerializeField] private int octaves = 4;
     [SerializeField] private float persistance = 1;
-    [SerializeField] private float lacunarity = 5;
+    [SerializeField] private float lacunarity = 4;
     [SerializeField] private Vector2 offset;
-    [SerializeField] private float perlinCuttoffPercent; // Perlin Cuttof sweet spot is just between 50 and 51 percent.
-    
+    [SerializeField] private float perlinCuttoffPercent = 0.1f;
+
+    [Header("Rock Perlin Noise Settings")]
+    [SerializeField] private float perlinScaleR = 3000;
+    [SerializeField] private int imgSizeR = 500;
+    [SerializeField] private int octavesR = 4;
+    [SerializeField] private float persistanceR = 1;
+    [SerializeField] private float lacunarityR = 4;
+    [SerializeField] private Vector2 offsetR;
+    [SerializeField] private float perlinCuttoffPercentR = 0.1f;
+
     // Allows us to view the perlin noise generated in order to dubug
     [Header("Perlin Noise Texture")]
     [SerializeField] private Texture2D perlinTexture;
@@ -49,14 +59,13 @@ public class TreeGeneration : NetworkBehaviour
     
     // These are all settings that remove trees from being placed independently from the perlin noise system that cuts out where the trees are that we get.
     [Header("Manual Exclusion Settings")]
-    [SerializeField] private float campfireExclusionRaduis;
-    [SerializeField] private float minimumTreeCount;
-    [SerializeField] private float maximuimTreePlacementFails;
-    [SerializeField] private Vector2 mapSize;
+    [SerializeField] private float campfireExclusionRaduis = 20;
+    [SerializeField] private Vector2 mapSize = new Vector2(1000, 1000);
     
     // Where we input any refrences to prefabs or in scene Game Objects that we need refrences to, like the tree prefab.
     [Header("Game Object Refrences")]
     [SerializeField] private GameObject treePrefab;
+    [SerializeField] private GameObject rockPrefab;
 
     [Space(15)]
     // Allows interfacing with the custom editor for this class that then makes debugging easier
@@ -77,6 +86,7 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] Material failMat;
 
     private int totalTrees;
+    private int totalRocks;
     
     private void OnValidate()
     {
@@ -120,7 +130,7 @@ public class TreeGeneration : NetworkBehaviour
             int tempSeed = Random.Range(0, 99999);
             PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
             
-            PerlinToTexture(perlinMap);
+            // PerlinToTexture(perlinMap);
 
             float multiple = imgSize / mapSize.x;
 
@@ -137,7 +147,7 @@ public class TreeGeneration : NetworkBehaviour
                     {
                         Vector3 eulerRandomRotation = new Vector3(0, Random.Range(0, 360));
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                        GameObject temp = GameObject.Instantiate(treePrefab, hit.point, quaternionRandomRotation);
+                        GameObject temp = Instantiate(treePrefab, hit.point, quaternionRandomRotation);
                         temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                         totalTrees++;
                     }
@@ -147,7 +157,33 @@ public class TreeGeneration : NetworkBehaviour
 
     private void GenRocksRuntime()
     {
-        // Code for placing all the rocks
+        List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
+        int tempSeed = Random.Range(0, 99999);
+        PerlinMap perlinMap = Noise.GenPerlinMap(imgSizeR, imgSizeR, tempSeed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
+
+        // PerlinToTexture(perlinMap);
+
+        float multiple = imgSizeR / mapSize.x;
+
+        foreach (Vector2 point in points)
+        {
+            float x = point.x - (mapSize.x / 2);
+            float y = point.y - (mapSize.y / 2);
+            RaycastHit hit;
+            if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
+            {
+                Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+
+                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercentR && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+                {
+                    Vector3 eulerRandomRotation = new Vector3(0, Random.Range(0, 360));
+                    Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
+                    GameObject temp = Instantiate(rockPrefab, hit.point, quaternionRandomRotation);
+                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                    totalRocks++;
+                }
+            }
+        }
     }
 
     private void CalcNetworkCost()
