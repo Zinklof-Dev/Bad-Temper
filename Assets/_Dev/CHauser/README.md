@@ -1,9 +1,12 @@
 You are assigned as a Musician, Programmer, and Modeler. in that order of importance.
 
 assignments:
-BUILDING PREP!: we need two primary systems for building, grid based, which will be for things like walls, floors, stairs etc etc. and free form, for crafting stations and whatever else i throw into this mess. Use the command system for now to start the placement process, use placeholder models for floors, walls, and ramps, floors would be easy as a 5x5x0.1m cube that snaps to every 2.5 meters, the stairs would snap to every 2.5m as well, the walls will be trickier, you can do the math on that as i have things to get done with the tightening schedule... free place items will be simplier, but ensure to check for colission! raycasts from the center of the camerea would be best to acheive this. i'll let you figure out the networking side of it yourself as there are quite a few options. 
+take the perlin noise tree gen, and separate the start function into different functions.
 
-if you complete this before i can get you more work, open up maya and ask me what i need. i'll have something. we are waiting on luigi to finally get work done so you can start doing AI. yell at him not me, i've got this roadmap pre planned and am scrambling with the lack of prereqs being completed.
+then begin to generate a secondary perlin map, and use it alongside another poisson sample to place rocks around the map.
 
+once this is done, we will add RNG to place different tree models, and different rock models.
 
-improvements to mock menu, speak to team lead directly for vision on this.
+once that is all done. we will establish a static string (I will likely have this set up by that point) that will have a function to change its value. you will update this string every step of the way, this string will end up displaying on the loading screen to inform the player what's happening.
+
+we will then consider our best option to network these objects. likely sending information only once to have every client place them, then send information to destroy them when they are harvested.
