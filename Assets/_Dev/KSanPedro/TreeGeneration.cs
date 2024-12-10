@@ -76,6 +76,8 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] Material passMat;
     [SerializeField] Material failMat;
 
+    private int totalTrees;
+    
     private void OnValidate()
     {
         if (autoDrawTextureInEditor && !autoComputeInEditor)
@@ -133,9 +135,30 @@ public class TreeGeneration : NetworkBehaviour
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                         GameObject temp = GameObject.Instantiate(treePrefab, hit.point, quaternionRandomRotation);
                         temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                        totalTrees++;
                     }
                 }
             }
+        CalcNetworkCost();
+    }
+
+    private void CalcNetworkCost()
+    {    
+        int16 floatCost = 4;
+        int16 doubleCost = 8;
+        
+        int16 vec3Cost = floatCost * 3;
+        int16 matriCost = floatCost * 16;
+        int16 vec3DoubCost = doubleCost * 3;
+        int16 matriDoubCost = doubleCost * 16;
+    
+        int bitCostVec3 = vec3Cost * 8;
+        int bitCostMatri matriCost * 8;
+        int bitCostDoubVec3 = vec3DoubCost * 8;
+        int bitCostDoubMatri matriDoubCost * 8;
+
+        
+        
     }
 
     private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
