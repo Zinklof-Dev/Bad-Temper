@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.IO;
 
-namespace ZinklofDev.DataPersistanceV2
+/*namespace ZinklofDev.DataPersistanceV2
 {
     public static class FileHandeler
     {
@@ -47,8 +47,8 @@ namespace ZinklofDev.DataPersistanceV2
 
         public static dynamic GetFileAsClass<T>(string path, string filename, bool encryption, bool create)
         {
-            string fullpath = Path.combine(path, filename);
-            T returnClass = null;
+            string fullpath = Path.Combine(path, filename);
+            T returnClass = (T)Activator.CreateInstance(typeof(T));
 
             if (File.Exists(fullpath))
             {
@@ -72,14 +72,14 @@ namespace ZinklofDev.DataPersistanceV2
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException("Error fetching file: " + fullpath + "\n" + e);
+                    Debug.LogError("Error fetching file: " + fullpath + "\n" + e);
                 }
             }
 			else if (create)
 			{
 				try
 				{
-					T defaultClass = T.Default();
+					T defaultClass = returnClass.Default();
 					
 					Directory.CreateDirectory(Path.GetDirectoryName(fullpath));
 
@@ -100,7 +100,7 @@ namespace ZinklofDev.DataPersistanceV2
 				}
 				catch (Exception e)
 				{
-					Debug.LogException("Error trying to create file " + fullpath + "\n" + e);
+					Debug.LogError("Error trying to create file " + fullpath + "\n" + e);
 				}
 				try
                 {
@@ -122,7 +122,7 @@ namespace ZinklofDev.DataPersistanceV2
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException("Error fetching file: " + fullpath + "\n" + e);
+                    Debug.LogError("Error fetching file: " + fullpath + "\n" + e);
                 }
 			}
 			else
@@ -133,33 +133,35 @@ namespace ZinklofDev.DataPersistanceV2
 		  	return returnClass;
         }
 
-		public static void CreateFile<T>(string path, string file)
+		public static void CreateFile<T>(string path, string file, bool encryption)
 		{
-				try
-				{
-					T defaultClass = T.Default();
+            string fullpath = Path.Combine(path, filename);
+
+            try
+			{
+				T defaultClass = T.Default();
 					
-					Directory.CreateDirectory(Path.GetDirectoryName(fullpath));
+				Directory.CreateDirectory(Path.GetDirectoryName(fullpath));
 
-					string data = JsonUtility.ToJson(defaultClass, true);
+				string data = JsonUtility.ToJson(defaultClass, true);
 
-					if (encryption)
-					{
-						data = EncryptDecrypt(dataToStore);
-					}
-
-					using (FileStream fs = new FileStream(fullPath, FileMode.Create))
-					{
-						using (StreamWriter sw = new StreamWriter(fs))
-						{
-							sw.write(data);
-						}
-					}
-				}
-				catch (Exception e)
+				if (encryption)
 				{
-					Debug.LogException("Error trying to create file " + fullpath + "\n" + e);
+					data = EncryptDecrypt(dataToStore);
 				}
+
+				using (FileStream fs = new FileStream(fullPath, FileMode.Create))
+				{
+					using (StreamWriter sw = new StreamWriter(fs))
+					{
+						sw.write(data);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.LogException("Error trying to create file " + fullpath + "\n" + e);
+			}
 		}
 
         private static string EncryptDecrypt(string data)
@@ -173,3 +175,4 @@ namespace ZinklofDev.DataPersistanceV2
         }
     }
 }
+*/
