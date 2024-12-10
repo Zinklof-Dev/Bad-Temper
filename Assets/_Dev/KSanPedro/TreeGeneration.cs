@@ -152,20 +152,19 @@ public class TreeGeneration : NetworkBehaviour
 
     private void CalcNetworkCost()
     {    
-        int floatCost = 4;
-        int doubleCost = 8;
+        long floatCost = 4;
         
-        ulong bitCostVec3 = ((floatCost * 3) * 8) * totalTrees;
-        ulong bitCostMatri = ((floatCost * 16) * 8) * totalTrees;
+        long bitCostVec3 = ((floatCost * 3) * 8) * totalTrees;
+        long bitCostMatri = ((floatCost * 16) * 8) * totalTrees;
         
-        ulong byteCostVec3 = bitCostVec3 / 8;
-        ulong byteCostMatri = bitCostMatri / 8;
+        long byteCostVec3 = bitCostVec3 / 8;
+        long byteCostMatri = bitCostMatri / 8;
         
-        double kilobyteCostVec3 = byteCostVec3 / 1000;
+        double kiloByteCostVec3 = byteCostVec3 / 1000;
         double KiloByteCostMatri = byteCostMatri / 1000;
         
         Debug.Log("Vector3 total cost: " + kiloByteCostVec3 + " KB (" + byteCostVec3 + " Bytes (" + bitCostVec3 + " Bits))");
-        Debug.Log("Matrix4x4 total cost: " + kiloByteCostMatri + " KB (" + ByteCostMatri + " Bytes (" + bitCostMatri + " Bits))");
+        Debug.Log("Matrix4x4 total cost: " + KiloByteCostMatri + " KB (" + byteCostMatri + " Bytes (" + bitCostMatri + " Bits))");
     }
 
     private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
