@@ -109,13 +109,17 @@ public class TreeGeneration : NetworkBehaviour
         //if (!_IsServer)
         //  return;
         SetVariableDefaultValues();
+        GenTreesRuntime();
+        GenRocksRuntime();
+        CalcNetworkCost();
+    }
 
+    private void GenTreesRuntime()
+    {
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
             int tempSeed = Random.Range(0, 99999);
             PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
-
-            //maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
-            //Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
+            
             PerlinToTexture(perlinMap);
 
             float multiple = imgSize / mapSize.x;
@@ -128,7 +132,7 @@ public class TreeGeneration : NetworkBehaviour
                 if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
                 {
                     Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
-                    //float value = perlinMap.Map[(int)point.x, (int)point.y];
+
                     if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent  && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
                     {
                         Vector3 eulerRandomRotation = new Vector3(0, Random.Range(0, 360));
@@ -139,7 +143,11 @@ public class TreeGeneration : NetworkBehaviour
                     }
                 }
             }
-        CalcNetworkCost();
+    }
+
+    private void GenRocksRuntime()
+    {
+        // Code for placing all the rocks
     }
 
     private void CalcNetworkCost()
