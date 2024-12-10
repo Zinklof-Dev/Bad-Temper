@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-using System.Collections;
-using System.IO;
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
-using UnityEngine.ProBuilder.MeshOperations;
 
 public enum TreePerlinDisplay {
     None,
@@ -110,39 +107,35 @@ public class TreeGeneration : NetworkBehaviour
         //if (!_IsServer)
         //  return;
         SetVariableDefaultValues();
-        float fails = 0;
-        bool success = false;
 
-        while(!success)
-        {
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
             int tempSeed = Random.Range(0, 99999);
             PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
-            maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
-            // Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
+
+            //maxPerlinValue = ((perlinMap.MaxMapHeight - perlinMap.MinMapHeight) * perlinCuttoffPercent) + perlinMap.MinMapHeight;
+            //Debug.Log("Max: " + perlinMap.MaxMapHeight + "\nMin: " + perlinMap.MinMapHeight + "\nCutoff Value: " + maxPerlinValue);
             PerlinToTexture(perlinMap);
-    
-            PlaceTrees(points, perlinMap);
 
-            GameObject[] treeCounter = GameObject.FindGameObjectsWithTag("Tree"); // Have to add a "Tree" tag to the tree prefab in Flower's
-            Debug.Log("Attempted Trees Spawned: " + treeCounter.Length);
+            float multiple = imgSize / mapSize.x;
 
-            if(treeCounter.Length >= minimumTreeCount)
+            foreach (Vector2 point in points)
             {
-                success = true;
-                break;
+                float x = point.x - (mapSize.x / 2);
+                float y = point.y - (mapSize.y / 2);
+                RaycastHit hit;
+                if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
+                {
+                    Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+                    //float value = perlinMap.Map[(int)point.x, (int)point.y];
+                    if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent  && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+                    {
+                        Vector3 eulerRandomRotation = new Vector3(0, Random.Range(0, 360));
+                        Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
+                        GameObject temp = GameObject.Instantiate(treePrefab, hit.point, quaternionRandomRotation);
+                        temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                    }
+                }
             }
-
-            fails++;
-
-            if (fails >= maximuimTreePlacementFails)
-                break;
-
-            foreach(GameObject tree in treeCounter)
-            {
-                GameObject.Destroy(tree);
-            }
-        }
     }
 
     private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
