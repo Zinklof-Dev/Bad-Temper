@@ -4,6 +4,8 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
+using System.Threading.Tasks;
+using Unity.Mathematics;
 
 public enum TreePerlinDisplay {
     None,
@@ -118,51 +120,64 @@ public class TreeGeneration : NetworkBehaviour
         _IsServer = IsServer;
         //if (!_IsServer)
         //  return;
-        SetVariableDefaultValues();
-        GenTreesRuntime();
-        GenRocksRuntime();
-        CalcNetworkCost();
+
+        //SetVariableDefaultValues();
+        //GenTreesRuntime();
+        // GenRocksRuntime();
+        //CalcNetworkCost();
+
+        ThreadManager();
     }
 
-    private void GenTreesRuntime()
+    private async void ThreadManager()
     {
-            List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
-            int tempSeed = UnityEngine.Random.Range(0, 99999);
-            PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
-            System.Random random = new System.Random(/*Seed goes here, takes in an Int32. If empty, just assigns a random seed.*/);
-            
-            
-            // PerlinToTexture(perlinMap);
+        await GenTreesRuntime();
+        //GenRocksRuntime();
+    }
 
-            float multiple = imgSize / mapSize.x;
+    private async Task<bool> GenTreesRuntime()
+    {
+        Debug.Log("Entered the tree func");
 
-            foreach (Vector2 point in points)
+        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, setSeed, 30);
+        int tempSeed = UnityEngine.Random.Range(0, 99999); ;
+        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
+        System.Random random = new System.Random(/*Seed goes here, takes in an Int32. If empty, just assigns a random seed.*/);
+
+        Debug.Log("Complex computations complete");
+
+        //PerlinToTexture(perlinMap);
+
+        float multiple = imgSize / mapSize.x;
+        foreach (Vector2 point in points)
+        {
+            float x = point.x - (mapSize.x / 2);
+            float y = point.y - (mapSize.y / 2);
+            RaycastHit hit;
+            if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
-                float x = point.x - (mapSize.x / 2);
-                float y = point.y - (mapSize.y / 2);
-                RaycastHit hit;
-                if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
-                {
-                    Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+                Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
-                    if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
-                    {
-                        int randomRotation = random.Next(0, 360);
-                        Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
-                        Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                        GameObject temp = Instantiate(treePrefab, hit.point, quaternionRandomRotation);
-                        temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                        totalTrees++;
-                    }
+                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+                {
+                    //Debug.Log("Tree Placed " + hit.point);
+                    int randomRotation = random.Next(0, 360);
+                    Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
+                    Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
+                    GameObject temp = Instantiate(treePrefab, hit.point, quaternionRandomRotation);
+                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                    totalTrees++;
                 }
             }
+        }
+        return true;
     }
 
-    private void GenRocksRuntime()
+    private async void GenRocksRuntime()
     {
-        List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
+        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, setSeed + 1, 30);
         int tempSeed = UnityEngine.Random.Range(0, 99999);
-        PerlinMap perlinMap = Noise.GenPerlinMap(imgSizeR, imgSizeR, tempSeed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
+        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSizeR, imgSizeR, tempSeed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
 
         // PerlinToTexture(perlinMap);
 
