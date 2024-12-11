@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
@@ -129,6 +130,8 @@ public class TreeGeneration : NetworkBehaviour
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
             int tempSeed = Random.Range(0, 99999);
             PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
+            Random random = new Random(/*Seed goes here, takes in an Int32. If empty, just assigns a random seed.*/);
+            
             
             // PerlinToTexture(perlinMap);
 
@@ -143,9 +146,10 @@ public class TreeGeneration : NetworkBehaviour
                 {
                     Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
-                    if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent  && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+                    if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
                     {
-                        Vector3 eulerRandomRotation = new Vector3(0, Random.Range(0, 360));
+                        int randomRotation = random.Next(0, 360);
+                        Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                         GameObject temp = Instantiate(treePrefab, hit.point, quaternionRandomRotation);
                         temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
