@@ -4,7 +4,6 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
 public enum TreePerlinDisplay {
     None,
@@ -128,9 +127,9 @@ public class TreeGeneration : NetworkBehaviour
     private void GenTreesRuntime()
     {
             List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
-            int tempSeed = Random.Range(0, 99999);
+            int tempSeed = UnityEngine.Random.Range(0, 99999);
             PerlinMap perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
-            Random random = new Random(/*Seed goes here, takes in an Int32. If empty, just assigns a random seed.*/);
+            System.Random random = new System.Random(/*Seed goes here, takes in an Int32. If empty, just assigns a random seed.*/);
             
             
             // PerlinToTexture(perlinMap);
@@ -162,7 +161,7 @@ public class TreeGeneration : NetworkBehaviour
     private void GenRocksRuntime()
     {
         List<Vector2> points = Noise.PoissonDiscSamplingVector2(5, mapSize, 30);
-        int tempSeed = Random.Range(0, 99999);
+        int tempSeed = UnityEngine.Random.Range(0, 99999);
         PerlinMap perlinMap = Noise.GenPerlinMap(imgSizeR, imgSizeR, tempSeed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
 
         // PerlinToTexture(perlinMap);
@@ -180,7 +179,7 @@ public class TreeGeneration : NetworkBehaviour
 
                 if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercentR && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
                 {
-                    Vector3 eulerRandomRotation = new Vector3(0, Random.Range(0, 360));
+                    Vector3 eulerRandomRotation = new Vector3(0, UnityEngine.Random.Range(0, 360));
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                     GameObject temp = Instantiate(rockPrefab, hit.point, quaternionRandomRotation);
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
@@ -250,7 +249,7 @@ public class TreeGeneration : NetworkBehaviour
         PerlinMap perlinMap;
         if (!overrideRandSeed)
         {
-            int tempSeed = Random.Range(0, 99999);
+            int tempSeed = UnityEngine.Random.Range(0, 99999);
             perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
         }
         else
