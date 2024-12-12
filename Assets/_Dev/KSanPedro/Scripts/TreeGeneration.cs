@@ -123,13 +123,12 @@ public class TreeGeneration : NetworkBehaviour
         {
             // Temp random seed for now, will maybe replace with System.Random and maybe have a player setting to set the seed
             seed = UnityEngine.Random.Range(0, 9999);
+            ThreadManager();
         }
         else
         {
             AskForSeedRpc();
         }
-
-        ThreadManager();
 
         base.OnNetworkSpawn();
     }
@@ -217,6 +216,7 @@ public class TreeGeneration : NetworkBehaviour
     private void SendSeedRpc(int seed, RpcParams rpcParams = default)
     {
         this.seed = seed;
+        ThreadManager();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
