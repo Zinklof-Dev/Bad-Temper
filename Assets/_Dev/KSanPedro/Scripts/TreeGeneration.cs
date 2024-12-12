@@ -144,10 +144,9 @@ public class TreeGeneration : NetworkBehaviour
     {
         Debug.Log("Entered the tree func");
 
-        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, setSeed, 30);
-        int tempSeed = UnityEngine.Random.Range(0, 99999); ;
-        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
-        System.Random random = new System.Random(/*Seed goes here, takes in an Int32. If empty, just assigns a random seed.*/);
+        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, seed, 30);
+        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSize, imgSize, seed, perlinScale, octaves, persistance, lacunarity, offset);
+        System.Random random = new System.Random(seed);
 
         Debug.Log("Complex computations complete");
 
@@ -179,9 +178,8 @@ public class TreeGeneration : NetworkBehaviour
 
     private async Task GenRocksRuntime()
     {
-        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, setSeed + 1, 30);
-        int tempSeed = UnityEngine.Random.Range(0, 99999);
-        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSizeR, imgSizeR, tempSeed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
+        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, seed + 1, 30);
+        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSizeR, imgSizeR, seed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
 
         // PerlinToTexture(perlinMap);
 
@@ -198,7 +196,7 @@ public class TreeGeneration : NetworkBehaviour
 
                 if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercentR && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
                 {
-                    Vector3 eulerRandomRotation = new Vector3(0, UnityEngine.Random.Range(0, 360));
+                    Vector3 eulerRandomRotation = new Vector3(0, 0, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                     GameObject temp = Instantiate(rockPrefab, hit.point, quaternionRandomRotation);
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
