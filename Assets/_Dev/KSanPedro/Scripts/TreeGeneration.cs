@@ -5,7 +5,6 @@ using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 using System.Threading.Tasks;
-using Unity.Mathematics;
 
 public enum TreePerlinDisplay {
     None,
@@ -23,6 +22,7 @@ public class TreeGeneration : NetworkBehaviour
     private static bool _IsServer;
     // Value that is calculated and stored as the max perlin value that trees can be placed.
     private float maxPerlinValue;
+    private int seed;
 
     // Settings for the Gizmos
     [Header("Debug Gizmos Settings")]
@@ -109,33 +109,38 @@ public class TreeGeneration : NetworkBehaviour
             TreeHiderEditor();
         }
     }
-    
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     // Probably going to move to OnNetworkSpawn function in the future
-    private void Start()
+    public override void OnNetworkSpawn()
     {
         autoDrawTextureInEditor = false;
         autoComputeInEditor = false;
         autoUpdateTreeVisibility = false;
         _IsServer = IsServer;
-        //if (!_IsServer)
-        //  return;
 
-        //SetVariableDefaultValues();
-        //GenTreesRuntime();
-        // GenRocksRuntime();
-        //CalcNetworkCost();
+        if(IsServer)
+        {
+            // Temp random seed for now, will maybe replace with System.Random and maybe have a player setting to set the seed
+            seed = UnityEngine.Random.Range(0, 9999);
+        }
+        else
+        {
+            AskForSeedRpc();
+        }
 
         ThreadManager();
+
+        base.OnNetworkSpawn();
     }
 
     private async void ThreadManager()
     {
         await GenTreesRuntime();
-        //GenRocksRuntime();
+        await GenRocksRuntime();
     }
 
-    private async Task<bool> GenTreesRuntime()
+    private async Task GenTreesRuntime()
     {
         Debug.Log("Entered the tree func");
 
@@ -170,10 +175,9 @@ public class TreeGeneration : NetworkBehaviour
                 }
             }
         }
-        return true;
     }
 
-    private async void GenRocksRuntime()
+    private async Task GenRocksRuntime()
     {
         List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, setSeed + 1, 30);
         int tempSeed = UnityEngine.Random.Range(0, 99999);
@@ -203,6 +207,21 @@ public class TreeGeneration : NetworkBehaviour
             }
         }
     }
+
+    [Rpc(SendTo.Server)]
+    private void AskForSeedRpc(RpcParams rpcParams = default)
+    {
+        ulong clientID = rpcParams.Receive.SenderClientId;
+        SendSeedRpc(seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void SendSeedRpc(int seed, RpcParams rpcParams = default)
+    {
+        this.seed = seed;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void CalcNetworkCost()
     {    
