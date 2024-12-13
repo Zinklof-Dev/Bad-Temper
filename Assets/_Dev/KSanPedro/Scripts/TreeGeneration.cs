@@ -66,8 +66,8 @@ public class TreeGeneration : NetworkBehaviour
     
     // Where we input any refrences to prefabs or in scene Game Objects that we need refrences to, like the tree prefab.
     [Header("Game Object Refrences")]
-    [SerializeField] private GameObject treePrefab;
-    [SerializeField] private GameObject rockPrefab;
+    [SerializeField] private List<GameObject> treeModelList;
+    [SerializeField] private List<GameObject> rockModelList;
 
     [Space(15)]
     // Allows interfacing with the custom editor for this class that then makes debugging easier
@@ -145,7 +145,8 @@ public class TreeGeneration : NetworkBehaviour
 
         List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, seed, 30);
         PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSize, imgSize, seed, perlinScale, octaves, persistance, lacunarity, offset);
-        System.Random random = new System.Random(seed);
+        System.Random randomRotationValue = new System.Random(seed);
+        System.Random randomModel = new System.Random(seed + 2);
 
         Debug.Log("Complex computations complete");
 
@@ -164,10 +165,10 @@ public class TreeGeneration : NetworkBehaviour
                 if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
                 {
                     //Debug.Log("Tree Placed " + hit.point);
-                    int randomRotation = random.Next(0, 360);
+                    int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    GameObject temp = Instantiate(treePrefab, hit.point, quaternionRandomRotation);
+                    GameObject temp = Instantiate(treeModelList[randomModel.Next(0, treeModelList.Count)], hit.point, quaternionRandomRotation);
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                     totalTrees++;
                 }
@@ -197,7 +198,7 @@ public class TreeGeneration : NetworkBehaviour
                 {
                     Vector3 eulerRandomRotation = new Vector3(0, 0, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    GameObject temp = Instantiate(rockPrefab, hit.point, quaternionRandomRotation);
+                    GameObject temp = Instantiate(rockModelList[0], hit.point, quaternionRandomRotation);
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                     totalRocks++;
                 }
@@ -238,7 +239,7 @@ public class TreeGeneration : NetworkBehaviour
         Debug.Log("Matrix4x4 total cost: " + KiloByteCostMatri + " KB (" + byteCostMatri + " Bytes (" + bitCostMatri + " Bits))");
     }
 
-    private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
+    /*private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
     {
         foreach (Vector2 point in points)
         {
@@ -255,7 +256,7 @@ public class TreeGeneration : NetworkBehaviour
                 }
             }
         }
-    }
+    }*/
 
     private bool CheckIfPlaceable(Vector3 treePos, PerlinMap perlinMap)
     {
@@ -293,7 +294,7 @@ public class TreeGeneration : NetworkBehaviour
         PerlinToTexture(perlinMap);
     }
 
-    public void GenTreesEditor()
+  /*  public void GenTreesEditor()
     {
         if (editorPerlinMap == null)
         {
@@ -322,7 +323,7 @@ public class TreeGeneration : NetworkBehaviour
 
             TreeHiderEditor();
         }
-    }   
+    }   */
 
     public void TreeHiderEditor()
     {

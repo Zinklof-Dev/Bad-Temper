@@ -196,10 +196,11 @@ MonoBehaviour:
   perlinMaterial: {fileID: 2100000, guid: 5e4ec51975a0b40459d823a9c8cff560, type: 2}
   campfireExclusionRaduis: 20
   mapSize: {x: 1000, y: 1000}
-  treePrefab: {fileID: 7803448073008630953, guid: 0d49d05b806abb442a3947b4ac848962,
-    type: 3}
-  rockPrefab: {fileID: 3246210935646571622, guid: ac25138f3d0e77e4088cef82b10db3ce,
-    type: 3}
+  treeModelList:
+  - {fileID: 7803448073008630953, guid: 0d49d05b806abb442a3947b4ac848962, type: 3}
+  - {fileID: 1864074382416269675, guid: 3810ff603c60d0546be32575811cd253, type: 3}
+  rockModelList:
+  - {fileID: 3246210935646571622, guid: ac25138f3d0e77e4088cef82b10db3ce, type: 3}
   overrideRandSeed: 0
   setSeed: 69
   autoComputeInEditor: 0

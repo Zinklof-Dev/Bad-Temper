@@ -28,7 +28,7 @@ public class TreeGenerationEditor : Editor
         }
         if(GUILayout.Button("Generate Trees"))
         {
-            tg.GenTreesEditor();
+            //tg.GenTreesEditor();
         }
         if(GUILayout.Button("Re Compute Hidden Trees"))
         {
