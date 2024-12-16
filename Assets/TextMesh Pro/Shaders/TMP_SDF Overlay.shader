@@ -216,7 +216,7 @@ SubShader {
 			float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
 			float2 maskUV = (vert.xy - clampedRect.xy) / (clampedRect.zw - clampedRect.xy);
 
-			// Support for texture tiling and offset
+			// Support for texture tiling and tOffset
 			float2 textureUV = input.texcoord1;
 			float2 faceUV = TRANSFORM_TEX(textureUV, _FaceTex);
 			float2 outlineUV = TRANSFORM_TEX(textureUV, _OutlineTex);

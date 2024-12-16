@@ -1,0 +1,71 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/UXML/TreeGenerationUSS.uss?fileID=7433441132597879392&amp;guid=c0301075410036a4e9a3767821187c28&amp;type=3#TreeGenerationUSS" />
+    <engine:VisualElement name="Buttons" style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: center; align-self: center; background-color: rgba(0, 0, 0, 0.22); padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px; min-width: 100%; width: 100%;">
+        <engine:Button text="Debug" name="MiscButton" style="-unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); font-size: 15px; -unity-font-style: bold; -unity-text-outline-width: 0; -unity-text-outline-color: rgb(0, 0, 255);" />
+        <engine:Button text="Trees" name="TreesButton" style="-unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); font-size: 15px; -unity-font-style: bold;" />
+        <engine:Button text="Rocks" name="RocksButton" style="-unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); font-size: 15px; -unity-font-style: bold;" />
+        <engine:Button text="Exclusion" name="ExclusionButton" style="-unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); font-size: 15px; -unity-font-style: bold;" />
+    </engine:VisualElement>
+    <engine:VisualElement name="GlobalPane" enabled="true" style="flex-grow: 1; align-items: stretch; align-self: flex-start; max-width: none; min-width: 100%; background-color: rgba(0, 0, 0, 0.22); border-right-width: 0; border-top-width: 0; border-left-width: 0; border-bottom-width: 0; padding-top: 0; padding-right: 15px; padding-bottom: 5px; padding-left: 15px; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 0; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px;">
+        <engine:Label text="Global Settings" style="-unity-text-align: middle-center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; font-size: 30px; -unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); -unity-font-style: bold; color: rgb(255, 255, 255); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; -unity-text-outline-width: 0.75px; -unity-text-outline-color: rgb(0, 255, 255);" />
+        <engine:Label text="Mapping" style="margin-top: 0; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px; padding-top: 0;" />
+        <editor:PropertyField binding-path="_MapSize" label="Map Size" />
+        <editor:PropertyField binding-path="_Seed" label="Seed" />
+    </engine:VisualElement>
+    <engine:VisualElement name="MiscPane" enabled="true" style="flex-grow: 1; align-items: stretch; align-self: flex-start; max-width: none; min-width: 100%; background-color: rgba(0, 0, 0, 0.22); border-right-width: 0; border-top-width: 0; border-left-width: 0; border-bottom-width: 0; padding-top: 0; padding-right: 15px; padding-bottom: 5px; padding-left: 15px; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 0; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px;">
+        <engine:Label text="Debug Menu" style="-unity-text-align: middle-center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; font-size: 30px; -unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); -unity-font-style: bold; color: rgb(255, 255, 255); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; -unity-text-outline-width: 0.75px; -unity-text-outline-color: rgb(0, 255, 255);" />
+        <engine:Label text="Seed" style="margin-top: 0; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px; padding-top: 0;" />
+        <editor:PropertyField binding-path="_OverrideRandomSeed" label="Override Seed?" name="OverrideSeedBoolean" />
+        <editor:PropertyField binding-path="_SetSeed" name="OverrideSeed" />
+        <engine:Label text="Editor" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField binding-path="_AutoComputeEditor" label="Auto Compute" style="align-items: stretch; align-self: auto; min-width: auto;" />
+        <editor:PropertyField binding-path="_AutoDrawTexEditor" enabled="true" label="Auto Draw Texture" style="flex-direction: column; align-content: flex-start;" />
+        <editor:PropertyField binding-path="_DrawGizmos" enabled="true" label="Draw Gizmos" style="flex-direction: column; align-content: flex-start;" />
+        <engine:Label text="Perlin" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField binding-path="_TreePerlinDisplay" enabled="true" label="Texture Setting" style="flex-direction: column; align-content: flex-start; margin-top: 0;" />
+        <editor:PropertyField binding-path="_PerlinTexture" enabled="true" label="Perlin Texture" style="flex-direction: column; align-content: flex-start; margin-top: 0;" />
+        <editor:PropertyField binding-path="_PerlinMaterial" enabled="true" label="Perlin Material" style="flex-direction: column; align-content: flex-start; margin-top: 0;" />
+        <engine:Button text="Generate Tree Perlin" name="TreePerlinButton" style="margin-top: 4px;" />
+        <engine:Button text="Generate Rock Perlin" name="RockPerlinButton" />
+    </engine:VisualElement>
+    <engine:VisualElement name="TreesPane" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.22); border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px; margin-top: 10px; margin-right: 0; margin-bottom: 10px; margin-left: 0; padding-left: 15px; padding-right: 15px; padding-bottom: 5px;">
+        <engine:Label text="Tree Settings" style="-unity-text-align: middle-center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; font-size: 30px; -unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); -unity-font-style: bold; color: rgb(255, 255, 255); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; -unity-text-outline-width: 0.75px; -unity-text-outline-color: rgb(0, 255, 255);" />
+        <engine:Label text="Perlin Noise" style="margin-top: 0; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px; padding-top: 0;" />
+        <editor:PropertyField binding-path="_TreePerlinScale" label="Scale" />
+        <editor:PropertyField binding-path="_TreeImageSize" label="Image Size" />
+        <editor:PropertyField label="Octaves" binding-path="_TreeOctaves" />
+        <editor:PropertyField label="Persistance" binding-path="_TreePersistance" />
+        <editor:PropertyField label="Lacunarity" binding-path="_TreeLacunarity" />
+        <editor:PropertyField label="Offset" binding-path="_TreeOffset" />
+        <engine:Label text="Poisson Sampling" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField label="Radius" binding-path="_TreeRadius" />
+        <editor:PropertyField label="Max Fails" binding-path="_TreeAccuracy" />
+        <engine:Label text="References" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField label="Prefab" binding-path="_TreePrefab" />
+        <editor:PropertyField label="Meshes" binding-path="_TreeMeshList" />
+    </engine:VisualElement>
+    <engine:VisualElement name="RocksPane" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.22); border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px; margin-top: 10px; margin-right: 0; margin-bottom: 10px; margin-left: 0; padding-left: 15px; padding-right: 15px; padding-bottom: 5px;">
+        <engine:Label text="Rock Settings" style="-unity-text-align: middle-center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; font-size: 30px; -unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); -unity-font-style: bold; color: rgb(255, 255, 255); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; -unity-text-outline-width: 0.75px; -unity-text-outline-color: rgb(0, 255, 255);" />
+        <engine:Label text="Perlin Noise" style="margin-top: 0; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px; padding-top: 0;" />
+        <editor:PropertyField binding-path="_RockPerlinScale" label="Scale" />
+        <editor:PropertyField binding-path="_RockImageSize" label="Image Size" />
+        <editor:PropertyField label="Octaves" binding-path="_RockOctaves" />
+        <editor:PropertyField label="Persistance" binding-path="_RockPersistance" />
+        <editor:PropertyField label="Lacunarity" binding-path="_RockLacunarity" />
+        <editor:PropertyField label="Offset" binding-path="_RockOffset" />
+        <engine:Label text="Poisson Sampling" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField label="Radius" binding-path="_RockRadius" />
+        <editor:PropertyField label="Max Fails" binding-path="_RockAccuracy" />
+        <engine:Label text="References" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField label="Prefab" binding-path="_RockPrefab" />
+        <editor:PropertyField label="Meshes" binding-path="_RockMeshList" />
+    </engine:VisualElement>
+    <engine:VisualElement name="ExclusionPane" enabled="true" style="flex-grow: 1; align-items: stretch; align-self: flex-start; max-width: none; min-width: 100%; background-color: rgba(0, 0, 0, 0.22); border-right-width: 0; border-top-width: 0; border-left-width: 0; border-bottom-width: 0; padding-top: 0; padding-right: 15px; padding-bottom: 5px; padding-left: 15px; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 0; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px;">
+        <engine:Label text="Exclusions" style="-unity-text-align: middle-center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; font-size: 30px; -unity-font-definition: url(&quot;project://database/Assets/ZinklofDEV/Console/Font/SourceCodePro-Regular.ttf?fileID=12800000&amp;guid=ec38358b07d19474086b2dbf2ad41e47&amp;type=3#SourceCodePro-Regular&quot;); -unity-font-style: bold; color: rgb(255, 255, 255); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; -unity-text-outline-width: 0.75px; -unity-text-outline-color: rgb(0, 255, 255);" />
+        <engine:Label text="Perlin" style="margin-top: 0; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px; padding-top: 0;" />
+        <editor:PropertyField binding-path="_TreeCutoffPercent" label="Tree Cutoff" />
+        <editor:PropertyField binding-path="_RockCutoffPercent" label="Rock Cutoff" />
+        <engine:Label text="Campfire" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField binding-path="_CampfireExclusionRadius" label="Exclusion Radius" style="align-items: stretch; align-self: auto; min-width: auto;" />
+    </engine:VisualElement>
+</engine:UXML>

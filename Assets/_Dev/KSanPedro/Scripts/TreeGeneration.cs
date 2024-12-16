@@ -5,6 +5,7 @@ using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 public enum TreePerlinDisplay {
     None,
@@ -17,112 +18,121 @@ public enum TreePerlinDisplay {
 
 public class TreeGeneration : NetworkBehaviour
 {
-    // Invisible variables
-    // Provides a static bool to determine if the player is the server, allowing us to do commands later down the line that involve networking
+    #region //////////////////////////////////////////////// VARIABLES ////////////////////////////////////////////////
+
+    #region Non-Serialized vars
     private static bool _IsServer;
-    // Value that is calculated and stored as the max perlin value that trees can be placed.
-    private float maxPerlinValue;
-    private int seed;
+    private PerlinMap _EditorPerlinMap;
+    private bool _ServerHasSeed = false;
+    private int _Seed;
+    #endregion
 
-    // Settings for the Gizmos
-    [Header("Debug Gizmos Settings")]
-    [SerializeField] private bool drawGizmos;
+    #region Global Vars
+    [SerializeField] private Vector2 _MapSize = new Vector2(1000, 1000);
+    #endregion
 
-    // Settings for the Poisson Disc Sampling that generates the points where trees will be placed. 
-    [Header("Poisson Disc Sampling Settings")]
-    [SerializeField] private bool useDefalutValuesPoisson;
-    
-    // Settings for the perlin noise that cuts out tress that have been placed from the Poisson Disc Sampling function
-    [Header("Tree Perlin Noise Settings")]
-    //[SerializeField] private bool useDefalutValuesPerlin;
-    [SerializeField] private float perlinScale = 3000;
-    [SerializeField] private int imgSize = 500;
-    [SerializeField] private int octaves = 4;
-    [SerializeField] private float persistance = 1;
-    [SerializeField] private float lacunarity = 4;
-    [SerializeField] private Vector2 offset;
-    [SerializeField] private float perlinCuttoffPercent = 0.1f;
+    #region Gizmos Vars
+    [SerializeField] private bool _DrawGizmos;
+    #endregion
 
-    [Header("Rock Perlin Noise Settings")]
-    [SerializeField] private float perlinScaleR = 3000;
-    [SerializeField] private int imgSizeR = 500;
-    [SerializeField] private int octavesR = 4;
-    [SerializeField] private float persistanceR = 1;
-    [SerializeField] private float lacunarityR = 4;
-    [SerializeField] private Vector2 offsetR;
-    [SerializeField] private float perlinCuttoffPercentR = 0.1f;
+    #region Tree Perlin Noise Vars
+    [SerializeField] private float _TreePerlinScale = 3000;
+    [SerializeField] private int _TreeImageSize = 500;
+    [SerializeField] private int _TreeOctaves = 4;
+    [SerializeField] private float _TreePersistance = 1;
+    [SerializeField] private float _TreeLacunarity = 4;
+    [SerializeField] private Vector2 _TreeOffset;
+    #endregion
 
-    // Allows us to view the perlin noise generated in order to dubug
-    [Header("Perlin Noise Texture")]
-    [SerializeField] private Texture2D perlinTexture;
-    [SerializeField] private TreePerlinDisplay treePerlinDisplayOptions;
-    [SerializeField] private bool debugColors;
-    [SerializeField] private Material perlinMaterial;
-    
-    // These are all settings that remove trees from being placed independently from the perlin noise system that cuts out where the trees are that we get.
-    [Header("Manual Exclusion Settings")]
-    [SerializeField] private float campfireExclusionRaduis = 20;
-    [SerializeField] private Vector2 mapSize = new Vector2(1000, 1000);
-    
-    // Where we input any refrences to prefabs or in scene Game Objects that we need refrences to, like the tree prefab.
-    [Header("Game Object Refrences")]
-    [SerializeField] private List<GameObject> treeModelList;
-    [SerializeField] private List<GameObject> rockModelList;
+    #region Tree Poisson Vars
+    [SerializeField] float _TreeRadius = 5;
+    [SerializeField] int _TreeAccuracy = 30;
+    #endregion
 
-    [Space(15)]
-    // Allows interfacing with the custom editor for this class that then makes debugging easier
-    [Header("Perlin Noise Editor Settings")]
-    [SerializeField] bool overrideRandSeed;
-    [SerializeField] int setSeed;
-    [SerializeField] public bool autoComputeInEditor;
-    [SerializeField] public bool autoDrawTextureInEditor;
-    
-    // Allows interfacing with the custom editor for this class, related to trees and memory.
-    [Header("EDITOR ONLY trees (ENSURE CLEAR BEFORE BUILD FOR MEMORY REASONS)")]
-    [SerializeField] public bool autoUpdateTreeVisibility;
-    [SerializeField] List<GameObject> trees = new List<GameObject>();
-    [SerializeField] float editorDist = 100;
-    [SerializeField] Vector3 editorScale;
-    [SerializeField] PerlinMap editorPerlinMap;
-    [SerializeField] Material passMat;
-    [SerializeField] Material failMat;
+    #region Rocks Perlin Noise Vars
+    [SerializeField] private float _RockPerlinScale = 3000;
+    [SerializeField] private int _RockImageSize = 500;
+    [SerializeField] private int _RockOctaves = 4;
+    [SerializeField] private float _RockPersistance = 1;
+    [SerializeField] private float _RockLacunarity = 4;
+    [SerializeField] private Vector2 _RockOffset;
+    #endregion
 
-    private int totalTrees;
-    private int totalRocks;
-    
+    #region Rocks Poisson Vars
+    [SerializeField] float _RockRadius = 5;
+    [SerializeField] int _RockAccuracy = 30;
+    #endregion
+
+    #region Perlin Debug Display Vars
+    [SerializeField] private Texture2D _PerlinTexture;
+    [SerializeField] private TreePerlinDisplay _TreePerlinDisplay;
+    [SerializeField] private Material _PerlinMaterial;
+    #endregion
+
+    #region Exclusion Vars
+    [SerializeField] private float _CampfireExclusionRadius = 20;
+    [SerializeField] private float _TreeCutoffPercent = 0.1f;
+    [SerializeField] private float _RockCutoffPercent = 0.1f;
+    #endregion
+
+    #region Reference Vars
+    [SerializeField] private List<Mesh> _TreeMeshList;
+    [SerializeField] private List<Mesh> _RockMeshList;
+    [SerializeField] private GameObject _TreePrefab;
+    [SerializeField] private GameObject _RockPrefab;
+    #endregion
+
+    #region Editor Vars
+    [SerializeField] public bool _OverrideRandomSeed;
+    [SerializeField] int _SetSeed;
+    [SerializeField] public bool _AutoComputeEditor;
+    [SerializeField] public bool _AutoDrawTexEditor;
+    #endregion
+
+    #endregion
+    #region //////////////////////////////////////////////// UNITY FUNCTIONS ////////////////////////////////////////////////
     private void OnValidate()
     {
-        if (autoDrawTextureInEditor && !autoComputeInEditor)
+        // Cameron | never use onValidate like i did here, its really bad practice but eh..
+
+        if (_AutoDrawTexEditor && !_AutoComputeEditor)
         {
             Debug.LogWarning("AutoDrawTexture is on, this is gonna get laggy");
-            PerlinToTexture(editorPerlinMap);
+            PerlinToTexture(_EditorPerlinMap, _TreeImageSize);
         }
-        else if(autoComputeInEditor)
+        else if (_AutoComputeEditor)
         {
             Debug.LogWarning("AutoCompute is on, this is gonna get extra laggy");
-            DrawPerlinEditor();
-        }
-
-        if (autoUpdateTreeVisibility)
-        {
-            Debug.LogWarning("AutoUpdateVisibility is on this might get a little laggy");
-            TreeHiderEditor();
+            DrawPerlinEditor(0);
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    // Probably going to move to OnNetworkSpawn function in the future
+    private void OnDrawGizmos() // Cameron | moved this to the top, keeping unity auto called functions at the top and your own functions below those helps orginization
+    {
+        if (!_DrawGizmos) return;
+
+        Gizmos.color = new Color(255, 0, 0, 0.5f);
+        Gizmos.DrawWireSphere(new Vector3(0, 0, 0), _CampfireExclusionRadius);
+        Gizmos.color = new Color(0, 255, 0, 0.5f);
+        Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(_MapSize.x, 100, _MapSize.y));
+    }
+
     public override void OnNetworkSpawn()
     {
-        autoDrawTextureInEditor = false;
-        autoComputeInEditor = false;
-        autoUpdateTreeVisibility = false;
+        _AutoDrawTexEditor = false;
+        _AutoComputeEditor = false;
         _IsServer = IsServer;
 
-        if(IsServer)
+        if (IsServer)
         {
             // Temp random seed for now, will maybe replace with System.Random and maybe have a player setting to set the seed
-            seed = UnityEngine.Random.Range(0, 9999);
+            if (!_OverrideRandomSeed)
+                _Seed = UnityEngine.Random.Range(0, 9999);
+            else
+                _Seed = _SetSeed;
+
+            _ServerHasSeed = true;
+
             ThreadManager();
         }
         else
@@ -132,45 +142,47 @@ public class TreeGeneration : NetworkBehaviour
 
         base.OnNetworkSpawn();
     }
-
+    #endregion
+    #region //////////////////////////////////////////////// OUR FUNCTIONS ////////////////////////////////////////////////
     private async void ThreadManager()
     {
         await GenTreesRuntime();
+        Debug.Log("Trees Fin");
         await GenRocksRuntime();
+        Debug.Log("Rocks Fin");
     }
 
     private async Task GenTreesRuntime()
     {
-        Debug.Log("Entered the tree func");
+        //Debug.Log("Entered the tree func");
 
-        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, seed, 30);
-        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSize, imgSize, seed, perlinScale, octaves, persistance, lacunarity, offset);
-        System.Random randomRotationValue = new System.Random(seed);
-        System.Random randomModel = new System.Random(seed + 2);
+        List<Vector2> points = await Noise.PoissonSamplingAsync(_TreeRadius, _MapSize, _Seed, _TreeAccuracy);
+        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(_TreeImageSize, _TreeImageSize, _Seed, _TreePerlinScale, _TreeOctaves, _TreePersistance, _TreeLacunarity, _TreeOffset);
+        System.Random randomRotationValue = new System.Random(_Seed);
+        System.Random randomModel = new System.Random(_Seed + 2);
 
-        Debug.Log("Complex computations complete");
+        //Debug.Log("Complex computations complete");
 
         //PerlinToTexture(perlinMap);
 
-        float multiple = imgSize / mapSize.x;
+        float multiple = _TreeImageSize / _MapSize.x;
         foreach (Vector2 point in points)
         {
-            float x = point.x - (mapSize.x / 2);
-            float y = point.y - (mapSize.y / 2);
+            float x = point.x - (_MapSize.x / 2);
+            float y = point.y - (_MapSize.y / 2);
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
                 Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
-                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _TreeCutoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
                 {
                     //Debug.Log("Tree Placed " + hit.point);
                     int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    GameObject temp = Instantiate(treeModelList[randomModel.Next(0, treeModelList.Count)], hit.point, quaternionRandomRotation);
+                    GameObject temp = Instantiate(_TreePrefab, hit.point, quaternionRandomRotation);
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                    totalTrees++;
                 }
             }
         }
@@ -178,280 +190,188 @@ public class TreeGeneration : NetworkBehaviour
 
     private async Task GenRocksRuntime()
     {
-        List<Vector2> points = await Noise.PoissonSamplingAsync(5, mapSize, seed + 1, 30);
-        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(imgSizeR, imgSizeR, seed, perlinScaleR, octavesR, persistanceR, lacunarityR, offsetR);
+        List<Vector2> points = await Noise.PoissonSamplingAsync(_RockRadius, _MapSize, _Seed + 1, _RockAccuracy);
+        PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(_RockImageSize, _RockImageSize, _Seed, _RockPerlinScale, _RockOctaves, _RockPersistance, _RockLacunarity, _RockOffset);
 
         // PerlinToTexture(perlinMap);
 
-        float multiple = imgSizeR / mapSize.x;
+        float multiple = _RockImageSize / _MapSize.x;
 
         foreach (Vector2 point in points)
         {
-            float x = point.x - (mapSize.x / 2);
-            float y = point.y - (mapSize.y / 2);
+            float x = point.x - (_MapSize.x / 2);
+            float y = point.y - (_MapSize.y / 2);
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
                 Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
-                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= perlinCuttoffPercentR && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(campfireExclusionRaduis))
+                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _RockCutoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
                 {
                     Vector3 eulerRandomRotation = new Vector3(0, 0, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    GameObject temp = Instantiate(rockModelList[0], hit.point, quaternionRandomRotation);
+                    GameObject temp = Instantiate(_RockPrefab, hit.point, quaternionRandomRotation);
                     temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                    totalRocks++;
                 }
             }
         }
     }
 
+    private async void AskAgain()
+    {
+        await Task.Delay(1000); // wait 500 ms, aka 0.5 secconds
+        AskForSeedRpc(); // ask again
+    }
+    #endregion
+    #region //////////////////////////////////////////////// RPC FUNCTIONS ////////////////////////////////////////////////
     [Rpc(SendTo.Server)]
     private void AskForSeedRpc(RpcParams rpcParams = default)
     {
-        ulong clientID = rpcParams.Receive.SenderClientId;
-        SendSeedRpc(seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
+        ulong clientID = rpcParams.Receive.SenderClientId; // get client ID
+        if (!_ServerHasSeed) // if the server doesn't yet have the seed then deny the clients request
+        {
+            DenySeedRequestRpc(RpcTarget.Single(clientID, RpcTargetUse.Temp)); 
+            return;
+        }
+        else // otherwise provide the seed
+            SendSeedRpc(_Seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
     }
 
     [Rpc(SendTo.SpecifiedInParams)]
     private void SendSeedRpc(int seed, RpcParams rpcParams = default)
     {
-        this.seed = seed;
+        this._Seed = seed;
         ThreadManager();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void CalcNetworkCost()
-    {    
-        long floatCost = 4;
-        
-        long bitCostVec3 = ((floatCost * 3) * 8) * totalTrees;
-        long bitCostMatri = ((floatCost * 16) * 8) * totalTrees;
-        
-        long byteCostVec3 = bitCostVec3 / 8;
-        long byteCostMatri = bitCostMatri / 8;
-        
-        double kiloByteCostVec3 = byteCostVec3 / 1000;
-        double KiloByteCostMatri = byteCostMatri / 1000;
-        
-        Debug.Log("Vector3 total cost: " + kiloByteCostVec3 + " KB (" + byteCostVec3 + " Bytes (" + bitCostVec3 + " Bits))");
-        Debug.Log("Matrix4x4 total cost: " + KiloByteCostMatri + " KB (" + byteCostMatri + " Bytes (" + bitCostMatri + " Bits))");
-    }
-
-    /*private void PlaceTrees(List<Vector2> points, PerlinMap perlinMap)
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void DenySeedRequestRpc(RpcParams rpcParams = default) // the server has denied our request. so lets wait and ask again
     {
-        foreach (Vector2 point in points)
-        {
-            float x = point.x - 500;
-            float y = point.y - 500;
-
-            RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
-            {
-                if (CheckIfPlaceable(new Vector3(point.x, hit.point.y, point.y), perlinMap))
-                {
-                    GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
-                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                }
-            }
-        }
-    }*/
-
-    private bool CheckIfPlaceable(Vector3 treePos, PerlinMap perlinMap)
-    {
-        float multiple = imgSize / mapSize.x;
-    
-        Vector2 pointToPerlinSpace = new Vector2(treePos.x * multiple, treePos.y * multiple);
-
-        Debug.Log((int)pointToPerlinSpace.y);
-        Debug.Log((int)pointToPerlinSpace.x);
-
-        float value = perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y];
-
-        if (value <= maxPerlinValue && Vectors.SqrDist3f(new Vector3(0, 0, 0), treePos) > Numbers.Sqr(campfireExclusionRaduis))
-        {
-            return true;
-        }
-        else
-        return false;
+        AskAgain();
     }
-
-    public void DrawPerlinEditor()
+    #endregion
+    #region //////////////////////////////////////////////// EDITOR FUNCTIONS ////////////////////////////////////////////////
+    public async void DrawPerlinEditor(int i)
     {
         PerlinMap perlinMap;
-        if (!overrideRandSeed)
+        int tempSeed = 0;
+
+        if (!_OverrideRandomSeed)
         {
-            int tempSeed = UnityEngine.Random.Range(0, 99999);
-            perlinMap = Noise.GenPerlinMap(imgSize, imgSize, tempSeed, perlinScale, octaves, persistance, lacunarity, offset);
+            tempSeed = UnityEngine.Random.Range(0, 99999);
         }
         else
         {
-            perlinMap = Noise.GenPerlinMap(imgSize, imgSize, setSeed, perlinScale, octaves, persistance, lacunarity, offset);
+            tempSeed = _SetSeed;
         }
 
-        editorPerlinMap = perlinMap;
-        PerlinToTexture(perlinMap);
-    }
-
-  /*  public void GenTreesEditor()
-    {
-        if (editorPerlinMap == null)
+        if (i == 0)
         {
-            Debug.LogError("Attempting to gen editor trees when there is no editorPerlinMap!");
-            return;
+            perlinMap = await Noise.GenPerlinMapAsnyc(_TreeImageSize, _TreeImageSize, tempSeed, _TreePerlinScale, _TreeOctaves, _TreePersistance, _TreeLacunarity, _TreeOffset);
+            PerlinToTexture(perlinMap, _TreeImageSize);
         }
-
-        trees = new List<GameObject>();
-        List<Vector2> points = Noise.PoissonDiscSamplingVector2(editorDist, mapSize, 30);
-
-        float multiple = imgSize / 1000;
-
-        foreach (Vector2 point in points)
+        else
         {
-            float x = point.x - 500;
-            float y = point.y - 500;
-
-            RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
-            {
-                GameObject temp = GameObject.Instantiate(treePrefab, hit.point, new Quaternion(0, 0, 0, 0));
-                temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                temp.transform.localScale = editorScale;
-                trees.Add(temp);
-            }
-
-            TreeHiderEditor();
+            perlinMap = await Noise.GenPerlinMapAsnyc(_RockImageSize, _RockImageSize, tempSeed, _RockPerlinScale, _RockOctaves, _RockPersistance, _RockLacunarity, _RockOffset);
+            PerlinToTexture(perlinMap, _RockImageSize);
         }
-    }   */
 
-    public void TreeHiderEditor()
-    {
-        foreach (GameObject tree in trees)
-        {
-            Renderer renderer = tree.GetComponent<Renderer>();
-            if (CheckIfPlaceable(tree.transform.position, editorPerlinMap))
-            {
-                renderer.material = passMat;
-            }
-            else
-            {
-                renderer.material = failMat;
-            }
-        }
+        _EditorPerlinMap = perlinMap;
     }
 
     public void ClearEditorOnlyVariables()
-    {
-        trees = null;
-        editorPerlinMap = null;
-    }
-    
-    private void SetVariableDefaultValues()
-    {
-        // For each variable group, this checks if we have the use default values bool checked, an it sets the correspnding variables to the hard coded default amounts
-        
+    { 
+        _EditorPerlinMap = null;
     }
 
-    private void OnDrawGizmos()
+    private void PerlinToTexture(PerlinMap perlinMap, int imageSize) // Authored: Cameron
     {
-        if(!drawGizmos) return;
+        float min = 0;
+        float max = 0;
 
-        Gizmos.color = new Color(255, 0, 0, 0.5f);
-        Gizmos.DrawWireSphere(new Vector3(0, 0, 0), campfireExclusionRaduis);
-        Gizmos.color = new Color(0, 255, 0, 0.5f);
-        Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(mapSize.x, 100, mapSize.y));
-    }
-
-    private void PerlinToTexture(PerlinMap perlinMap) // Authored: Cameron
-    {
-        Color[] colorMap = new Color[imgSize * imgSize]; // Creating a color array with the same number of pixels as a imgSize imgSize image, knowing our texture is a 4k texture
-
-        if (treePerlinDisplayOptions == TreePerlinDisplay.WhiteHot) // if we have the white hot setting on, make the larger values aproach white, and the smaller ones aproach black
-        for(int y = 0; y < imgSize; y++)
+        for (int y = 0; y < imageSize; y++)
         {
-            for(int x = 0; x < imgSize; x++)
+            for (int x = 0; x < imageSize; x++)
             {
-                colorMap[y * imgSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
+                float temp = perlinMap.Map[x,y];
+
+                if (temp < min) min = temp;
+                if (temp > max) max = temp;
             }
         }
-        else if (treePerlinDisplayOptions == TreePerlinDisplay.BlackHot) // if instead we have black hot, make larger values aproach black, smaller values aproach white
-        for(int y = 0; y < imgSize; y++)
+
+        Debug.Log(min);
+        Debug.Log(max);
+
+        Color[] colorMap = new Color[imageSize * imageSize]; // Creating a color array with the same number of pixels as a _TreeImageSize _TreeImageSize image, knowing our texture is a 4k texture
+
+        if (_TreePerlinDisplay == TreePerlinDisplay.WhiteHot) // if we have the white hot setting on, make the larger values aproach white, and the smaller ones aproach black
+        for(int y = 0; y < imageSize; y++)
         {
-            for(int x = 0; x < imgSize; x++)
+            for(int x = 0; x < imageSize; x++)
             {
-                colorMap[y * imgSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
+                colorMap[y * imageSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
             }
         }
-        else if (treePerlinDisplayOptions == TreePerlinDisplay.PassFail)
-        for(int y = 0; y < imgSize; y++)
+        else if (_TreePerlinDisplay == TreePerlinDisplay.BlackHot) // if instead we have black hot, make larger values aproach black, smaller values aproach white
+        for(int y = 0; y < imageSize; y++)
         {
-            for(int x = 0; x < imgSize; x++)
+            for(int x = 0; x < imageSize; x++)
             {
-                if (perlinMap.Map[x,y] > perlinCuttoffPercent)
-                colorMap[y * imgSize + x] = Color.red;
+                colorMap[y * imageSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
+            }
+        }
+        else if (_TreePerlinDisplay == TreePerlinDisplay.PassFail)
+        for(int y = 0; y < imageSize; y++)
+        {
+            for(int x = 0; x < imageSize; x++)
+            {
+                if (perlinMap.Map[x,y] > _TreeCutoffPercent)
+                colorMap[y * imageSize + x] = Color.red;
                 else
-                colorMap[y * imgSize + x] = Color.green;
+                colorMap[y * imageSize + x] = Color.green;
             }
         }
-        else if (treePerlinDisplayOptions == TreePerlinDisplay.PassFailWhiteHot) // if we have pass fail white hot, generate white hot, then apply a faint pass fail on top.
+        else if (_TreePerlinDisplay == TreePerlinDisplay.PassFailWhiteHot) // if we have pass fail white hot, generate white hot, then apply a faint pass fail on top.
         {
-            for(int y = 0; y < imgSize; y++)
+            for(int y = 0; y < imageSize; y++)
             {
-                for(int x = 0; x < imgSize; x++)
+                for(int x = 0; x < imageSize; x++)
                 {
-                    colorMap[y * imgSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
+                    colorMap[y * imageSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
+
+                    if (perlinMap.Map[x, y] > _TreeCutoffPercent)
+                        colorMap[y * imageSize + x] -= new Color(0, 0.1f, 0.25f, 0);
+                    else
+                        colorMap[y * imageSize + x] -= new Color(0.1f, 0, 0.25f, 0);
                 }
             }
-            for(int y = 0; y < imgSize; y++)
-            {
-                for(int x = 0; x < imgSize; x++)
-                {
-                    if (perlinMap.Map[x,y] > perlinCuttoffPercent)
-                    colorMap[y * imgSize + x] -= new Color(0, 0.25f, 0.25f, 0);
-                    else
-                    colorMap[y * imgSize + x] -= new Color(0.25f, 0, 0.25f, 0);
-                }
-            } 
         }
         else // the only other scenario would be pass fail black hot, so generate black hot then apply a faint pass fail.
         {
-            for(int y = 0; y < imgSize; y++)
+            for(int y = 0; y < imageSize; y++)
             {
-                for(int x = 0; x < imgSize; x++)
+                for(int x = 0; x < imageSize; x++)
                 {
-                    colorMap[y * imgSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
-                }
-            }
-            for(int y = 0; y < imgSize; y++)
-            {
-                for(int x = 0; x < imgSize; x++)
-                {
-                    if (perlinMap.Map[x,y] > perlinCuttoffPercent)
-                    colorMap[y * imgSize + x] -= new Color(0, 0.25f, 0.25f, 0);
+                    colorMap[y * imageSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
+
+                    if (perlinMap.Map[x, y] > _TreeCutoffPercent)
+                        colorMap[y * imageSize + x] -= new Color(0, 0.1f, 0.25f, 0);
                     else
-                    colorMap[y * imgSize + x] -= new Color(0.25f, 0, 0.25f, 0);
+                        colorMap[y * imageSize + x] -= new Color(0.1f, 0, 0.25f, 0);
                 }
-            } 
-        }
-        
-        if (debugColors) // if we have debug colors on, log the first 200 colors so we can see them
-        {
-            for (int y = 0; y < 200; y++)
-            {
-                Debug.Log(colorMap[y]);
             }
         }
 
-        perlinTexture = new Texture2D(imgSize, imgSize); // turn the null texture2d object into a new texture2d
-        perlinTexture.filterMode = FilterMode.Point; // set the filter to point to see exact points
-        perlinTexture.wrapMode = TextureWrapMode.Clamp; // clamp to avoid repeating
-        perlinTexture.SetPixels(colorMap); // take the color array and set the pixels of our texture2d (for anyone unsure how this works as a 1d array for a 2d texture, check unity documentation :D)
-        perlinTexture.Apply(); // apply all changes
+        // Cameron | debug colors step removed, the problem we used it for was solved long ago
 
-        perlinMaterial.mainTexture = perlinTexture; // set the _MainTex value (desiganted in the HLSL on the materials shader) to the new texture2d.
-        
-        //byte[] bytes = perlinTexture.EncodeToPNG(); // this turns the texture 2d into bytes that work in the png format
-        //File.WriteAllBytes(Application.dataPath + "perlinDebugView.png", bytes); // this saves the bytes, though i think its actually an entirely wrong way to do this... FileStream and StreamWriter would likley be the best method, no worries as we wont be using this again.
+        _PerlinTexture = new Texture2D(imageSize, imageSize); // turn the null texture2d object into a new texture2d
+        _PerlinTexture.filterMode = FilterMode.Point; // set the filter to point to see exact points
+        _PerlinTexture.wrapMode = TextureWrapMode.Clamp; // clamp to avoid repeating
+        _PerlinTexture.SetPixels(colorMap); // take the color array and set the pixels of our texture2d (for anyone unsure how this works as a 1d array for a 2d texture, check unity documentation :D)
+        _PerlinTexture.Apply(); // apply all changes
+
+        _PerlinMaterial.mainTexture = _PerlinTexture; // set the _MainTex value (desiganted in the HLSL on the materials shader) to the new texture2d.
     }
+    #endregion
 }

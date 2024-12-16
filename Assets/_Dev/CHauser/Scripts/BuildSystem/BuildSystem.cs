@@ -272,11 +272,11 @@ public class BuildSystem : NetworkBehaviour
         return Mathf.Round(inputValue / baseNumberOfMultipule) * baseNumberOfMultipule;
     }
 
-    // Cole | Also thank you to Bunny83, this allows for the function to also take in an offset value for rounding
+    // Cole | Also thank you to Bunny83, this allows for the function to also take in an tOffset value for rounding
 
-    private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule, float offset)
+    private static float RoundToMultipule(float inputValue, float baseNumberOfMultipule, float tOffset)
     {
-        return Mathf.Round((inputValue - offset) / baseNumberOfMultipule) * baseNumberOfMultipule + offset;
+        return Mathf.Round((inputValue - tOffset) / baseNumberOfMultipule) * baseNumberOfMultipule + tOffset;
     }
 
     [Rpc(SendTo.Server)]

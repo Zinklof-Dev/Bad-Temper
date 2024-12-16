@@ -42,7 +42,7 @@ public class Player : NetworkBehaviour
         //if the client running this code owns the object its attached to this is true
         if (IsOwner)
         {
-            //get the main camera, lock the cursor, move the camera to the player objects position with the default offset i always use, and make it a child of the player object on this clients end only.
+            //get the main camera, lock the cursor, move the camera to the player objects position with the default tOffset i always use, and make it a child of the player object on this clients end only.
             playerCamera = GameObject.FindWithTag("MainCamera");
 
             Cursor.lockState = CursorLockMode.Locked;

@@ -82,9 +82,9 @@ void GenerateUV_float(float2 inUV, float4 transform, float2 animSpeed, out float
 	outUV = inUV * transform.xy + transform.zw + (animSpeed * _Time.y);
 }
 
-void ComputeUVOffset_float(float texWidth, float texHeight, float2 offset, float SDR, out float2 uvOffset)
+void ComputeUVOffset_float(float texWidth, float texHeight, float2 tOffset, float SDR, out float2 uvOffset)
 {
-	uvOffset = float2(-offset.x * SDR / texWidth, -offset.y * SDR / texHeight);
+	uvOffset = float2(-tOffset.x * SDR / texWidth, -tOffset.y * SDR / texHeight);
 }
 
 void ScreenSpaceRatio2_float(float4x4 projection, float4 position, float2 objectScale, float screenWidth, float screenHeight, float fontScale, out float SSR)
