@@ -17,10 +17,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Dev/JVargo/Wave_System.unity
     guid: c4a8c63644e061d4e9ea6849ffdf9a0f
-  - enabled: 0
+  - enabled: 1
     path: Assets/_Dev/KSanPedro/Scenes/DevScene.unity
     guid: 6e192681005d3294898d784380b79afc
-  - enabled: 1
+  - enabled: 0
     path: Assets/!Game/Scenes/MainMenu.unity
     guid: f8bdbc51263dfcd408421484ff401974
   m_configObjects:

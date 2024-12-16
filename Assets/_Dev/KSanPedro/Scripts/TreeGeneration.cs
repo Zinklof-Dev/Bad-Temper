@@ -5,7 +5,8 @@ using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using UnityEditor;
+using UnityEngine.Rendering;
 
 public enum TreePerlinDisplay {
     None,
@@ -98,7 +99,7 @@ public class TreeGeneration : NetworkBehaviour
         if (_AutoDrawTexEditor && !_AutoComputeEditor)
         {
             Debug.LogWarning("AutoDrawTexture is on, this is gonna get laggy");
-            PerlinToTexture(_EditorPerlinMap, _TreeImageSize);
+            PerlinToTexture(_EditorPerlinMap, _TreeImageSize, _TreeCutoffPercent);
         }
         else if (_AutoComputeEditor)
         {
@@ -181,8 +182,7 @@ public class TreeGeneration : NetworkBehaviour
                     int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    GameObject temp = Instantiate(_TreePrefab, hit.point, quaternionRandomRotation);
-                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                    Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
                 }
             }
         }
@@ -199,19 +199,26 @@ public class TreeGeneration : NetworkBehaviour
 
         foreach (Vector2 point in points)
         {
-            float x = point.x - (_MapSize.x / 2);
-            float y = point.y - (_MapSize.y / 2);
-            RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
-            {
-                Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+            float worldX = point.x - (_MapSize.x / 2);
+            float worldY = point.y - (_MapSize.y / 2);
 
-                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _RockCutoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
+            Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
+
+            if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _RockCutoffPercent)
+            {
+                List<Vector2> clusterPoints = await Noise.PoissonSamplingAsync(1.5f, new Vector2(10, 10), _Seed + (int)point.x + (int)point.y);
+                foreach(Vector2 clusterPoint in clusterPoints) 
                 {
-                    Vector3 eulerRandomRotation = new Vector3(0, 0, 0);
-                    Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    GameObject temp = Instantiate(_RockPrefab, hit.point, quaternionRandomRotation);
-                    temp.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                    RaycastHit hit;
+                    float x = clusterPoint.x - (10 / 2);
+                    float y = clusterPoint.y - (10 / 2);
+
+                    if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999) && Vectors.SqrDist3f(new Vector3(0,0,0), new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY)) > Numbers.Sqr(_CampfireExclusionRadius))
+                    {
+                        Vector3 eulerRandomRotation = new Vector3(0, 0, 0);
+                        Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
+                        Instantiate(_RockPrefab, new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY), quaternionRandomRotation);
+                    }
                 }
             }
         }
@@ -268,12 +275,12 @@ public class TreeGeneration : NetworkBehaviour
         if (i == 0)
         {
             perlinMap = await Noise.GenPerlinMapAsnyc(_TreeImageSize, _TreeImageSize, tempSeed, _TreePerlinScale, _TreeOctaves, _TreePersistance, _TreeLacunarity, _TreeOffset);
-            PerlinToTexture(perlinMap, _TreeImageSize);
+            PerlinToTexture(perlinMap, _TreeImageSize, _TreeCutoffPercent);
         }
         else
         {
             perlinMap = await Noise.GenPerlinMapAsnyc(_RockImageSize, _RockImageSize, tempSeed, _RockPerlinScale, _RockOctaves, _RockPersistance, _RockLacunarity, _RockOffset);
-            PerlinToTexture(perlinMap, _RockImageSize);
+            PerlinToTexture(perlinMap, _RockImageSize, _RockCutoffPercent);
         }
 
         _EditorPerlinMap = perlinMap;
@@ -284,7 +291,7 @@ public class TreeGeneration : NetworkBehaviour
         _EditorPerlinMap = null;
     }
 
-    private void PerlinToTexture(PerlinMap perlinMap, int imageSize) // Authored: Cameron
+    private void PerlinToTexture(PerlinMap perlinMap, int imageSize, float cutoffPercent) // Authored: Cameron
     {
         float min = 0;
         float max = 0;
@@ -300,8 +307,8 @@ public class TreeGeneration : NetworkBehaviour
             }
         }
 
-        Debug.Log(min);
-        Debug.Log(max);
+        //Debug.Log(min);
+        //Debug.Log(max);
 
         Color[] colorMap = new Color[imageSize * imageSize]; // Creating a color array with the same number of pixels as a _TreeImageSize _TreeImageSize image, knowing our texture is a 4k texture
 
@@ -326,7 +333,7 @@ public class TreeGeneration : NetworkBehaviour
         {
             for(int x = 0; x < imageSize; x++)
             {
-                if (perlinMap.Map[x,y] > _TreeCutoffPercent)
+                if (perlinMap.Map[x,y] > cutoffPercent)
                 colorMap[y * imageSize + x] = Color.red;
                 else
                 colorMap[y * imageSize + x] = Color.green;
@@ -340,7 +347,7 @@ public class TreeGeneration : NetworkBehaviour
                 {
                     colorMap[y * imageSize + x] = Color.Lerp(Color.black, Color.white, perlinMap.Map[x,y]);
 
-                    if (perlinMap.Map[x, y] > _TreeCutoffPercent)
+                    if (perlinMap.Map[x, y] > cutoffPercent)
                         colorMap[y * imageSize + x] -= new Color(0, 0.1f, 0.25f, 0);
                     else
                         colorMap[y * imageSize + x] -= new Color(0.1f, 0, 0.25f, 0);
@@ -355,7 +362,7 @@ public class TreeGeneration : NetworkBehaviour
                 {
                     colorMap[y * imageSize + x] = Color.Lerp(Color.white, Color.black, perlinMap.Map[x,y]);
 
-                    if (perlinMap.Map[x, y] > _TreeCutoffPercent)
+                    if (perlinMap.Map[x, y] > cutoffPercent)
                         colorMap[y * imageSize + x] -= new Color(0, 0.1f, 0.25f, 0);
                     else
                         colorMap[y * imageSize + x] -= new Color(0.1f, 0, 0.25f, 0);
