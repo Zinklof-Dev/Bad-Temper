@@ -197,7 +197,7 @@ MonoBehaviour:
   _PerlinMaterial: {fileID: 2100000, guid: 5e4ec51975a0b40459d823a9c8cff560, type: 2}
   _CampfireExclusionRadius: 20
   _TreeCutoffPercent: 0.45
-  _RockCutoffPercent: 0.35
+  _RockCutoffPercent: 0.4
   _TreeMeshList: []
   _RockMeshList: []
   _TreePrefab: {fileID: 7803448073008630953, guid: 0d49d05b806abb442a3947b4ac848962,

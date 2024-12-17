@@ -5,8 +5,6 @@ using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 using System.Threading.Tasks;
-using UnityEditor;
-using UnityEngine.Rendering;
 
 public enum TreePerlinDisplay {
     None,
@@ -188,6 +186,7 @@ public class TreeGeneration : NetworkBehaviour
         }
     }
 
+    // Cole | Probably need to go through and stop hard coding some values but I don't know how to update the editor for this script
     private async Task GenRocksRuntime()
     {
         List<Vector2> points = await Noise.PoissonSamplingAsync(_RockRadius, _MapSize, _Seed + 1, _RockAccuracy);
@@ -201,23 +200,25 @@ public class TreeGeneration : NetworkBehaviour
         {
             float worldX = point.x - (_MapSize.x / 2);
             float worldY = point.y - (_MapSize.y / 2);
+            System.Random randomExclusion = new System.Random(_Seed + 69);
+            System.Random randomRoation = new System.Random(_Seed + 5);
 
             Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
             if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _RockCutoffPercent)
             {
-                List<Vector2> clusterPoints = await Noise.PoissonSamplingAsync(1.5f, new Vector2(10, 10), _Seed + (int)point.x + (int)point.y);
+                List<Vector2> clusterPoints = await Noise.PoissonSamplingAsync(2f, new Vector2(5, 5), _Seed + (int)point.x + (int)point.y);
                 foreach(Vector2 clusterPoint in clusterPoints) 
                 {
                     RaycastHit hit;
-                    float x = clusterPoint.x - (10 / 2);
-                    float y = clusterPoint.y - (10 / 2);
+                    float x = clusterPoint.x - (5 / 2);
+                    float y = clusterPoint.y - (5 / 2);
 
-                    if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999) && Vectors.SqrDist3f(new Vector3(0,0,0), new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY)) > Numbers.Sqr(_CampfireExclusionRadius))
+                    if (Physics.Raycast(new Vector3(x + worldX, 9000, y + worldY), Vector3.down, out hit, 9999) && Vectors.SqrDist3f(new Vector3(0,0,0), new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY)) > Numbers.Sqr(_CampfireExclusionRadius) && randomExclusion.Next(0, 6) != 0)
                     {
-                        Vector3 eulerRandomRotation = new Vector3(0, 0, 0);
+                        Vector3 eulerRandomRotation = new Vector3(0, randomRoation.Next(0, 360), 0);
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                        Instantiate(_RockPrefab, new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY), quaternionRandomRotation);
+                        Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
                     }
                 }
             }
