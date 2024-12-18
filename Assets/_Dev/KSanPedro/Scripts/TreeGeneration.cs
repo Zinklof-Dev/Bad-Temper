@@ -79,6 +79,7 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private List<Mesh> _RockMeshList;
     [SerializeField] private GameObject _TreePrefab;
     [SerializeField] private GameObject _RockPrefab;
+    [SerializeField] private TreeManager _TreeManager;
     #endregion
 
     #region Editor Vars
@@ -121,6 +122,7 @@ public class TreeGeneration : NetworkBehaviour
         _AutoDrawTexEditor = false;
         _AutoComputeEditor = false;
         _IsServer = IsServer;
+        _TreeManager = FindAnyObjectByType<TreeManager>();
 
         if (IsServer)
         {
@@ -147,7 +149,7 @@ public class TreeGeneration : NetworkBehaviour
     {
         await GenTreesRuntime();
         Debug.Log("Trees Fin");
-        await GenRocksRuntime();
+        //await GenRocksRuntime();
         Debug.Log("Rocks Fin");
     }
 
@@ -180,7 +182,8 @@ public class TreeGeneration : NetworkBehaviour
                     int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                    //Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                    _TreeManager.AddTree(Matrix4x4.TRS(new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation, Vector3.one), 0);
                 }
             }
         }
