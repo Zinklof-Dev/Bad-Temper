@@ -759,8 +759,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64b905d776237354e84e31c0dfe99e51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  treeList: []
   meshes:
   - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  material: {fileID: 2100000, guid: c83b584639f355f4495ffa2f90696228, type: 2}
 --- !u!4 &1015903601
 Transform:
   m_ObjectHideFlags: 0
