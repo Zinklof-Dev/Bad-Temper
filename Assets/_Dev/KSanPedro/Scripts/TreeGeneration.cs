@@ -5,6 +5,7 @@ using Unity.Netcode;
 using ZinklofDev.Utils.Mapping;
 using ZinklofDev.Utils.MathZ;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 public enum TreePerlinDisplay {
     None,
@@ -22,7 +23,6 @@ public class TreeGeneration : NetworkBehaviour
     #region Non-Serialized vars
     private static bool _IsServer;
     private PerlinMap _EditorPerlinMap;
-    private bool _ServerHasSeed = false;
     private int _Seed;
     #endregion
 
@@ -32,6 +32,8 @@ public class TreeGeneration : NetworkBehaviour
 
     #region Gizmos Vars
     [SerializeField] private bool _DrawGizmos;
+    [SerializeField] private bool _DrawTreeHeightGizmos;
+    [SerializeField] private bool _DrawRockHeightGizmos;
     #endregion
 
     #region Tree Perlin Noise Vars
@@ -72,6 +74,10 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private float _CampfireExclusionRadius = 20;
     [SerializeField] private float _TreeCutoffPercent = 0.1f;
     [SerializeField] private float _RockCutoffPercent = 0.1f;
+    [SerializeField] private float _TreeMinHeight;
+    [SerializeField] private float _TreeMaxHeight;
+    [SerializeField] private float _RockMinHeight;
+    [SerializeField] private float _RockMaxHeight;
     #endregion
 
     #region Reference Vars
@@ -114,7 +120,18 @@ public class TreeGeneration : NetworkBehaviour
         Gizmos.color = new Color(255, 0, 0, 0.5f);
         Gizmos.DrawWireSphere(new Vector3(0, 0, 0), _CampfireExclusionRadius);
         Gizmos.color = new Color(0, 255, 0, 0.5f);
-        Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(_MapSize.x, 100, _MapSize.y));
+        Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(_MapSize.x, 9999, _MapSize.y));
+
+        if (_DrawTreeHeightGizmos)
+        {
+            Gizmos.color = Color.black;
+            Gizmos.DrawWireCube(new Vector3(0, (_TreeMinHeight + _TreeMaxHeight) / 2, 0), new Vector3(_MapSize.x, MathF.Abs(_TreeMinHeight - _TreeMaxHeight), _MapSize.y));
+        }
+        if (_DrawRockHeightGizmos)
+        {
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireCube(new Vector3(0, (_RockMinHeight + _RockMaxHeight) / 2, 0), new Vector3(_MapSize.x, MathF.Abs(_RockMinHeight - _RockMaxHeight), _MapSize.y));
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -124,33 +141,24 @@ public class TreeGeneration : NetworkBehaviour
         _IsServer = IsServer;
         _TreeManager = FindAnyObjectByType<TreeManager>();
 
-        if (IsServer)
+        if (_TreeManager == null)
         {
-            // Temp random seed for now, will maybe replace with System.Random and maybe have a player setting to set the seed
-            if (!_OverrideRandomSeed)
-                _Seed = UnityEngine.Random.Range(0, 9999);
-            else
-                _Seed = _SetSeed;
-
-            _ServerHasSeed = true;
-
-            ThreadManager();
-        }
-        else
-        {
-            AskForSeedRpc();
+            Debug.Log("didn't find treemanager");
         }
 
         base.OnNetworkSpawn();
     }
     #endregion
     #region //////////////////////////////////////////////// OUR FUNCTIONS ////////////////////////////////////////////////
-    private async void ThreadManager()
+    public async Task Initialize(int seed)
     {
+        _Seed = seed;
+
         await GenTreesRuntime();
-        Debug.Log("Trees Fin");
-        //await GenRocksRuntime();
-        Debug.Log("Rocks Fin");
+        //Debug.Log("Trees Fin");
+        //_TreeManager.TreesDone();
+        await GenRocksRuntime();
+        //Debug.Log("Rocks Fin");
     }
 
     private async Task GenTreesRuntime()
@@ -174,6 +182,15 @@ public class TreeGeneration : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(x, 9000, y), Vector3.down, out hit, 9999))
             {
+                if (hit.point.y > _TreeMaxHeight)
+                {
+                    continue;
+                }
+                else if (hit.point.y < _TreeMinHeight)
+                {
+                    continue;
+                }
+
                 Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
                 if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _TreeCutoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
@@ -182,8 +199,8 @@ public class TreeGeneration : NetworkBehaviour
                     int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    //Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
-                    _TreeManager.AddTree(Matrix4x4.TRS(new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation, Vector3.one), 0);
+                    Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                    //_TreeManager.AddTree(Matrix4x4.TRS(new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation, Vector3.one), 0);
                 }
             }
         }
@@ -219,6 +236,15 @@ public class TreeGeneration : NetworkBehaviour
 
                     if (Physics.Raycast(new Vector3(x + worldX, 9000, y + worldY), Vector3.down, out hit, 9999) && Vectors.SqrDist3f(new Vector3(0,0,0), new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY)) > Numbers.Sqr(_CampfireExclusionRadius) && randomExclusion.Next(0, 6) != 0)
                     {
+                        if (hit.point.y > _RockMaxHeight)
+                        {
+                            continue;
+                        }
+                        else if (hit.point.y < _RockMinHeight)
+                        {
+                            continue;
+                        }
+
                         Vector3 eulerRandomRotation = new Vector3(0, randomRoation.Next(0, 360), 0);
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                         Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
@@ -226,39 +252,6 @@ public class TreeGeneration : NetworkBehaviour
                 }
             }
         }
-    }
-
-    private async void AskAgain()
-    {
-        await Task.Delay(1000); // wait 500 ms, aka 0.5 secconds
-        AskForSeedRpc(); // ask again
-    }
-    #endregion
-    #region //////////////////////////////////////////////// RPC FUNCTIONS ////////////////////////////////////////////////
-    [Rpc(SendTo.Server)]
-    private void AskForSeedRpc(RpcParams rpcParams = default)
-    {
-        ulong clientID = rpcParams.Receive.SenderClientId; // get client ID
-        if (!_ServerHasSeed) // if the server doesn't yet have the seed then deny the clients request
-        {
-            DenySeedRequestRpc(RpcTarget.Single(clientID, RpcTargetUse.Temp)); 
-            return;
-        }
-        else // otherwise provide the seed
-            SendSeedRpc(_Seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
-    }
-
-    [Rpc(SendTo.SpecifiedInParams)]
-    private void SendSeedRpc(int seed, RpcParams rpcParams = default)
-    {
-        this._Seed = seed;
-        ThreadManager();
-    }
-
-    [Rpc(SendTo.SpecifiedInParams)]
-    private void DenySeedRequestRpc(RpcParams rpcParams = default) // the server has denied our request. so lets wait and ask again
-    {
-        AskAgain();
     }
     #endregion
     #region //////////////////////////////////////////////// EDITOR FUNCTIONS ////////////////////////////////////////////////

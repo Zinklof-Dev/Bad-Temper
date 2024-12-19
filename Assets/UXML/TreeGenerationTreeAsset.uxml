@@ -21,6 +21,8 @@
         <editor:PropertyField binding-path="_AutoComputeEditor" label="Auto Compute" style="align-items: stretch; align-self: auto; min-width: auto;" />
         <editor:PropertyField binding-path="_AutoDrawTexEditor" enabled="true" label="Auto Draw Texture" style="flex-direction: column; align-content: flex-start;" />
         <editor:PropertyField binding-path="_DrawGizmos" enabled="true" label="Draw Gizmos" style="flex-direction: column; align-content: flex-start;" />
+        <editor:PropertyField binding-path="_DrawTreeHeightGizmos" enabled="true" label="Draw Tree Height Gizmos" style="flex-direction: column; align-content: flex-start;" />
+        <editor:PropertyField binding-path="_DrawRockHeightGizmos" enabled="true" label="Draw Rock Height Gizmos" style="flex-direction: column; align-content: flex-start;" />
         <engine:Label text="Perlin" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
         <editor:PropertyField binding-path="_TreePerlinDisplay" enabled="true" label="Texture Setting" style="flex-direction: column; align-content: flex-start; margin-top: 0;" />
         <editor:PropertyField binding-path="_PerlinTexture" enabled="true" label="Perlin Texture" style="flex-direction: column; align-content: flex-start; margin-top: 0;" />
@@ -67,5 +69,10 @@
         <editor:PropertyField binding-path="_RockCutoffPercent" label="Rock Cutoff" />
         <engine:Label text="Campfire" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
         <editor:PropertyField binding-path="_CampfireExclusionRadius" label="Exclusion Radius" style="align-items: stretch; align-self: auto; min-width: auto;" />
+        <engine:Label text="Height" style="margin-top: 8px; color: rgb(255, 255, 255); font-size: 22px; -unity-font-style: bold; -unity-text-outline-color: rgb(0, 255, 255); -unity-text-outline-width: 0.25px;" />
+        <editor:PropertyField binding-path="_TreeMinHeight" label="Min Tree Height" style="align-items: stretch; align-self: auto; min-width: auto;" />
+        <editor:PropertyField binding-path="_TreeMaxHeight" label="Max Tree Height" style="align-items: stretch; align-self: auto; min-width: auto;" />
+        <editor:PropertyField binding-path="_RockMinHeight" label="Min Rock Height" style="align-items: stretch; align-self: auto; min-width: auto;" />
+        <editor:PropertyField binding-path="_RockMaxHeight" label="Max Rock Height" style="align-items: stretch; align-self: auto; min-width: auto;" />
     </engine:VisualElement>
 </engine:UXML>
