@@ -6,7 +6,6 @@ using TriangleNet.Geometry;
 using TriangleNet.Meshing;
 using TriangleNet.Topology;
 using System.Threading.Tasks;
-using static UnityEditor.Progress;
 
 public class TerrainGeneration : MonoBehaviour
 {

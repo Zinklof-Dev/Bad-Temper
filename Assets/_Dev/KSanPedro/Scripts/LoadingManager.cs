@@ -11,12 +11,13 @@ public class LoadingManager : NetworkBehaviour
     [SerializeField] TerrainGeneration _TerrainGen;
 
     private bool _ServerHasSeed = false;
-    int _Seed = 0;
+    int _Seed;
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
+            _Seed = UnityEngine.Random.Range(0, 99999);
             _ServerHasSeed = true;
             StartWorldGeneration();
         }
