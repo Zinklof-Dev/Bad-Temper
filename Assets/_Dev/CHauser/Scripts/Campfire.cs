@@ -1,13 +1,25 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Threading.Tasks;
+using UnityEditor.ShaderGraph.Internal;
+using System.Net;
+using Unity.VisualScripting;
+using NUnit.Framework.Interfaces;
 
 public class Campfire : NetworkBehaviour
 {
+    public static Vector3 _campfirePosition;
+
+    [SerializeField] private Vector2[] positions;
+    private static Vector2[] _positions;
+    private static GameObject _gameObject;
+
+
     // Refrences to Game Objects and variables that are used client side
     // Can be effected by Network Variables, but aren't synced across the network
 
     [Header("Client Side Refrences")]
-    [SerializeField] private GameObject campfirePrefab;
+    //[SerializeField] private GameObject campfirePrefab;
     [SerializeField] private GameObject healthBar;
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private Server server;
@@ -33,6 +45,9 @@ public class Campfire : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        _positions = positions;
+        _gameObject = gameObject;
+
         // Server Only- first write to the synced campfireHealth network variable
 
         if (IsServer)
@@ -41,7 +56,7 @@ public class Campfire : NetworkBehaviour
         // Does all of the client side spawning and assigning refrences to needed refrences
 
         healTimer = healTime;
-        Instantiate(campfirePrefab);
+        //Instantiate(campfirePrefab);
         healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
@@ -71,6 +86,8 @@ public class Campfire : NetworkBehaviour
         // Makes sure we aren't executing the code and getting a million error messages from Unity before the health bar gets refrenced when Network Spawn happens
         if (healthBar == null)
             return;
+
+        _campfirePosition = transform.position;
 
         HealthBarLookAtCamera();
     }
@@ -117,5 +134,51 @@ public class Campfire : NetworkBehaviour
     private void DamageCampfire(float damage)
     {
         campfireHealth.Value -= damage;
+    }
+
+    public static async Task Initialize()
+    {
+        RaycastHit hit;
+        int i = 0;
+        int fails = 0;
+
+        while (i < _positions.Length)
+        {
+
+            if (Physics.Raycast(new Vector3(_positions[i].x, 9999, _positions[i].y), Vector3.down, out hit))
+            {
+                if (hit.point.y <= 0)
+                {
+                    i++;
+                    continue;
+                }
+
+                //_gameObject.transform.position = hit.point;
+                _campfirePosition = hit.point;
+                return;
+            }
+        }
+
+        while (fails < 30)
+        {
+            if (Physics.Raycast(new Vector3(Random.Range(0, 1000), 9999, Random.Range(0, 1000)), Vector3.down, out hit))
+            {
+                if (hit.point.y <= 0)
+                {
+                    fails++;
+                    continue;
+                }
+
+                //_gameObject.transform.position = hit.point;
+                _campfirePosition = hit.point;
+                return;
+            }
+        }
+
+        Debug.Log("Critical Campfire Failure");
+    }
+    public async static Task SpawnCampfire(Vector3 position)
+    {
+        _gameObject.transform.position = position;
     }
 }
