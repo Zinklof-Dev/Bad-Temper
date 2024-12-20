@@ -2,19 +2,33 @@ using System;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
+using TMP;
 
 public class LoadingManager : NetworkBehaviour
 {
-    [SerializeField] string _LoadingString;
-
+    [Header("UI References")]
+    [SerializeField] Canvas _LoadingCanvas;
+    [SerializeField] TextMeshPro _LoadingText;
+    [SerializeFIeld] Slider _LoadingSlider;
+    [Header("Script References")]
     [SerializeField] TreeGeneration _TreeGen;
     [SerializeField] TerrainGeneration _TerrainGen;
+
+    private float currentBarValue;
+    private float wantedBarValue;
+    private int totalSteps;
+    private int stepsComplete;
+
+    private float timeElapsed;
+    private float minTimeElapsed;
 
     private bool _ServerHasSeed = false;
     int _Seed;
 
     public override void OnNetworkSpawn()
     {
+        
+    
         if (IsServer)
         {
             _Seed = UnityEngine.Random.Range(0, 99999);
@@ -29,16 +43,27 @@ public class LoadingManager : NetworkBehaviour
         base.OnNetworkSpawn();
     }
 
+    private void PreLoadChecklist()
+    {
+        minTimeElapsed = UnityEngine.Randim.Range(28,32);
+        timeElapsed = 0;
+    }
+
+    public void FinishStep(string nextStepText)
+    {
+        stepsComplete++;
+        _LoadingText.Text = text;
+    }
+
+        private async void EvalateBar()
+    {
+        currentBarValue += (wantedBarValue - currentBarValue) * 0.1f; //get 10% closer to the wanted value every evaluation;
+    }
+
     private async void StartWorldGeneration()
     {
         await _TerrainGen.Initialize(_Seed);
         await _TreeGen.Initialize(_Seed);
-    }
-
-    public void UpdateString(string text)
-    {
-        _LoadingString = text;
-        //code to update GUI
     }
 
     private async void AskAgain()
