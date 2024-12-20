@@ -7,9 +7,10 @@ using TMP;
 public class LoadingManager : NetworkBehaviour
 {
     [Header("UI References")]
-    [SerializeField] Canvas _LoadingCanvas;
-    [SerializeField] TextMeshPro _LoadingText;
-    [SerializeFIeld] Slider _LoadingSlider;
+    [SerializeField] GameObject _LoadingCanvas;
+    [SerializeField] TextMeshProUGUI _LoadingText;
+    [SerializeField] TextMeshProUGUI _TipText;
+    [SerializeField] Slider _LoadingSlider;
     [Header("Script References")]
     [SerializeField] TreeGeneration _TreeGen;
     [SerializeField] TerrainGeneration _TerrainGen;
@@ -23,7 +24,13 @@ public class LoadingManager : NetworkBehaviour
     private float minTimeElapsed;
 
     private bool _ServerHasSeed = false;
-    int _Seed;
+    private int _Seed;
+
+    private string[] loadingTips = {
+    "This is a loading tip!",
+    "Need a Dispenser here!",
+    ""
+    }
 
     public override void OnNetworkSpawn()
     {
@@ -45,19 +52,46 @@ public class LoadingManager : NetworkBehaviour
 
     private void PreLoadChecklist()
     {
-        minTimeElapsed = UnityEngine.Randim.Range(28,32);
+        minTimeElapsed = UnityEngine.Random.Range(28,32);
         timeElapsed = 0;
     }
 
     public void FinishStep(string nextStepText)
     {
         stepsComplete++;
+        wantedBarValue = stepsComplete/totalSteps;
         _LoadingText.Text = text;
     }
 
-        private async void EvalateBar()
+    private void EvalateBar()
     {
-        currentBarValue += (wantedBarValue - currentBarValue) * 0.1f; //get 10% closer to the wanted value every evaluation;
+        currentBarValue += (wantedBarValue - currentBarValue) * (25 * Time.deltaTime); //get 10% closer to the wanted value every evaluation;
+        if (currentBarValue > 0.98f && wantedBarValue >= 1)
+        {
+            currentBarValue = 0.99f;
+        }
+
+        _LoadingSlider.Value = currentBarValue;
+    }
+
+    private void ChangeLoadingTip()
+    {
+        
+    ]
+
+    private void update()
+    {
+        timeElapsed += Time.deltaTime;
+        EvaluateBar();
+
+        if (wantedBarValue >= 1 && timeElapsed > minTimeElapsed)
+        {
+            _LoadingSlider = null;
+            _LoadingText = null;
+            Destroy(_LoadingCanvas);
+            //code to teleport player, player script needs updated
+            Destroy(this);
+        }
     }
 
     private async void StartWorldGeneration()
