@@ -2,7 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
-using TMP;
+using TMPro;
+using UnityEngine.UI;
 
 public class LoadingManager : NetworkBehaviour
 {
@@ -30,7 +31,7 @@ public class LoadingManager : NetworkBehaviour
     "This is a loading tip!",
     "Need a Dispenser here!",
     ""
-    }
+    };
 
     public override void OnNetworkSpawn()
     {
@@ -60,10 +61,10 @@ public class LoadingManager : NetworkBehaviour
     {
         stepsComplete++;
         wantedBarValue = stepsComplete/totalSteps;
-        _LoadingText.Text = text;
+        _LoadingText.text = nextStepText;
     }
 
-    private void EvalateBar()
+    private void EvaluateBar()
     {
         currentBarValue += (wantedBarValue - currentBarValue) * (25 * Time.deltaTime); //get 10% closer to the wanted value every evaluation;
         if (currentBarValue > 0.98f && wantedBarValue >= 1)
@@ -71,15 +72,15 @@ public class LoadingManager : NetworkBehaviour
             currentBarValue = 0.99f;
         }
 
-        _LoadingSlider.Value = currentBarValue;
+        _LoadingSlider.value = currentBarValue;
     }
 
     private void ChangeLoadingTip()
     {
-        
-    ]
 
-    private void update()
+    }
+
+    private void Update()
     {
         timeElapsed += Time.deltaTime;
         EvaluateBar();
