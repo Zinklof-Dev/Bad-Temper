@@ -1,10 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Threading.Tasks;
-using UnityEditor.ShaderGraph.Internal;
-using System.Net;
-using Unity.VisualScripting;
-using NUnit.Framework.Interfaces;
 
 public class Campfire : NetworkBehaviour
 {
@@ -138,6 +134,7 @@ public class Campfire : NetworkBehaviour
 
     public static async Task Initialize()
     {
+        System.Random random = new System.Random(69);
         RaycastHit hit;
         int i = 0;
         int fails = 0;
@@ -161,7 +158,7 @@ public class Campfire : NetworkBehaviour
 
         while (fails < 30)
         {
-            if (Physics.Raycast(new Vector3(Random.Range(0, 1000), 9999, Random.Range(0, 1000)), Vector3.down, out hit))
+            if (Physics.Raycast(new Vector3(random.Next(0, 1000), 9999, random.Next(0, 1000)), Vector3.down, out hit))
             {
                 if (hit.point.y <= 0)
                 {

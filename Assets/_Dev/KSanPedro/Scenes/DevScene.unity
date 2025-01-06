@@ -318,6 +318,7 @@ MonoBehaviour:
     type: 3}
   _RockPrefab: {fileID: 3246210935646571622, guid: ac25138f3d0e77e4088cef82b10db3ce,
     type: 3}
+  _Campfire: {fileID: 0}
   _TreeManager: {fileID: 0}
   _OverrideRandomSeed: 0
   _SetSeed: 69
@@ -1996,7 +1997,7 @@ GameObject:
   - component: {fileID: 3968275977892501270}
   m_Layer: 0
   m_Name: Campfire
-  m_TagString: Untagged
+  m_TagString: Campfire
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

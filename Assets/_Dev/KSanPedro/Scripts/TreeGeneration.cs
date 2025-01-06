@@ -84,6 +84,7 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private List<Mesh> _RockMeshList;
     [SerializeField] private GameObject _TreePrefab;
     [SerializeField] private GameObject _RockPrefab;
+    [SerializeField] private GameObject _Campfire;
     [SerializeField] private TreeManager _TreeManager;
     #endregion
 
@@ -115,9 +116,11 @@ public class TreeGeneration : NetworkBehaviour
     private void OnDrawGizmos() // Cameron | moved this to the top, keeping unity auto called functions at the top and your own functions below those helps orginization
     {
         if (!_DrawGizmos) return;
-
-        Gizmos.color = new Color(255, 0, 0, 0.5f);
-        Gizmos.DrawWireSphere(new Vector3(0, 0, 0), _CampfireExclusionRadius);
+        if (_Campfire != null)
+        {
+            Gizmos.color = new Color(255, 0, 0, 0.5f);
+            Gizmos.DrawWireSphere(_Campfire.transform.position, _CampfireExclusionRadius);
+        }
         Gizmos.color = new Color(0, 255, 0, 0.5f);
         Gizmos.DrawWireCube(new Vector3(0, 0, 0), new Vector3(_MapSize.x, 9999, _MapSize.y));
 
@@ -151,6 +154,7 @@ public class TreeGeneration : NetworkBehaviour
     #region //////////////////////////////////////////////// OUR FUNCTIONS ////////////////////////////////////////////////
     public async Task Initialize(int seed)
     {
+        _Campfire = GameObject.FindWithTag("Campfire");
         _Seed = seed;
 
         await GenTreesRuntime();
@@ -192,7 +196,7 @@ public class TreeGeneration : NetworkBehaviour
 
                 Vector2 pointToPerlinSpace = new Vector2(point.x * multiple, point.y * multiple);
 
-                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _TreeCutoffPercent && Vectors.SqrDist3f(new Vector3(0, 0, 0), hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
+                if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _TreeCutoffPercent && Vectors.SqrDist3f(_Campfire.transform.position, hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
                 {
                     //Debug.Log("Tree Placed " + hit.point);
                     int randomRotation = randomRotationValue.Next(0, 360);
@@ -233,7 +237,7 @@ public class TreeGeneration : NetworkBehaviour
                     float x = clusterPoint.x - (5 / 2);
                     float y = clusterPoint.y - (5 / 2);
 
-                    if (Physics.Raycast(new Vector3(x + worldX, 9000, y + worldY), Vector3.down, out hit, 9999) && Vectors.SqrDist3f(new Vector3(0,0,0), new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY)) > Numbers.Sqr(_CampfireExclusionRadius) && randomExclusion.Next(0, 6) != 0)
+                    if (Physics.Raycast(new Vector3(x + worldX, 9000, y + worldY), Vector3.down, out hit, 9999) && Vectors.SqrDist3f(_Campfire.transform.position, new Vector3(hit.point.x + worldX, hit.point.y, hit.point.z + worldY)) > Numbers.Sqr(_CampfireExclusionRadius) && randomExclusion.Next(0, 6) != 0)
                     {
                         if (hit.point.y > _RockMaxHeight)
                         {

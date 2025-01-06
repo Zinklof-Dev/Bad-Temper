@@ -9,6 +9,7 @@ TagManager:
   - Server
   - PlayerScreen
   - Tree
+  - Campfire
   layers:
   - Default
   - TransparentFX
