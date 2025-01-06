@@ -33,7 +33,7 @@ namespace ZinklofDev.Console
             }
         }
     }
-
+    
     public class CommandBasic
     {
         private string commandId;

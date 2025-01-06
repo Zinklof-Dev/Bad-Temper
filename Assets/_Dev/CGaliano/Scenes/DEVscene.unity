@@ -621,7 +621,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 777e41b7e9814f244bc3939ba8248c22, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5910,8 +5910,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  campfirePrefab: {fileID: 3551531143735023704, guid: b82c5d01a2258e54da2f6e534c8b250f,
-    type: 3}
+  positions: []
   healthBar: {fileID: 0}
   playerCamera: {fileID: 0}
   server: {fileID: 0}

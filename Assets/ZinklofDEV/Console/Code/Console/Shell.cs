@@ -152,6 +152,10 @@ namespace ZinklofDev.Console
                         (commandList[i] as LegacyCommand<string>).Invoke(alteredInput[1]);
                         return;
                     }
+                    else if (commandList[i] as LegacyCommand<string, string> != null)
+                    {
+                        (commandList[i] as LegacyCommand<string, string>).Invoke(alteredInput[1], alteredInput[2]); 
+                    }
                     else
                     {
                         Log.LogError(alteredInput[0] += " is not a properly registered command");
