@@ -98,11 +98,11 @@ public class LoadingManager : NetworkBehaviour
     private async void StartWorldGeneration()
     {
         await _TerrainGen.Initialize(_Seed);
-        if (IsServer)
-        {
-            await Campfire.Initialize();
-        }
-        await Campfire.SpawnCampfire(Campfire._campfirePosition);
+
+        if(IsServer)
+            await Campfire.Initialize(_Seed);
+
+        await Campfire.PlaceCampfire();
         await _TreeGen.Initialize(_Seed);
     }
 

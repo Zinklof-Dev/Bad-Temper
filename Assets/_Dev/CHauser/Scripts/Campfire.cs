@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Threading.Tasks;
+using TMPro;
 
 public class Campfire : NetworkBehaviour
 {
@@ -98,7 +99,7 @@ public class Campfire : NetworkBehaviour
             if (healTimer <= 0)
             {
                 campfireHealth.Value += healAmount;
-                Debug.Log(OwnerClientId + "; " + campfireHealth.Value);
+                //Debug.Log(OwnerClientId + "; " + campfireHealth.Value);
                 healTimer = healTime;
             }
             else
@@ -132,9 +133,9 @@ public class Campfire : NetworkBehaviour
         campfireHealth.Value -= damage;
     }
 
-    public static async Task Initialize()
+    public static async Task Initialize(int seed)
     {
-        System.Random random = new System.Random(69);
+        System.Random random = new System.Random(seed * 69 / 420 + 69);
         RaycastHit hit;
         int i = 0;
         int fails = 0;
@@ -174,8 +175,9 @@ public class Campfire : NetworkBehaviour
 
         Debug.Log("Critical Campfire Failure");
     }
-    public async static Task SpawnCampfire(Vector3 position)
+
+    public static async Task PlaceCampfire()
     {
-        _gameObject.transform.position = position;
+        _gameObject.transform.position = _campfirePosition;
     }
 }
