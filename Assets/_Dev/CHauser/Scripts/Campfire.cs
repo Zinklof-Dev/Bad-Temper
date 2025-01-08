@@ -137,11 +137,10 @@ public class Campfire : NetworkBehaviour
         Vector3 v0 = mesh.vertices[vertex0Index];
         Vector3 v1 = mesh.vertices[vertex1Index];
         Vector3 v2 = mesh.vertices[vertex2Index];
+        
+        (Debug.Log("Vertex Positions: " + v0 + v1 + v2);
 
-        Vector3 edge1 = v1 - v0;
-        Vector3 edge2 = v2 - v0;
-
-        return Vector3.Cross(edge1, edge2);
+        return Vector3.Cross(v1 - v0, v2 - v0);
     }
 
     public static async Task Initialize(int seed, GameObject loadingManagerObject)
