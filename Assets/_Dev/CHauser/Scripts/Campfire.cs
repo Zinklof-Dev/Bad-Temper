@@ -1,12 +1,9 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Threading.Tasks;
-using TMPro;
 
 public class Campfire : NetworkBehaviour
 {
-    public static Vector3 _campfirePosition;
-
     [SerializeField] private Vector2[] positions;
     private static Vector2[] _positions;
     private static GameObject _gameObject;
@@ -84,8 +81,6 @@ public class Campfire : NetworkBehaviour
         if (healthBar == null)
             return;
 
-        _campfirePosition = transform.position;
-
         HealthBarLookAtCamera();
     }
 
@@ -133,9 +128,33 @@ public class Campfire : NetworkBehaviour
         campfireHealth.Value -= damage;
     }
 
-    public static async Task Initialize(int seed)
+    private static async Task<Vector3> GetTriangleNormal(int index, Mesh mesh)
+    {
+        int vertex0Index = mesh.triangles[index * 3]; // First vertex index
+        int vertex1Index = mesh.triangles[index * 3 + 1]; // Second vertex index
+        int vertex2Index = mesh.triangles[index * 3 + 2]; // Third vertex index
+
+        Vector3 v0 = mesh.vertices[vertex0Index];
+        Vector3 v1 = mesh.vertices[vertex1Index];
+        Vector3 v2 = mesh.vertices[vertex2Index];
+
+        Vector3 edge1 = v1 - v0;
+        Vector3 edge2 = v2 - v0;
+
+        return Vector3.Cross(edge1, edge2);
+    }
+
+    public static async Task Initialize(int seed, GameObject loadingManagerObject)
     {
         System.Random random = new System.Random(seed * 69 / 420 + 69);
+
+        MeshFilter terrainMeshFilter = loadingManagerObject.GetComponent<MeshFilter>();
+        UnityEngine.Mesh mesh = terrainMeshFilter.sharedMesh;
+
+        Vector3[] vertices = mesh.vertices;
+        int[] triangles = mesh.triangles;
+
+
         RaycastHit hit;
         int i = 0;
         int fails = 0;
@@ -145,14 +164,25 @@ public class Campfire : NetworkBehaviour
 
             if (Physics.Raycast(new Vector3(_positions[i].x, 9999, _positions[i].y), Vector3.down, out hit))
             {
+                //mesh = hit.transform.gameObject.GetComponent<Mesh>();
+
                 if (hit.point.y <= 0)
                 {
                     i++;
                     continue;
                 }
 
-                //_gameObject.transform.position = hit.point;
-                _campfirePosition = hit.point;
+                Vector3 triangleNormal = await GetTriangleNormal(hit.triangleIndex, mesh);
+                Debug.Log("Triangle Normal: " + triangleNormal);
+
+                if(Mathf.Abs(triangleNormal.x) > 0.5f || Mathf.Abs(triangleNormal.x) > 0.5 || Mathf.Abs(triangleNormal.x) > 0.5)
+                {
+                    i++;
+                    Debug.Log("Failed because of incline");
+                    continue;
+                }
+
+                _gameObject.transform.position = hit.point;
                 return;
             }
         }
@@ -167,17 +197,21 @@ public class Campfire : NetworkBehaviour
                     continue;
                 }
 
-                //_gameObject.transform.position = hit.point;
-                _campfirePosition = hit.point;
+                Vector3 triangleNormal = await GetTriangleNormal(hit.triangleIndex, mesh);
+                Debug.Log("Triangle Normal: " + triangleNormal);
+
+                if (Mathf.Abs(triangleNormal.x) > 0.5f || Mathf.Abs(triangleNormal.x) > 0.5 || Mathf.Abs(triangleNormal.x) > 0.5)
+                {
+                    i++;
+                    Debug.Log("Failed because of incline");
+                    continue;
+                }
+
+                _gameObject.transform.position = hit.point;
                 return;
             }
         }
 
         Debug.Log("Critical Campfire Failure");
-    }
-
-    public static async Task PlaceCampfire()
-    {
-        _gameObject.transform.position = _campfirePosition;
     }
 }

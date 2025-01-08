@@ -100,9 +100,8 @@ public class LoadingManager : NetworkBehaviour
         await _TerrainGen.Initialize(_Seed);
 
         if(IsServer)
-            await Campfire.Initialize(_Seed);
+            await Campfire.Initialize(_Seed, gameObject);
 
-        await Campfire.PlaceCampfire();
         await _TreeGen.Initialize(_Seed);
     }
 
