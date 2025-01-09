@@ -1,12 +1,14 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Threading.Tasks;
+using ZinklofDev.ConsoleV2;
 
 public class Campfire : NetworkBehaviour
 {
     [SerializeField] private Vector2[] positions;
     private static Vector2[] _positions;
     private static GameObject _gameObject;
+    public static Campfire campfire;
 
 
     // Refrences to Game Objects and variables that are used client side
@@ -39,6 +41,7 @@ public class Campfire : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        campfire = this;
         _positions = positions;
         _gameObject = gameObject;
 
@@ -130,17 +133,15 @@ public class Campfire : NetworkBehaviour
 
     private static async Task<Vector3> GetTriangleNormal(int index, Mesh mesh)
     {
-        int vertex0Index = mesh.triangles[index * 3]; // First vertex index
-        int vertex1Index = mesh.triangles[index * 3 + 1]; // Second vertex index
-        int vertex2Index = mesh.triangles[index * 3 + 2]; // Third vertex index
+        Vector3 v0 = mesh.vertices[mesh.triangles[index * 3]];
+        Vector3 v1 = mesh.vertices[mesh.triangles[index * 3 + 1]];
+        Vector3 v2 = mesh.vertices[mesh.triangles[index * 3 + 2]];
+        Vector3 crossedVectors = Vector3.Cross(v1 - v0, v2 - v0);
+        Vector3 normal = crossedVectors / crossedVectors.magnitude;
 
-        Vector3 v0 = mesh.vertices[vertex0Index];
-        Vector3 v1 = mesh.vertices[vertex1Index];
-        Vector3 v2 = mesh.vertices[vertex2Index];
-        
-        Debug.Log("Vertex Positions: " + v0 + v1 + v2);
+        Debug.Log("Vertex Positions: " + v0 + v1 + v2 + "\nCrossed Vector Normal Before Normalization: " + crossedVectors + "\nNormal Vector After Normalization: " + normal);
 
-        return Vector3.Cross(v1 - v0, v2 - v0);
+        return normal; //Vector3.Cross(v1 - v0, v2 - v0);
     }
 
     public static async Task Initialize(int seed, GameObject loadingManagerObject)
@@ -212,5 +213,18 @@ public class Campfire : NetworkBehaviour
         }
 
         Debug.Log("Critical Campfire Failure");
+    }
+
+    [Command("Changes the health of the campfire")]
+   public static void ChangeHealth(float health)
+    {
+        if(!campfire.IsServer)
+        {
+            Console.Log("Only Server Can Execute This Command!", "ChangeHealth");
+            return;
+        }
+
+        campfire.campfireHealth.Value = health;
+        Console.Log("New Health: " + campfire.campfireHealth.Value, "ChangeHealth");
     }
 }
