@@ -138,7 +138,7 @@ public class Campfire : NetworkBehaviour
         Vector3 v1 = mesh.vertices[vertex1Index];
         Vector3 v2 = mesh.vertices[vertex2Index];
         
-        (Debug.Log("Vertex Positions: " + v0 + v1 + v2);
+        Debug.Log("Vertex Positions: " + v0 + v1 + v2);
 
         return Vector3.Cross(v1 - v0, v2 - v0);
     }
