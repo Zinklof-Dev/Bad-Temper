@@ -3,6 +3,8 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 using Unity.Collections;
+using ZinklofDev.ConsoleV2;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 
 public class Player : NetworkBehaviour
 {
@@ -34,6 +36,8 @@ public class Player : NetworkBehaviour
     private float lastJump;
     [SerializeField] private float lastSpeed;
 
+    private static Player playerClass = null;
+
     public override void OnNetworkSpawn()
     {
         //subscribe to the event for the value of the username getting changed for this GameObject.
@@ -56,6 +60,9 @@ public class Player : NetworkBehaviour
 
             //set the current username value to the current username value in the clientbackend class, likley set elsewhere like the main menu.
             networkUsername.Value = ClientBackend.playerUsername;
+
+            // Save reference to this playerclass, and playerobject, for command use later
+            playerClass = this;
         }
         //now let unity do its usual stuff
         base.OnNetworkSpawn();
@@ -118,7 +125,7 @@ public class Player : NetworkBehaviour
         //iirc this bool is true when a raycast sent down from the player hits something, not the guy who made the default unity character controller though
         if (characterController.isGrounded)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && lastJump > 0.25f)
+            if (Input.GetKeyDown(KeyCode.Space) && lastJump > 0.25f && !ZinklofDev.ConsoleV2.Console.isOpen)
             {
                 //Debug.Log("playerJumping");
                 y = jumpForce;
@@ -142,8 +149,11 @@ public class Player : NetworkBehaviour
         //tranform.forward and transform.right to work kindly with regular floats or a Vector2
         Vector3 xz = Vector3.zero;
 
-        xz += Input.GetAxis("Vertical") * transform.forward;
-        xz += Input.GetAxis("Horizontal") * transform.right;
+        if (!ZinklofDev.ConsoleV2.Console.isOpen)
+        {
+            xz += Input.GetAxis("Vertical") * transform.forward;
+            xz += Input.GetAxis("Horizontal") * transform.right;
+        }
 
         xz = xz.normalized;
 
@@ -235,26 +245,42 @@ public class Player : NetworkBehaviour
         }
     }
 
+    [Command("Teleports the player to the provided position", true)]
+    public static void Teleport(float x, float y, float z)
+    {
+        if (playerClass = null)
+        {
+            ZinklofDev.ConsoleV2.Console.Log("Player Commands cannot be run when no player exists (IE you're in the game scene)", "Teleport");
+        }
+        else if (!playerClass.IsServer)
+        {
+            ZinklofDev.ConsoleV2.Console.Log("You lack sufficient permission to run this command (IE server only command)", "Teleport");
+        }
+        else
+        {
+            playerClass.gameObject.transform.position = new Vector3(x, y, z);
+        }
+    }
+
+    // this override isn't a command as the new command system cannot construct Vector3's, at least yet, this is primarily for the times we actually need to teleport the player
+    // It also lacks the server check as it doesn't need to ensure its the server (unless exploited which at that point they can likely change the variable IsServer anyways) as it can only be called by code rather than by command or user input.
+    public static void Teleport(Vector3 pos)
+    {
+        if (playerClass = null)
+        {
+            Debug.LogError("Attempted to TP player that does not exist");
+        }
+        else
+        {
+            playerClass.gameObject.transform.position = pos;
+        }
+    }
+
     private void Update()
     {
         if (!IsOwner) return;
 
         lastJump += Time.deltaTime;
-        
-        //locks or unlocks the player cursor, movement, and ability to look if the tilde key is pressed, this allows the player to type, and use thier mouse when they open the console without the player moving everywhere
-        if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) 
-        {
-            if (playerLive)
-            {
-                playerLive = false;
-                Cursor.lockState = CursorLockMode.None;
-            }
-            else
-            {
-                playerLive = true;
-                Cursor.lockState = CursorLockMode.Locked;
-            }
-        }
 
         //request all our movement, and look code is run, wrapped in a try catch statement for not really any real reason, this isn't calling any networked code and is pretty simple stuff so it wont fail catastrophically
         //but... you never know i guess, so past me decided a try catch was worth it.
