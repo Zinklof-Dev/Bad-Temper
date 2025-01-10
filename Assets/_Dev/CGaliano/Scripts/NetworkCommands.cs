@@ -5,6 +5,7 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using ZinklofDev.Console;
+using ZinklofDev.ConsoleV2;
 
 public class NetworkCommands : MonoBehaviour
 {
@@ -30,12 +31,14 @@ public class NetworkCommands : MonoBehaviour
         Connect(t1);
     });
 
+    [Command("Starts hosting", false, "Host")]
     public static void host()
     {
         NetworkManager.Singleton.StartHost();
         Debug.Log(IPV4toHex.IPV4ToHexadecimal(Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToString()));
     }
 
+    [Command("Connects to the specified join ID", false, "Connect")]
     public static void Connect(string hostID)
     {
         try
