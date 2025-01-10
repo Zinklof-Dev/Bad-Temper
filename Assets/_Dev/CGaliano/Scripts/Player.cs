@@ -286,15 +286,15 @@ public class Player : NetworkBehaviour
         //but... you never know i guess, so past me decided a try catch was worth it.
         try
         {
-            if (playerLive)
+            if (!ZinklofDev.ConsoleV2.Console.isOpen)
             {
                 XRotation();
                 YRotation();
-
-                CalculateMovement();
-
-                //ApplyFallDamage();
             }
+
+            CalculateMovement();
+
+            //ApplyFallDamage();
         }
         catch (Exception e)
         {
