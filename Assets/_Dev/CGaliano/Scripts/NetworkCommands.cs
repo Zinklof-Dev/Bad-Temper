@@ -16,9 +16,9 @@ public class NetworkCommands : MonoBehaviour
 
     private void Awake()
     {
-        Shell.RegisterCommand(HOST);
-        Shell.RegisterCommand(CONNECT);
-        Shell.RegisterCommand(ClientBackend.CHANGEUSERNAME);
+        ZinklofDev.Console.Shell.RegisterCommand(HOST);
+        ZinklofDev.Console.Shell.RegisterCommand(CONNECT);
+        ZinklofDev.Console.Shell.RegisterCommand(ClientBackend.CHANGEUSERNAME);
     }
 
     LegacyCommand HOST =  new LegacyCommand("0001x8800000000", "host", "starts server", false, ()=>
