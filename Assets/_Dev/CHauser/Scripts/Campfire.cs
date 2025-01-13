@@ -131,17 +131,26 @@ public class Campfire : NetworkBehaviour
         campfireHealth.Value -= damage;
     }
 
-    private static async Task<Vector3> GetTriangleNormal(int index, Mesh mesh)
+    private static async Task<Quaternion> GetTriangleQuaternionRotation(int index, Mesh mesh)
     {
         Vector3 v0 = mesh.vertices[mesh.triangles[index * 3]];
         Vector3 v1 = mesh.vertices[mesh.triangles[index * 3 + 1]];
         Vector3 v2 = mesh.vertices[mesh.triangles[index * 3 + 2]];
-        Vector3 crossedVectors = Vector3.Cross(v1 - v0, v2 - v0);
-        Vector3 normal = crossedVectors / crossedVectors.magnitude;
+        Vector3 normal = Vector3.Cross(v1 - v0, v2 - v0).normalized;
+        Quaternion quaternionRotation = Quaternion.FromToRotation(normal, Vector3.up);
+        Debug.Log("Triangle Positions: " + v0 + v1 + v2+ "\nRotation of triangle: " +  quaternionRotation.eulerAngles);
 
-        Debug.Log("Vertex Positions: " + v0 + v1 + v2 + "\nCrossed Vector Normal Before Normalization: " + crossedVectors + "\nNormal Vector After Normalization: " + normal);
 
-        return normal; //Vector3.Cross(v1 - v0, v2 - v0);
+        return quaternionRotation;
+    }
+
+    private static async Task<Vector3> GetTrianglePosition(int index, Mesh mesh)
+    {
+        Vector3 v0 = mesh.vertices[mesh.triangles[index * 3]];
+        Vector3 v1 = mesh.vertices[mesh.triangles[index * 3 + 1]];
+        Vector3 v2 = mesh.vertices[mesh.triangles[index * 3 + 2]];
+
+        return new Vector3((v0.x + v1.x + v2.x) / 3, (v0.y + v1.y + v2.y) / 3, (v0.z + v1.z + v2.z) / 3);
     }
 
     public static async Task Initialize(int seed, GameObject loadingManagerObject)
@@ -164,25 +173,27 @@ public class Campfire : NetworkBehaviour
 
             if (Physics.Raycast(new Vector3(_positions[i].x, 9999, _positions[i].y), Vector3.down, out hit))
             {
-                //mesh = hit.transform.gameObject.GetComponent<Mesh>();
+                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, mesh);
 
-                if (hit.point.y <= 0)
+                if (trianglePosition.y <= 0)
                 {
                     i++;
                     continue;
                 }
 
-                Vector3 triangleNormal = await GetTriangleNormal(hit.triangleIndex, mesh);
-                Debug.Log("Triangle Normal: " + triangleNormal);
+                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, mesh);
+                Vector3 triangleEulerRotation = triangleQuaternionRotation.eulerAngles;
 
-                if(Mathf.Abs(triangleNormal.x) > 0.5f || Mathf.Abs(triangleNormal.x) > 0.5 || Mathf.Abs(triangleNormal.x) > 0.5)
+                if((triangleEulerRotation.x > 20 && triangleEulerRotation.x < 340) || (triangleEulerRotation.z > 20 && triangleEulerRotation.z < 340))
                 {
                     i++;
                     Debug.Log("Failed because of incline");
                     continue;
                 }
 
-                _gameObject.transform.position = hit.point;
+                _gameObject.transform.position = trianglePosition;
+                _gameObject.transform.rotation = Quaternion.Euler(-triangleEulerRotation.x, 0, -triangleEulerRotation.z);
+
                 return;
             }
         }
@@ -191,23 +202,27 @@ public class Campfire : NetworkBehaviour
         {
             if (Physics.Raycast(new Vector3(random.Next(0, 1000), 9999, random.Next(0, 1000)), Vector3.down, out hit))
             {
-                if (hit.point.y <= 0)
+                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, mesh);
+
+                if (trianglePosition.y <= 0)
                 {
-                    fails++;
+                    i++;
                     continue;
                 }
 
-                Vector3 triangleNormal = await GetTriangleNormal(hit.triangleIndex, mesh);
-                Debug.Log("Triangle Normal: " + triangleNormal);
+                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, mesh);
+                Vector3 triangleEulerRotation = triangleQuaternionRotation.eulerAngles;
 
-                if (Mathf.Abs(triangleNormal.x) > 0.5f || Mathf.Abs(triangleNormal.x) > 0.5 || Mathf.Abs(triangleNormal.x) > 0.5)
+                if ((triangleEulerRotation.x > 20 && triangleEulerRotation.x < 340) || (triangleEulerRotation.z > 20 && triangleEulerRotation.z < 340))
                 {
                     i++;
                     Debug.Log("Failed because of incline");
                     continue;
                 }
 
-                _gameObject.transform.position = hit.point;
+                _gameObject.transform.position = trianglePosition;
+                _gameObject.transform.rotation = Quaternion.Euler(-triangleEulerRotation.x, 0, -triangleEulerRotation.z);
+
                 return;
             }
         }
@@ -216,7 +231,7 @@ public class Campfire : NetworkBehaviour
     }
 
     [Command("Changes the health of the campfire")]
-   public static void ChangeHealth(float health)
+    public static void ChangeHealth(float health)
     {
         if(!campfire.IsServer)
         {
