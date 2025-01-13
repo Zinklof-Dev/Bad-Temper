@@ -4,7 +4,6 @@ using Unity.Netcode;
 using UnityEngine;
 using Unity.Collections;
 using ZinklofDev.ConsoleV2;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 
 public class Player : NetworkBehaviour
 {
@@ -37,6 +36,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private float lastSpeed;
 
     private static Player playerClass = null;
+    [SerializeField] private Player playerClassNonStatic = null;
 
     public override void OnNetworkSpawn()
     {
@@ -54,7 +54,6 @@ public class Player : NetworkBehaviour
             playerCamera.transform.position = gameObject.transform.position + new Vector3(0, 0.9f, 0);
             playerCamera.transform.parent = gameObject.transform;
 
-
             //subscribe to the client backend event for changing your username.
             ClientBackend.OnClientEndUsernameChanged += OncClientUsernameChange;
 
@@ -63,6 +62,7 @@ public class Player : NetworkBehaviour
 
             // Save reference to this playerclass, and playerobject, for command use later
             playerClass = this;
+            playerClassNonStatic = playerClass;
         }
         //now let unity do its usual stuff
         base.OnNetworkSpawn();
@@ -248,17 +248,20 @@ public class Player : NetworkBehaviour
     [Command("Teleports the player to the provided position", true)]
     public static void Teleport(float x, float y, float z)
     {
-        if (playerClass = null)
+        if (playerClass == null)
         {
             ZinklofDev.ConsoleV2.Console.Log("Player Commands cannot be run when no player exists (IE you're in the game scene)", "Teleport");
+            return;
         }
         else if (!playerClass.IsServer)
         {
             ZinklofDev.ConsoleV2.Console.Log("You lack sufficient permission to run this command (IE server only command)", "Teleport");
+            return;
         }
         else
         {
-            playerClass.gameObject.transform.position = new Vector3(x, y, z);
+            playerClass.characterController.transform.position = new Vector3(x, y, z);
+            ZinklofDev.ConsoleV2.Console.Log("New player position is: " + playerClass.gameObject.transform.position, "Teleport");
         }
     }
 
@@ -272,7 +275,7 @@ public class Player : NetworkBehaviour
         }
         else
         {
-            playerClass.gameObject.transform.position = pos;
+            playerClass.characterController.transform.position = pos;
         }
     }
 
