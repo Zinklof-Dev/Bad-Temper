@@ -15,6 +15,9 @@ public class LoadingManager : NetworkBehaviour
     [Header("Script References")]
     [SerializeField] TreeGeneration _TreeGen;
     [SerializeField] TerrainGeneration _TerrainGen;
+    [Header("Player Spawn Points")]
+    // To find circle of all points a distance from (0,0), do x^2 + y^2 = a^2
+    [SerializeField] private Vector3[] spawnPoints;
 
     private float currentBarValue;
     private float wantedBarValue;
@@ -25,6 +28,7 @@ public class LoadingManager : NetworkBehaviour
     private float minTimeElapsed;
 
     private bool _ServerHasSeed = false;
+    private bool _CampfirePlaced = false;
     private int _Seed;
 
     private string[] loadingTips = {
@@ -100,9 +104,13 @@ public class LoadingManager : NetworkBehaviour
         await _TerrainGen.Initialize(_Seed);
 
         if (IsServer)
+        {
             await Campfire.Initialize(_Seed, gameObject);
+            _CampfirePlaced = true;
+        }       
 
         await _TreeGen.Initialize(_Seed);
+        AskToTeleportRpc();
     }
 
     private async void AskAgain()
@@ -136,5 +144,41 @@ public class LoadingManager : NetworkBehaviour
     private void DenySeedRequestRpc(RpcParams rpcParams = default) // the server has denied our request. so lets wait and ask again
     {
         AskAgain();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void AskToTeleportRpc(RpcParams rpcParams = default)
+    {
+        ulong clientID = rpcParams.Receive.SenderClientId;
+        if(!_CampfirePlaced)
+        {
+            DenyTeleportationRpc(RpcTarget.Single(clientID, RpcTargetUse.Temp));
+            return;
+        }
+        else
+        {
+            Ray ray;
+            RaycastHit hit;
+            if (Physics.Raycast(new Vector3(Campfire._position.x += spawnPoints[clientID].x, 9999, Campfire._position.z += spawnPoints[clientID].z), Vector3.down, out hit))
+            {
+                TeleportPlayerRpc(hit.point, RpcTarget.Single(clientID, RpcTargetUse.Temp));
+            }
+        }
+    }
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void DenyTeleportationRpc(RpcParams rpcParams = default)
+    {
+        AskToTeleportAgain();
+    }
+    [Rpc(SendTo.SpecifiedInParams)] 
+    private void TeleportPlayerRpc(Vector3 position, RpcParams rpcParams = default)
+    {
+        Debug.Log("Player Position: " + position);
+        Player.Teleport(position);
+    }
+    private async void AskToTeleportAgain()
+    {
+        await Task.Delay(1000);
+        AskToTeleportRpc();
     }
 }

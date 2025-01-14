@@ -9,6 +9,7 @@ public class Campfire : NetworkBehaviour
     private static Vector2[] _positions;
     private static GameObject _gameObject;
     public static Campfire campfire;
+    public static Vector3 _position;
 
 
     // Refrences to Game Objects and variables that are used client side
@@ -80,6 +81,8 @@ public class Campfire : NetworkBehaviour
 
     private void Update()
     {
+        _position = transform.position;
+
         // Makes sure we aren't executing the code and getting a million error messages from Unity before the health bar gets refrenced when Network Spawn happens
         if (healthBar == null)
             return;
