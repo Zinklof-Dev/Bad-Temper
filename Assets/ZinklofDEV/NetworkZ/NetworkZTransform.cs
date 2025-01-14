@@ -1,4 +1,4 @@
-/* starting this commented out to avoid comp errors for others since i'm on web */
+/* starting this commented out to avoid comp errors for others since i'm on web
 using Unity.Netcode;
 using UnityEngine;
 
@@ -107,4 +107,4 @@ Namespace ZinklofDev.NetworkZ
         }
     }
 }
-
+ */
