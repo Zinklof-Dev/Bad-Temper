@@ -21,7 +21,7 @@ public class LoadingManager : NetworkBehaviour
 
     private float currentBarValue;
     private float wantedBarValue;
-    private int totalSteps;
+    private int totalSteps = 6;
     private int stepsComplete;
 
     private float timeElapsed;
@@ -39,8 +39,8 @@ public class LoadingManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        
-    
+        PreLoadChecklist();
+
         if (IsServer)
         {
             _Seed = UnityEngine.Random.Range(0, 99999);
@@ -59,6 +59,7 @@ public class LoadingManager : NetworkBehaviour
     {
         minTimeElapsed = UnityEngine.Random.Range(28,32);
         timeElapsed = 0;
+        _LoadingText.text = "Generating/Fetching Seed";
     }
 
     public void FinishStep(string nextStepText)
@@ -101,16 +102,21 @@ public class LoadingManager : NetworkBehaviour
 
     private async void StartWorldGeneration()
     {
+        FinishStep("Generating Terrain");
         await _TerrainGen.Initialize(_Seed);
+        FinishStep("Initializing Campfire");
 
         if (IsServer)
         {
             await Campfire.Initialize(_Seed, gameObject);
             _CampfirePlaced = true;
-        }       
+        }
+        FinishStep("Generating Trees/Rocks");
 
         await _TreeGen.Initialize(_Seed);
+        FinishStep("Teleporting Player Object");
         AskToTeleportRpc();
+        FinishStep("Awaiting Server...");
     }
 
     private async void AskAgain()
