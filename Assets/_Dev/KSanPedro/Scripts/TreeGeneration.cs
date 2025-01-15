@@ -86,6 +86,7 @@ public class TreeGeneration : NetworkBehaviour
     [SerializeField] private GameObject _RockPrefab;
     [SerializeField] private GameObject _Campfire;
     [SerializeField] private TreeManager _TreeManager;
+    [SerializeField] private NetworkTreeManager _NetworkTreeManager;
     #endregion
 
     #region Editor Vars
@@ -156,6 +157,7 @@ public class TreeGeneration : NetworkBehaviour
     {
         _Campfire = GameObject.FindWithTag("Campfire");
         _Seed = seed;
+        _NetworkTreeManager = FindFirstObjectByType<NetworkTreeManager>();
 
         await GenTreesRuntime();
         //Debug.Log("Trees Fin");
@@ -172,6 +174,7 @@ public class TreeGeneration : NetworkBehaviour
         PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(_TreeImageSize, _TreeImageSize, _Seed, _TreePerlinScale, _TreeOctaves, _TreePersistance, _TreeLacunarity, _TreeOffset);
         System.Random randomRotationValue = new System.Random(_Seed);
         System.Random randomModel = new System.Random(_Seed + 2);
+        int treeIndex = 0;
 
         //Debug.Log("Complex computations complete");
 
@@ -202,7 +205,10 @@ public class TreeGeneration : NetworkBehaviour
                     int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                    GameObject refrence = Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                    Tree tree = new Tree(refrence, treeIndex);
+                    _NetworkTreeManager.trees.Add(tree);
+                    treeIndex++;
                     //_TreeManager.AddTree(Matrix4x4.TRS(new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation, Vector3.one), 0);
                 }
             }

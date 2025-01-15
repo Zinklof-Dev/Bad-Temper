@@ -176,6 +176,11 @@ public class Campfire : NetworkBehaviour
 
             if (Physics.Raycast(new Vector3(_positions[i].x, 9999, _positions[i].y), Vector3.down, out hit))
             {
+                if(hit.point.y <= 0)
+                {
+                    continue;
+                }
+
                 Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, mesh);
 
                 if (trianglePosition.y <= 0)
