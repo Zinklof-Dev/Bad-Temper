@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
+using ZinklofDev.ConsoleV2;
 
+[System.Serializable]
 public struct Tree
 {
     public int health;
@@ -18,23 +19,44 @@ public struct Tree
 
 public class NetworkTreeManager : NetworkBehaviour
 {
+    public override void OnNetworkSpawn()
+    {
+
+
+        base.OnNetworkSpawn();
+    }
+
     public List<Tree> trees;
 
     [Rpc(SendTo.Server)]
-    public void AskToDeleteTreeRpc(int treeID)
+    public static void AskToRemoveTreeRpc(int treeID)
     {
-        DeleteTreeRpc(treeID);
+        NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
+
+        if (networkTreeManager.trees[treeID].treeObject == null)
+        {
+            Debug.Log("Tree already removed!");
+            return;
+        }
+        RemoveTreeRpc(treeID);
     }
 
     [Rpc(SendTo.Everyone)]
-    public void DeleteTreeRpc(int treeID)
+    public static void RemoveTreeRpc(int treeID)
     {
-        if (trees[treeID].index != treeID)
+        NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
+
+        if (networkTreeManager.trees[treeID].index != treeID)
         {
             Debug.Log("Something is definitly broken, the index stored by the Tree does not match it's index in the trees array");
             return;
         }
 
-        Destroy(trees[treeID].treeObject);
+        Destroy(networkTreeManager.trees[treeID].treeObject);
+    }
+
+    public static void RemoveTree(int treeID)
+    {
+        AskToRemoveTreeRpc(treeID);
     }
 }

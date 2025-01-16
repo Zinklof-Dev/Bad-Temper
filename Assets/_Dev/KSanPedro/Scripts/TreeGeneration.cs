@@ -206,7 +206,7 @@ public class TreeGeneration : NetworkBehaviour
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                     //Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
-                    GameObject tree = GameObject.Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation) as GameObject;
+                    GameObject tree = Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
                     _NetworkTreeManager.trees.Add(new Tree(tree, treeIndex));
                     treeIndex++;
                     //_TreeManager.AddTree(Matrix4x4.TRS(new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation, Vector3.one), 0);
