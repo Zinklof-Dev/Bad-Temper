@@ -22,7 +22,7 @@ public class NetworkTreeManager : NetworkBehaviour
     public List<Tree> trees;
 
     [Rpc(SendTo.Server)]
-    public static void AskToRemoveTreeRpc(int treeID)
+    public void AskToRemoveTreeRpc(int treeID)
     {
         NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
 
@@ -35,7 +35,7 @@ public class NetworkTreeManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public static void RemoveTreeRpc(int treeID)
+    public void RemoveTreeRpc(int treeID)
     {
         NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
 
@@ -51,6 +51,6 @@ public class NetworkTreeManager : NetworkBehaviour
     [Command("Command to remove a tree")]
     public static void RemoveTree(int treeID)
     {
-        AskToRemoveTreeRpc(treeID);
+        //AskToRemoveTreeRpc(treeID);
     }
 }
