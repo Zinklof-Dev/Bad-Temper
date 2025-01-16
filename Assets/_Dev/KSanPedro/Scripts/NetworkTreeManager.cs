@@ -19,13 +19,6 @@ public struct Tree
 
 public class NetworkTreeManager : NetworkBehaviour
 {
-    public override void OnNetworkSpawn()
-    {
-
-
-        base.OnNetworkSpawn();
-    }
-
     public List<Tree> trees;
 
     [Rpc(SendTo.Server)]
@@ -55,6 +48,7 @@ public class NetworkTreeManager : NetworkBehaviour
         Destroy(networkTreeManager.trees[treeID].treeObject);
     }
 
+    [Command("Command to remove a tree")]
     public static void RemoveTree(int treeID)
     {
         AskToRemoveTreeRpc(treeID);
