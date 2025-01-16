@@ -224,6 +224,7 @@ public class TreeGeneration : NetworkBehaviour
         // PerlinToTexture(perlinMap);
 
         float multiple = _RockImageSize / _MapSize.x;
+        int rockIndex = 0;
 
         foreach (Vector2 point in points)
         {
@@ -256,7 +257,9 @@ public class TreeGeneration : NetworkBehaviour
 
                         Vector3 eulerRandomRotation = new Vector3(0, randomRoation.Next(0, 360), 0);
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                        Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                        GameObject rock = Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                        _NetworkTreeManager.rocks.Add(new Rock(rock, rockIndex));
+                        rockIndex++;
                     }
                 }
             }
