@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
+using Unity.Mathematics;
 
 public class LoadingManager : NetworkBehaviour
 {
@@ -11,7 +11,7 @@ public class LoadingManager : NetworkBehaviour
     [SerializeField] GameObject _LoadingCanvas;
     [SerializeField] TextMeshProUGUI _LoadingText;
     [SerializeField] TextMeshProUGUI _TipText;
-    [SerializeField] Slider _LoadingSlider;
+    [SerializeField] RectTransform _LoadingSlider;
     [Header("Script References")]
     [SerializeField] TreeGeneration _TreeGen;
     [SerializeField] TerrainGeneration _TerrainGen;
@@ -19,13 +19,16 @@ public class LoadingManager : NetworkBehaviour
     // To find circle of all points a distance from (0,0), do x^2 + y^2 = a^2
     [SerializeField] private Vector3[] spawnPoints;
 
-    private float currentBarValue;
-    private float wantedBarValue;
-    private int totalSteps = 6;
+    [Header("DebugVars")]
+    [SerializeField] private float currentBarValue;
+    [SerializeField] private float wantedBarValue;
+    private int totalSteps = 5;
     private int stepsComplete;
 
-    private float timeElapsed;
-    private float minTimeElapsed;
+    [SerializeField] private float timeElapsed;
+    [SerializeField] private float minTimeElapsed;
+    private float nextSnapCheck;
+    private float nextHintChange;
 
     private bool _ServerHasSeed = false;
     private bool _CampfirePlaced = false;
@@ -95,37 +98,63 @@ public class LoadingManager : NetworkBehaviour
     {
         minTimeElapsed = UnityEngine.Random.Range(28,32);
         timeElapsed = 0;
+        nextHintChange = -1;
+        nextSnapCheck = -1;
         _LoadingText.text = "Generating/Fetching Seed";
     }
 
     public void FinishStep(string nextStepText)
     {
         stepsComplete++;
-        wantedBarValue = stepsComplete/totalSteps;
+        wantedBarValue = (float)stepsComplete/(float)totalSteps;
         _LoadingText.text = nextStepText;
     }
 
     private void EvaluateBar()
     {
-        currentBarValue += (wantedBarValue - currentBarValue) * (25 * Time.deltaTime); //get 10% closer to the wanted value every evaluation;
+        currentBarValue += (wantedBarValue - currentBarValue) * (1 * Time.deltaTime);
+
+        if (timeElapsed > nextSnapCheck) // every 2 sec have chance to snap to next point
+        {
+            nextSnapCheck = timeElapsed + 2;
+            int randomChance = UnityEngine.Random.Range(0, 101); // min exclusive, max exclusive, thus 0, 101 to get 0-100
+            if (randomChance == 50) // one in 100 chance
+            {
+                currentBarValue = wantedBarValue;
+            }
+        }
+
         if (currentBarValue > 0.98f && wantedBarValue >= 1)
         {
             currentBarValue = 0.99f;
         }
 
-        _LoadingSlider.value = currentBarValue;
+        _LoadingSlider.sizeDelta = new Vector2(currentBarValue * 1300, 32);
     }
 
     private void ChangeLoadingTip()
     {
+        if (timeElapsed > nextHintChange)
+        {
+            // assuming 180 wpm read speed (slow), thats 3 word per sec, average word in english is 4.7 chars long, so we will round up to 5, so for every 15 chars we give 3 sec, or for every 5 char we give 1 sec
+
+            int index = UnityEngine.Random.Range(0, loadingTips.Length);
+            string tip = loadingTips[index];
+
+            float length = (tip.Length / 5); // results in 1 for every 5 chars, thus 1 every average word length, resulting in 1 sec per word.
+
+            nextHintChange = timeElapsed + length;
+            _TipText.text = tip;
+        }
     }
 
     private void Update()
     {
         timeElapsed += Time.deltaTime;
         EvaluateBar();
+        ChangeLoadingTip();
 
-        if (wantedBarValue >= 1 && timeElapsed > minTimeElapsed)
+        if (wantedBarValue >= 0.99f && timeElapsed > minTimeElapsed)
         {
             _LoadingSlider = null;
             _LoadingText = null;
