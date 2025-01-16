@@ -69,7 +69,7 @@ public class LoadingManager : NetworkBehaviour
     "Confidence is key. Just act like you know what you're doing, and people will assume you do, and soon enough you will. Trial by fire!",
     "Don't let life's small setbacks make you feel like you've failed, just like a game, you have plenty of time to try again!",
     "What?",
-    "HuH?,
+    "HuH?",
     "I made most of these loading screen tips motivational, because I, Zinklof, suffer with depression. I know what it's like to hurt, to feel alone. I want to remind you that you're not alone, life gets better, keep truckin onward, you'll find the light at that end of the tunnel, and be a cowpoke with a whole lotta stories to tell. And do tell them, let others know they aren't alone, and allow the trauma of the past to flow out of you, thats the best way to heal... alongside time of course. Have a blessed day :D."
     };
 
