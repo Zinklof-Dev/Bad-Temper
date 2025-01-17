@@ -36,7 +36,14 @@ public class LoadingManager : NetworkBehaviour
 
     private string[] loadingTips = {
     "This is a loading tip!",
+    "Bottom Text",
+    "Release the Quacken!",
     "Need a Dispenser here!",
+    "Zink's SSN: 696969696969",
+    "LARRY!!!!!!!",
+    "I have Visions of creating a walking sim one day...",
+    "'Buppadapappadapubbaboopadubaba' -Zinklof 1/17/2025",
+    "I tremble to think of the comments people will see if this game is decompiled...",
     "Don't forget to breathe. You'd be shocked how much that helps... with anything really...",
     "Life lesson: Sometimes you're the hero, sometimes you're the NPC, you know which one you are, accept your fate, go make someones day.",
     "If you press every button at once, something magical might happen. Or you might just break your keyboard... same difference.",

@@ -62,7 +62,7 @@ public class NetworkTreeManager : NetworkBehaviour
     public static void RemoveTree(int treeID)
     {
         NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
-        networkTreeManager.RemoveTreeRpc(treeID);
+        networkTreeManager.AskToRemoveTreeRpc(treeID);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +97,6 @@ public class NetworkTreeManager : NetworkBehaviour
     public static void RemoveRock(int rockID)
     {
         NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
-        networkTreeManager.RemoveRockRpc(rockID);
+        networkTreeManager.AskToRemoveRockRpc(rockID);
     }
 }
