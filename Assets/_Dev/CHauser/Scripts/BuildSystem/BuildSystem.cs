@@ -3,7 +3,9 @@ using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
+using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
+using Unity.VisualScripting;
 
 public class BuildSystem : NetworkBehaviour
 {
@@ -30,9 +32,9 @@ public class BuildSystem : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Cole | All commands must be registered with the shell
-        Shell.RegisterCommand(IS_BUILDING);
-        Shell.RegisterCommand(BUILD_ID);
+        // Cole | All legacy commands must be registered with the shell
+        ZinklofDev.Console.Shell.RegisterCommand(IS_BUILDING);
+        ZinklofDev.Console.Shell.RegisterCommand(BUILD_ID);
         // Cole | Assigns the player camera refrence
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         // Cole | Allows for the function to execute what it needs to do because of the ovveride.
@@ -285,6 +287,21 @@ public class BuildSystem : NetworkBehaviour
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, rotation);
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
+
+    // V2 Commands
+
+    [Command("Activates or deactivates build system.")]
+    public static void Building(bool _isBuilding)
+    {
+        isBuilding = _isBuilding;
+    }
+
+    [Command("Changes the object you are placing in the scene.")]
+    public static void BuildID(int ID)
+    {
+        currentObjectID = ID;
+    }
+
 
     // Tests and (Legacy) Commands
 
