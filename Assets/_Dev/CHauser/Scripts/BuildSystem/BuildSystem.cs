@@ -5,7 +5,6 @@ using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
-using Unity.VisualScripting;
 
 public class BuildSystem : NetworkBehaviour
 {
@@ -76,12 +75,15 @@ public class BuildSystem : NetworkBehaviour
         switch (currentObjectID)
         {
             case 0:
-                FloorPlace();
+                FoundationPlace();
                 break;
             case 1:
-                RampPlace();
+                FloorPlace();
                 break;
             case 2:
+                RampPlace();
+                break;
+            case 3:
                 WallPlace(); 
                 break;
             default:
@@ -90,35 +92,58 @@ public class BuildSystem : NetworkBehaviour
         }
     }
 
-    private void FloorPlace()
+    private void FoundationPlace()
     {
-        // FLOOR IS ID 0
-
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[0].GetComponent<GhostObject>();
 
-        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, floorLayerMask))
         {
-            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f), RoundToMultipule(hit.point.z, 2.5f));
+            ghostObject.gameObject.transform.position = hit.point;
         }
         else
         {
-            ghostObjects[0].transform.position = ghostObject.defaultPosition;
+            ghostObject.gameObject.transform.position = ghostObject.defaultPosition;
+        }
+
+        if (ghostObject.isSpawnable)
+        {
+            if (Input.GetMouseButtonDown(1))
+            {
+                PlaceObjectInSceneRpc(hit.point, ghostObject.gameObject.transform.rotation, 0);
+            }
+        }
+    }
+
+    private void FloorPlace()
+    {
+        // FLOOR IS ID 1
+
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+
+        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        {
+            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f), RoundToMultipule(hit.point.z, 2.5f));
+        }
+        else
+        {
+            ghostObjects[1].transform.position = ghostObject.defaultPosition;
         }
 
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, transform.rotation, 0);
+                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, transform.rotation, 1);
             }
         }
     }
 
     private void RampPlace()
     {
-        // RAMP ID IS 1
+        // RAMP ID IS 2
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();

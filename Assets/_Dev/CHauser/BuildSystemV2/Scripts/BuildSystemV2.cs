@@ -25,15 +25,13 @@ public class BuildSystemV2 : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsSpawned)
-            return;
-
         if (!isBuilding)
             return;
 
         switch(currentObjectID) 
         { 
             case 0:
+                PlaceFoundation();
                 break;
             case 1:
                 break;
@@ -52,7 +50,7 @@ public class BuildSystemV2 : NetworkBehaviour
                 ghostObject.gameObject.transform.position = hit.point;
                 if(Input.GetMouseButtonDown(0))
                 {
-                    
+                    PlaceObjectRpc(hit.point, ghostObject.gameObject.transform.rotation, 0);
                 }
             }
             else
