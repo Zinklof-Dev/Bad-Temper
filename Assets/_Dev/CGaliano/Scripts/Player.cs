@@ -38,6 +38,8 @@ public class Player : NetworkBehaviour
     private static Player playerClass = null;
     [SerializeField] private Player playerClassNonStatic = null;
 
+    // private BasicPhysObject currentlyHeldPhysObject;
+
     public override void OnNetworkSpawn()
     {
         //subscribe to the event for the value of the username getting changed for this GameObject.
@@ -279,6 +281,24 @@ public class Player : NetworkBehaviour
         }
     }
 
+    /*public void PickupOrDropObject()
+    {
+        if ( currentlyHeldPhysObject == null)
+        {
+            RaycastHit hit;
+            if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, 2.5f)
+            {
+                currentlyHeldPhysObject = hit.gameObject.GetComponent<BasicPhysObject>();
+                currentlyHeldPhysObject.RequestToPickupRPC();
+            }
+        }
+        else
+        {
+            currentlyHeldPhysObject.RequestToDropRPC();
+            currentlyHeldPhysObject = null;
+        }
+    }*/
+
     private void Update()
     {
         if (!IsOwner) return;
@@ -289,10 +309,12 @@ public class Player : NetworkBehaviour
         //but... you never know i guess, so past me decided a try catch was worth it.
         try
         {
-            if (!ZinklofDev.ConsoleV2.Console.isOpen)
+            if (!ZinklofDev.ConsoleV2.Console.isOpen /*|| !Input.GetKey(Keycode.G)*/)
             {
                 XRotation();
                 YRotation();
+
+                // check for mouse1 here then call pickup/drop func
             }
 
             CalculateMovement();
