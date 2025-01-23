@@ -6,8 +6,47 @@ using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
 
+[System.Serializable]
+public struct SnapPoint
+{
+    public Vector3 position;
+    public Vector3 eulerRotation;
+    public Quaternion quaternionRotation { get; private set; }
+
+    public SnapPoint(Vector3 position, Vector3 eulerRotation)
+    {
+        this.position = position;
+        this.eulerRotation = eulerRotation;
+        quaternionRotation = Quaternion.Euler(eulerRotation);
+    }
+}
+
 public class BuildSystem : NetworkBehaviour
 {
+    #region Snap Points
+    // All points are just offsets we then add to the positions of whatever base object we're building off of
+    private static SnapPoint[] floorWallPoints = 
+    { 
+        new SnapPoint(new Vector3(1.25f, 1.25f, 0), new Vector3(0, 0, -90)), 
+        new SnapPoint(new Vector3(-1.25f, 1.25f, 0), new Vector3(0, 0, 90)), 
+        new SnapPoint(new Vector3(0, 1.25f, 1.25f), new Vector3(90, 0, 0)),
+        new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(-90, 0, 0))
+    };
+
+    private static SnapPoint[] foundationWallPoints =
+    {
+        new SnapPoint(new Vector3(1.25f, 1.75f, 0), new Vector3(0, 0, -90)),
+        new SnapPoint(new Vector3(-1.25f, 1.75f, 0), new Vector3(0, 0, 90)),
+        new SnapPoint(new Vector3(0, 1.75f, 1.25f), new Vector3(90, 0, 0)),
+        new SnapPoint(new Vector3(0, 1.75f, -1.25f), new Vector3(-90, 0, 0))
+    };
+    private static SnapPoint[] wallFloorPoints;
+    private static SnapPoint[] foundationFoundationPoints;
+    private static SnapPoint[] foundationRampPoints;
+    private static SnapPoint[] floorRampPoints;
+
+    #endregion
+
     [Header("Game Object Refrences")]
     // Cole | Don't touch yourself, refrence gets assigned in the OnNetworkSpawn function
     [SerializeField] private GameObject playerCamera;
@@ -99,6 +138,8 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, floorLayerMask))
         {
+            //Collider[] foundationColliders = Physics.CheckSphere
+
             ghostObject.gameObject.transform.position = hit.point;
         }
         else
@@ -192,7 +233,7 @@ public class BuildSystem : NetworkBehaviour
 
             Collider closestFloor = ClosestCollider(floorColliders, hit);
             FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
-            List<WallPoint> wallPoints = floorObject.GetWallPoints();
+            List<SnapPoint> wallPoints = floorObject.GetWallPoints();
 
             if (wallPoints.Count <= 1)
             {
@@ -200,8 +241,8 @@ public class BuildSystem : NetworkBehaviour
                 return;
             }
 
-            WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
-            ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
+            SnapPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
+            ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.position;
             ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
         }
         else
@@ -241,11 +282,11 @@ public class BuildSystem : NetworkBehaviour
         return closestCollider;
     }
 
-    private WallPoint FindClosestWallPoint(List<WallPoint> wallPoints, GameObject closestFloor, RaycastHit hit)
+    private SnapPoint FindClosestWallPoint(List<SnapPoint> wallPoints, GameObject closestFloor, RaycastHit hit)
     {
-        WallPoint closestWallPoint = wallPoints[0];
+        SnapPoint closestWallPoint = wallPoints[0];
         int i = 0;
-        foreach(WallPoint wallPoint in wallPoints)
+        foreach(SnapPoint wallPoint in wallPoints)
         {
             if (i == 0)
             {
@@ -254,7 +295,7 @@ public class BuildSystem : NetworkBehaviour
                 continue;
             }
             
-            if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint.pos) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint.pos))
+            if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint.position) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint.position))
             {
                 closestWallPoint = wallPoint;
             }
