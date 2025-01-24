@@ -23,7 +23,6 @@ public struct SnapPoint
 
 public class BuildSystem : NetworkBehaviour
 {
-/*
     #region Snap Points
     // All points are just offsets we then add to the positions of whatever base object we're building off of
     private static SnapPoint[] floorWallPoints = 
@@ -44,10 +43,10 @@ public class BuildSystem : NetworkBehaviour
     private static SnapPoint[] wallFloorPoints;
     private static SnapPoint[] foundationFoundationPoints =
     {
-        new SnapPoint(new Vector3(2.5f, 0, 0), new Vector3(0,0,0));
-        new SnapPoint(new Vector3(-2.5f, 0, 0), new Vector3(0,0,0));
-        new SnapPoint(new Vector3(0, 0, 2.5f), new Vector3(0,0,0));
-        new SnapPoint(new Vector3(0, 0, -2.5f), new Vector3(0,0,0));
+        new SnapPoint(new Vector3(2.5f, 0, 0), new Vector3(0,0,0)),
+        new SnapPoint(new Vector3(-2.5f, 0, 0), new Vector3(0,0,0)),
+        new SnapPoint(new Vector3(0, 0, 2.5f), new Vector3(0,0,0)),
+        new SnapPoint(new Vector3(0, 0, -2.5f), new Vector3(0,0,0))
     };
     private static SnapPoint[] foundationRampPoints;
     private static SnapPoint[] floorRampPoints;
@@ -76,6 +75,8 @@ public class BuildSystem : NetworkBehaviour
     private static int currentObjectID;
     public static bool isBuilding;
 
+    private List<Vector3> DebugSnapPoints = new List<Vector3>();
+
     public override void OnNetworkSpawn()
     {
         // Cole | All legacy commands must be registered with the shell
@@ -85,6 +86,15 @@ public class BuildSystem : NetworkBehaviour
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         // Cole | Allows for the function to execute what it needs to do because of the ovveride.
         base.OnNetworkSpawn();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        foreach (Vector3 v in DebugSnapPoints)
+        {
+            Gizmos.DrawSphere(v, 0.1f); 
+        }
     }
 
     void Update()
@@ -154,9 +164,11 @@ public class BuildSystem : NetworkBehaviour
             }
             else
             {
-                Collider closestFoundation = ClosestCollider(foundationColliders, hit);
-                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, closestFoundation, hit);
-                ghostObject.gameObject.transform.position = closestCollider.transform.position + closestSnapPoint.position;
+                //Collider closestFoundation = ClosestCollider(foundationColliders, hit);
+                //SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, closestFoundation.gameObject, hit);
+                //ghostObject.transform.position = closestFoundation.transform.position + closestSnapPoint.position;
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, foundationColliders[0].gameObject, hit);
+                ghostObject.transform.position = foundationColliders[0].transform.position + closestSnapPoint.position;
                 ghostObject.rotation = closestSnapPoint.quaternionRotation;
             }
         }
@@ -169,7 +181,11 @@ public class BuildSystem : NetworkBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(hit.point, ghostObject.gameObject.transform.rotation, 0);
+                PlaceObjectInSceneRpc(ghostObject.transform.position, ghostObject.gameObject.transform.rotation, 0);
+                foreach (SnapPoint sp in foundationFoundationPoints)
+                {
+                    DebugSnapPoints.Add(sp.position + new Vector3(ghostObject.transform.position.x, ghostObject.transform.position.y, ghostObject.transform.position.z));
+                }
             }
         }
     }
@@ -243,25 +259,18 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, floorLayerMask);
-            if (floorColliders.Length <= 1)
+            if (floorColliders.Length == 0)
             {
                 ghostObjects[2].transform.position = ghostObject.defaultPosition;
                 return;
             }
 
-            Collider closestFloor = ClosestCollider(floorColliders, hit);
-            FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
-            List<SnapPoint> wallPoints = floorObject.GetWallPoints();
-
-            if (wallPoints.Count <= 1)
+            if (floorColliders[0].gameObject.layer == LayerMask.NameToLayer("Foundation"))
             {
-                ghostObjects[2].transform.position = ghostObject.defaultPosition;
-                return;
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, floorColliders[0].gameObject, hit);
+                ghostObjects[2].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
+                ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
-
-            SnapPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
-            ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.position;
-            ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
         }
         else
         {
@@ -300,7 +309,7 @@ public class BuildSystem : NetworkBehaviour
         return closestCollider;
     }
 
-    private SnapPoint FindClosestSnapPoint(List<SnapPoint> snapPoints, GameObject originObject, RaycastHit hit)
+    private SnapPoint FindClosestSnapPoint(SnapPoint[] snapPoints, GameObject originObject, RaycastHit hit)
     {
         SnapPoint closestSnapPoint = snapPoints[0];
         int i = 0;
@@ -372,6 +381,8 @@ public class BuildSystem : NetworkBehaviour
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 
+    #region Commands
+
     // V2 Commands
 
     [Command("Activates or deactivates build system.")]
@@ -385,7 +396,9 @@ public class BuildSystem : NetworkBehaviour
     {
         currentObjectID = ID;
     }
+    #endregion
 
+    #region Tests and Legacy Commands
 
     // Tests and (Legacy) Commands
 
@@ -423,5 +436,5 @@ public class BuildSystem : NetworkBehaviour
     {
         currentObjectID = t1;
     });
-*/
+    #endregion
 }

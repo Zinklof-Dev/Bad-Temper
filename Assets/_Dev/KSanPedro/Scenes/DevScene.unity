@@ -2923,6 +2923,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
         type: 3}
+      propertyPath: layerMask.m_Bits
+      value: 311
+      objectReference: {fileID: 0}
+    - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
+        type: 3}
       propertyPath: ghostObjects.Array.size
       value: 5
       objectReference: {fileID: 0}
@@ -3106,7 +3111,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!1 &1722719350
 GameObject:
@@ -3707,7 +3712,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 9
+  m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!224 &2008912772
 RectTransform:
@@ -3766,7 +3771,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -150.2475, y: 36.447815}
+  m_AnchoredPosition: {x: -150.24756, y: 36.447754}
   m_SizeDelta: {x: 300.4904, y: 72.8954}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2107423554
@@ -4469,6 +4474,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FoundationGhost
+      objectReference: {fileID: 0}
+    - target: {fileID: 8014293591512398017, guid: 1e2653ba749c90146a1993cbbcbbcb93,
+        type: 3}
+      propertyPath: layerMask.m_Bits
+      value: 257
       objectReference: {fileID: 0}
     - target: {fileID: 9198651461707148140, guid: 1e2653ba749c90146a1993cbbcbbcb93,
         type: 3}
