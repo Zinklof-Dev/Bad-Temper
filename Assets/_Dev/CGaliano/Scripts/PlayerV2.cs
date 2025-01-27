@@ -98,11 +98,11 @@ public class PlayerV2 : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void SendServerUsernameRPC(FixedString64Bytes username)
     {
-        SendUSernameToAllClients(username); // Because clients cannot send RPCs to clients.
+        SendUSernameToAllClientsRPC(username); // Because clients cannot send RPCs to clients.
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    public void SendUSernameToAllClients(FixedString64Bytes username)
+    public void SendUSernameToAllClientsRPC(FixedString64Bytes username)
     {
         this.username = username.ToString();
         UpdateUsernameObject();
