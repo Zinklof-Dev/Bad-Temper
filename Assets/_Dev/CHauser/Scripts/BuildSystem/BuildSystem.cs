@@ -5,10 +5,54 @@ using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
-using Unity.VisualScripting;
+
+[System.Serializable]
+public struct SnapPoint
+{
+    public Vector3 position;
+    public Vector3 eulerRotation;
+    public Quaternion quaternionRotation { get; private set; }
+
+    public SnapPoint(Vector3 position, Vector3 eulerRotation)
+    {
+        this.position = position;
+        this.eulerRotation = eulerRotation;
+        quaternionRotation = Quaternion.Euler(eulerRotation);
+    }
+}
 
 public class BuildSystem : NetworkBehaviour
 {
+    #region Snap Points
+    // All points are just offsets we then add to the positions of whatever base object we're building off of
+    private static SnapPoint[] floorWallPoints = 
+    { 
+        new SnapPoint(new Vector3(1.25f, 1.25f, 0), new Vector3(0, 0, -90)), 
+        new SnapPoint(new Vector3(-1.25f, 1.25f, 0), new Vector3(0, 0, 90)), 
+        new SnapPoint(new Vector3(0, 1.25f, 1.25f), new Vector3(90, 0, 0)),
+        new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(-90, 0, 0))
+    };
+
+    private static SnapPoint[] foundationWallPoints =
+    {
+        new SnapPoint(new Vector3(1.25f, 1.75f, 0), new Vector3(0, 0, -90)),
+        new SnapPoint(new Vector3(-1.25f, 1.75f, 0), new Vector3(0, 0, 90)),
+        new SnapPoint(new Vector3(0, 1.75f, 1.25f), new Vector3(90, 0, 0)),
+        new SnapPoint(new Vector3(0, 1.75f, -1.25f), new Vector3(-90, 0, 0))
+    };
+    private static SnapPoint[] wallFloorPoints;
+    private static SnapPoint[] foundationFoundationPoints =
+    {
+        new SnapPoint(new Vector3(2.5f, 0, 0), new Vector3(0,0,0)),
+        new SnapPoint(new Vector3(-2.5f, 0, 0), new Vector3(0,0,0)),
+        new SnapPoint(new Vector3(0, 0, 2.5f), new Vector3(0,0,0)),
+        new SnapPoint(new Vector3(0, 0, -2.5f), new Vector3(0,0,0))
+    };
+    private static SnapPoint[] foundationRampPoints;
+    private static SnapPoint[] floorRampPoints;
+
+    #endregion
+
     [Header("Game Object Refrences")]
     // Cole | Don't touch yourself, refrence gets assigned in the OnNetworkSpawn function
     [SerializeField] private GameObject playerCamera;
@@ -22,6 +66,7 @@ public class BuildSystem : NetworkBehaviour
 
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private LayerMask floorLayerMask;
+    [SerializeField] private LayerMask foundationLayerMask;
 
     [Header("Modifiable Variables")]
     
@@ -29,6 +74,8 @@ public class BuildSystem : NetworkBehaviour
 
     private static int currentObjectID;
     public static bool isBuilding;
+
+    private List<Vector3> DebugSnapPoints = new List<Vector3>();
 
     public override void OnNetworkSpawn()
     {
@@ -39,6 +86,15 @@ public class BuildSystem : NetworkBehaviour
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         // Cole | Allows for the function to execute what it needs to do because of the ovveride.
         base.OnNetworkSpawn();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        foreach (Vector3 v in DebugSnapPoints)
+        {
+            Gizmos.DrawSphere(v, 0.1f); 
+        }
     }
 
     void Update()
@@ -76,12 +132,15 @@ public class BuildSystem : NetworkBehaviour
         switch (currentObjectID)
         {
             case 0:
-                FloorPlace();
+                FoundationPlace();
                 break;
             case 1:
-                RampPlace();
+                FloorPlace();
                 break;
             case 2:
+                RampPlace();
+                break;
+            case 3:
                 WallPlace(); 
                 break;
             default:
@@ -90,35 +149,76 @@ public class BuildSystem : NetworkBehaviour
         }
     }
 
-    private void FloorPlace()
+    private void FoundationPlace()
     {
-        // FLOOR IS ID 0
-
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[0].GetComponent<GhostObject>();
 
-        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, floorLayerMask))
         {
-            ghostObjects[0].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f), RoundToMultipule(hit.point.z, 2.5f));
+            Collider[] foundationColliders = Physics.OverlapSphere(hit.point, 2.5f, foundationLayerMask);
+            
+            if(foundationColliders.Length == 0)
+            {
+                ghostObject.gameObject.transform.position = hit.point;
+            }
+            else
+            {
+                //Collider closestFoundation = ClosestCollider(foundationColliders, hit);
+                //SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, closestFoundation.gameObject, hit);
+                //ghostObject.transform.position = closestFoundation.transform.position + closestSnapPoint.position;
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, foundationColliders[0].gameObject, hit);
+                ghostObject.transform.position = foundationColliders[0].transform.position + closestSnapPoint.position;
+                ghostObject.rotation = closestSnapPoint.quaternionRotation;
+            }
         }
         else
         {
-            ghostObjects[0].transform.position = ghostObject.defaultPosition;
+            ghostObject.gameObject.transform.position = ghostObject.defaultPosition;
+        }
+
+        if (ghostObject.isSpawnable)
+        {
+            if (Input.GetMouseButtonDown(1))
+            {
+                PlaceObjectInSceneRpc(ghostObject.transform.position, ghostObject.gameObject.transform.rotation, 0);
+                foreach (SnapPoint sp in foundationFoundationPoints)
+                {
+                    DebugSnapPoints.Add(sp.position + new Vector3(ghostObject.transform.position.x, ghostObject.transform.position.y, ghostObject.transform.position.z));
+                }
+            }
+        }
+    }
+
+    private void FloorPlace()
+    {
+        // FLOOR IS ID 1
+
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        RaycastHit hit;
+        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+
+        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        {
+            ghostObjects[1].transform.position = new Vector3(RoundToMultipule(hit.point.x, 2.5f), RoundToMultipule(hit.point.y, 2.5f), RoundToMultipule(hit.point.z, 2.5f));
+        }
+        else
+        {
+            ghostObjects[1].transform.position = ghostObject.defaultPosition;
         }
 
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[0].transform.position, transform.rotation, 0);
+                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, transform.rotation, 1);
             }
         }
     }
 
     private void RampPlace()
     {
-        // RAMP ID IS 1
+        // RAMP ID IS 2
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
@@ -159,25 +259,18 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(ray, out hit, playerReach, layerMask))
         {
             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, floorLayerMask);
-            if (floorColliders.Length <= 1)
+            if (floorColliders.Length == 0)
             {
                 ghostObjects[2].transform.position = ghostObject.defaultPosition;
                 return;
             }
 
-            Collider closestFloor = ClosestCollider(floorColliders, hit);
-            FloorObject floorObject = closestFloor.gameObject.GetComponent<FloorObject>();
-            List<WallPoint> wallPoints = floorObject.GetWallPoints();
-
-            if (wallPoints.Count <= 1)
+            if (floorColliders[0].gameObject.layer == LayerMask.NameToLayer("Foundation"))
             {
-                ghostObjects[2].transform.position = ghostObject.defaultPosition;
-                return;
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, floorColliders[0].gameObject, hit);
+                ghostObjects[2].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
+                ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
-
-            WallPoint closestWallPoint = FindClosestWallPoint(wallPoints, closestFloor.gameObject, hit);
-            ghostObjects[2].transform.position = closestFloor.gameObject.transform.position + closestWallPoint.pos;
-            ghostObject.rotation = Quaternion.Euler(closestWallPoint.eulerRotation);
         }
         else
         {
@@ -216,28 +309,28 @@ public class BuildSystem : NetworkBehaviour
         return closestCollider;
     }
 
-    private WallPoint FindClosestWallPoint(List<WallPoint> wallPoints, GameObject closestFloor, RaycastHit hit)
+    private SnapPoint FindClosestSnapPoint(SnapPoint[] snapPoints, GameObject originObject, RaycastHit hit)
     {
-        WallPoint closestWallPoint = wallPoints[0];
+        SnapPoint closestSnapPoint = snapPoints[0];
         int i = 0;
-        foreach(WallPoint wallPoint in wallPoints)
+        foreach(SnapPoint snapPoint in snapPoints)
         {
             if (i == 0)
             {
-                closestWallPoint = wallPoint;
+                closestSnapPoint = snapPoint;
                 i++;
                 continue;
             }
             
-            if(Vectors.SqrDist3f(hit.point, closestFloor.transform.position + wallPoint.pos) < Vectors.SqrDist3f(hit.point, closestFloor.transform.position + closestWallPoint.pos))
+            if(Vectors.SqrDist3f(hit.point, originObject.transform.position + snapPoint.position) < Vectors.SqrDist3f(hit.point, originObject.transform.position + closestSnapPoint.position))
             {
-                closestWallPoint = wallPoint;
+                closestSnapPoint = snapPoint;
             }
 
             i++;
         }
 
-        return closestWallPoint;
+        return closestSnapPoint;
     }
 
     private void FreePlace(int objectID)
@@ -288,6 +381,8 @@ public class BuildSystem : NetworkBehaviour
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 
+    #region Commands
+
     // V2 Commands
 
     [Command("Activates or deactivates build system.")]
@@ -301,7 +396,9 @@ public class BuildSystem : NetworkBehaviour
     {
         currentObjectID = ID;
     }
+    #endregion
 
+    #region Tests and Legacy Commands
 
     // Tests and (Legacy) Commands
 
@@ -339,5 +436,5 @@ public class BuildSystem : NetworkBehaviour
     {
         currentObjectID = t1;
     });
-
+    #endregion
 }

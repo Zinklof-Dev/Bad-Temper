@@ -1,0 +1,54 @@
+/*using System;
+using Unity;
+
+public class BasicPhysObject : NetworkBehavior
+{
+  [SerializedField] bool pickedUp;
+  [SerializedField] Vector3 Offset;
+  [SerializedField] float rotSens; // rotation sensitivity;
+
+  Quaternion rot; // used when being held so player can rotate the object.
+
+  private GameObject playerCamera;
+  private RigidBody rb;
+
+  private void Start()
+  {
+    rb = gameObject.GetComponent<RigidBody>();
+  }
+
+  private void Update()
+  {
+    if (pickedUp && IsOwner)
+    {
+      transform.position = Vector3.Lerp(transform.position, playerCamera.transform.position + Offset, 0.65f);
+      if (Input.GetKey(Keycode.G))
+      {
+        // uh oh quaternion math time | Cameron
+      
+        float y = Input.GetAxis("MouseY") * rotSens * Time.deltaTime;
+        float x = Input.GetAxis("MouseX") * rotSens * Time.deltaTime;
+
+        rot *= Quaternion.Euler(x, y, 0); // will this work? we shall find out! quaternions hurt my brain :D
+      }
+    }
+  }
+  
+  [Rpc(SendTo.Server)]
+  public void RequestToPickupRPC(long clientID)
+  {
+    ChangeOwnership(clientID);
+  }
+
+  [Rpc(SendTo.Server)]
+  public void RequestToDrop()
+  {
+    ChangeOwnership((long)0)
+  }
+
+  [Rpc(SendTo.ClientsAndHost)]
+  public void TogglePickedUp()
+  {
+    pickedUp = !pickedUp;
+  }
+}*/
