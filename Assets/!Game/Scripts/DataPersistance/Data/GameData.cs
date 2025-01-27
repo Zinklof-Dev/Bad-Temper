@@ -7,12 +7,12 @@ using UnityEngine;
 public class ProfileData
 {
     public string profileVers;
-    public FixedString32Bytes username;
+    public FixedString64Bytes username;
 
     //defines what to start with when no save data is found or new save is made
     public ProfileData()
     {
-        username = new FixedString32Bytes("New Player");
+        username = new FixedString64Bytes("New Player");
         profileVers = "0.1";
     }
 }

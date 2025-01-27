@@ -7,12 +7,12 @@ using UnityEngine;
 public class PlayersManager : NetworkBehaviour
 {
     [SerializeField] ulong[] slots = new ulong[6];
-    [SerializeField] FixedString32Bytes[] usernames = new FixedString32Bytes[6];
+    [SerializeField] FixedString64Bytes[] usernames = new FixedString64Bytes[6];
     [SerializeField] GameObject[] playerObjects = new GameObject[6];
     [SerializeField] ulong clientId;
     [SerializeField] DataPersistanceManager dataPersistanceManager;
 
-    FixedString32Bytes localUsername;
+    FixedString64Bytes localUsername;
 
 
 
@@ -98,7 +98,7 @@ public class PlayersManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    void GiveServerUsernameRpc(FixedString32Bytes username, RpcParams rpcParams = default)
+    void GiveServerUsernameRpc(FixedString64Bytes username, RpcParams rpcParams = default)
     {
         clientId = rpcParams.Receive.SenderClientId;
         bool nameSaved = false;
@@ -128,7 +128,7 @@ public class PlayersManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    void SendUsernamesAcrossNetworkRpc(FixedString32Bytes[] newUsernames, RpcParams rpcParams = default)
+    void SendUsernamesAcrossNetworkRpc(FixedString64Bytes[] newUsernames, RpcParams rpcParams = default)
     {
         for (int i = 0; i < 6; i++)
         {
