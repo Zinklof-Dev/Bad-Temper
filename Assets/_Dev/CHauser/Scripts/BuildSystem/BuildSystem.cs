@@ -67,6 +67,7 @@ public class BuildSystem : NetworkBehaviour
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private LayerMask floorLayerMask;
     [SerializeField] private LayerMask foundationLayerMask;
+    [SerializeField] private LayerMask terrainLayerMask;
 
     [Header("Modifiable Variables")]
     
@@ -154,7 +155,7 @@ public class BuildSystem : NetworkBehaviour
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[0].GetComponent<GhostObject>();
 
-        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, floorLayerMask))
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, terrainLayerMask))
         {
             Collider[] foundationColliders = Physics.OverlapSphere(hit.point, 2.5f, foundationLayerMask);
             
@@ -164,9 +165,6 @@ public class BuildSystem : NetworkBehaviour
             }
             else
             {
-                //Collider closestFoundation = ClosestCollider(foundationColliders, hit);
-                //SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, closestFoundation.gameObject, hit);
-                //ghostObject.transform.position = closestFoundation.transform.position + closestSnapPoint.position;
                 SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, foundationColliders[0].gameObject, hit);
                 ghostObject.transform.position = foundationColliders[0].transform.position + closestSnapPoint.position;
                 ghostObject.rotation = closestSnapPoint.quaternionRotation;
@@ -254,34 +252,40 @@ public class BuildSystem : NetworkBehaviour
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
-        GhostObject ghostObject = ghostObjects[2].GetComponent<GhostObject>();
+        GhostObject ghostObject = ghostObjects[3].GetComponent<GhostObject>();
 
-        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        if (Physics.Raycast(ray, out hit, playerReach))
         {
-            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, floorLayerMask);
+            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, LayerMask.NameToLayer("Foundation") + LayerMask.NameToLayer("Floor"));
             if (floorColliders.Length == 0)
             {
-                ghostObjects[2].transform.position = ghostObject.defaultPosition;
+                ghostObjects[3].transform.position = ghostObject.defaultPosition;
                 return;
             }
 
             if (floorColliders[0].gameObject.layer == LayerMask.NameToLayer("Foundation"))
             {
                 SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, floorColliders[0].gameObject, hit);
-                ghostObjects[2].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
+                ghostObjects[3].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
+                ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
+            }
+            if (floorColliders[0].gameObject.layer == LayerMask.NameToLayer("Floor"))
+            {
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(floorWallPoints, floorColliders[0].gameObject, hit);
+                ghostObjects[3].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
                 ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
         }
         else
         {
-            ghostObjects[2].transform.position = ghostObject.defaultPosition;
+            ghostObjects[3].transform.position = ghostObject.defaultPosition;
         }
 
         if (ghostObject.isSpawnable == true)
         {
             if (Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[2].transform.position, ghostObject.rotation, 2);
+                PlaceObjectInSceneRpc(ghostObjects[3].transform.position, ghostObject.rotation, 3);
             }
         }
     }

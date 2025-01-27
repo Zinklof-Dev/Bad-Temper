@@ -433,7 +433,7 @@ GameObject:
   - component: {fileID: 122584772}
   - component: {fileID: 122584771}
   - component: {fileID: 122584770}
-  m_Layer: 7
+  m_Layer: 9
   m_Name: LoadingManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2923,13 +2923,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
         type: 3}
-      propertyPath: layerMask.m_Bits
-      value: 311
+      propertyPath: ghostObjects.Array.size
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
         type: 3}
-      propertyPath: ghostObjects.Array.size
-      value: 5
+      propertyPath: terrainLayerMask.m_Bits
+      value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
         type: 3}
