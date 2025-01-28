@@ -32,7 +32,6 @@ public class BuildSystem : NetworkBehaviour
         new SnapPoint(new Vector3(0, 1.25f, 1.25f), new Vector3(90, 0, 0)),
         new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(-90, 0, 0))
     };
-
     private static SnapPoint[] foundationWallPoints =
     {
         new SnapPoint(new Vector3(1.25f, 1.75f, 0), new Vector3(0, 0, -90)),
@@ -48,8 +47,6 @@ public class BuildSystem : NetworkBehaviour
         new SnapPoint(new Vector3(0, 0, 2.5f), new Vector3(0,0,0)),
         new SnapPoint(new Vector3(0, 0, -2.5f), new Vector3(0,0,0))
     };
-    private static SnapPoint[] foundationRampPoints;
-    private static SnapPoint[] floorRampPoints;
 
     #endregion
 
@@ -219,31 +216,36 @@ public class BuildSystem : NetworkBehaviour
         // RAMP ID IS 2
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
-        GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+        GhostObject ghostObject = ghostObjects[2].GetComponent<GhostObject>();
 
-        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        if (Physics.Raycast(ray, out hit, playerReach))
         {
-             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5, floorLayerMask);
+             Collider[] floorColliders = Physics.OverlapSphere(hit.point, 5);
              if(floorColliders.Length <= 0)
              {
-                ghostObjects[1].transform.position = ghostObject.defaultPosition;
+                ghostObjects[2].transform.position = ghostObject.defaultPosition;
                 return;
              }
 
             Collider closestFloor = ClosestCollider(floorColliders, hit);
-            ghostObjects[1].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
+
+            if(floorColliders[0].gameObject.layer == 7)
+                closestFloor.transform.position = new Vector3(floorColliders[0].gameObject.transform.position.x, floorColliders[0].gameObject.transform.position.y + 1.25f, floorColliders[0].gameObject.transform.position.z);
+            if (floorColliders[0].gameObject.layer == 8)
+                ghostObjects[2].transform.position = new Vector3(floorColliders[0].gameObject.transform.position.x, floorColliders[0].gameObject.transform.position.y + 1.75f, floorColliders[0].gameObject.transform.position.z);
+
             ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
         }
         else
         {
-            ghostObjects[1].transform.position = ghostObject.defaultPosition;
+            ghostObjects[2].transform.position = ghostObject.defaultPosition;
         }
 
         if(ghostObject.isSpawnable == true)
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRpc(ghostObjects[1].transform.position, ghostObject.rotation, 1);
+                PlaceObjectInSceneRpc(ghostObjects[2].transform.position, ghostObject.rotation, 2);
             }
         }
     }
@@ -256,23 +258,25 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach))
         {
-            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, LayerMask.NameToLayer("Foundation") + LayerMask.NameToLayer("Floor"));
+            Collider[] floorColliders = Physics.OverlapSphere(hit.point, 2.5f, floorLayerMask + foundationLayerMask);
+
             if (floorColliders.Length == 0)
             {
-                ghostObjects[3].transform.position = ghostObject.defaultPosition;
+                ghostObject.transform.position = ghostObject.defaultPosition;
                 return;
             }
 
-            if (floorColliders[0].gameObject.layer == LayerMask.NameToLayer("Foundation"))
+            if (floorColliders[0].gameObject.layer == 8) // Foundation Layer is Layer 8
             {
+                Debug.Log("Foundation!");
                 SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, floorColliders[0].gameObject, hit);
-                ghostObjects[3].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
+                ghostObject.transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
                 ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
-            if (floorColliders[0].gameObject.layer == LayerMask.NameToLayer("Floor"))
+            if (floorColliders[0].gameObject.layer == 7) // Floor Layer is Layer 7
             {
                 SnapPoint closestSnapPoint = FindClosestSnapPoint(floorWallPoints, floorColliders[0].gameObject, hit);
-                ghostObjects[3].transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
+                ghostObject.transform.position = floorColliders[0].gameObject.transform.position + closestSnapPoint.position;
                 ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
         }
