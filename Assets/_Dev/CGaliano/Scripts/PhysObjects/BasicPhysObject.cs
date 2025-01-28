@@ -7,6 +7,8 @@ public class BasicPhysObject : NetworkBehavior
   [SerializedField] Vector3 Offset;
   [SerializedField] float rotSens; // rotation sensitivity;
 
+  [SerializedField] bool serverSide; // toggle whether this logic should be server side or not, if server side it MUST be syncronized over network, non server side doesn't have to be synced but objects may end up in different places if not.
+
   Quaternion rot; // used when being held so player can rotate the object.
 
   private GameObject playerCamera;
@@ -15,6 +17,11 @@ public class BasicPhysObject : NetworkBehavior
   private void Start()
   {
     rb = gameObject.GetComponent<RigidBody>();
+
+    if (!IsServer && serverSide)
+    {
+      //use func that deletes RB, this way only the server does physics math then syncs that over network.
+    }
   }
 
   private void Update()
@@ -29,8 +36,9 @@ public class BasicPhysObject : NetworkBehavior
         float y = Input.GetAxis("MouseY") * rotSens * Time.deltaTime;
         float x = Input.GetAxis("MouseX") * rotSens * Time.deltaTime;
 
-        rot *= Quaternion.Euler(x, y, 0); // will this work? we shall find out! quaternions hurt my brain :D
+        rot *= Quaternion.Euler(x, y, 0); // will this work? we shall find out! quaternions hurt my brain :D | Cameron
       }
+      transform.rotation = rot;
     }
   }
   
@@ -38,16 +46,18 @@ public class BasicPhysObject : NetworkBehavior
   public void RequestToPickupRPC(long clientID)
   {
     ChangeOwnership(clientID);
+    TogglePickedUpRPC();
   }
 
   [Rpc(SendTo.Server)]
-  public void RequestToDrop()
+  public void RequestToDropRPC()
   {
     ChangeOwnership((long)0)
+    TogglePickedUpRPC();
   }
 
   [Rpc(SendTo.ClientsAndHost)]
-  public void TogglePickedUp()
+  public void TogglePickedUpRPC()
   {
     pickedUp = !pickedUp;
   }
