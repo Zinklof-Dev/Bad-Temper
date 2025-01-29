@@ -685,6 +685,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 366514406058456968, guid: 7fc842481b452aa42aa4bf1e252e715e,
         type: 3}
+      propertyPath: layerMask.m_Bits
+      value: 231
+      objectReference: {fileID: 0}
+    - target: {fileID: 366514406058456968, guid: 7fc842481b452aa42aa4bf1e252e715e,
+        type: 3}
       propertyPath: defaultPosition.y
       value: -100
       objectReference: {fileID: 0}
@@ -1931,6 +1936,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6935095389006228148, guid: 59d7820211165bd4a9f85b628a60347d,
         type: 3}
+      propertyPath: layerMask.m_Bits
+      value: 743
+      objectReference: {fileID: 0}
+    - target: {fileID: 6935095389006228148, guid: 59d7820211165bd4a9f85b628a60347d,
+        type: 3}
       propertyPath: defaultPosition.y
       value: -100
       objectReference: {fileID: 0}
@@ -2137,6 +2147,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3490097113913183468, guid: 8e56983ed7fbb294aa9059ad44ae6a0c,
+        type: 3}
+      propertyPath: layerMask.m_Bits
+      value: 1767
+      objectReference: {fileID: 0}
     - target: {fileID: 3490097113913183468, guid: 8e56983ed7fbb294aa9059ad44ae6a0c,
         type: 3}
       propertyPath: defaultPosition.y
