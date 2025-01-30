@@ -129,12 +129,12 @@ public class LoadingManager : NetworkBehaviour
 
         if (debugLoad)
         {
-            minTimeElapsed = -1
-            _LoadingText.text = "Generating/Fetching Seed <b><i><color=#ff0000>(DEBUG LOADING ON)</b></i></color>"
+            minTimeElapsed = -1;
+            _LoadingText.text = "Generating/Fetching Seed <b><i><color=#ff0000>(DEBUG LOADING ON)</b></i></color>";
         }
 
-        int regTipCount = loadingTips.length * regLoadingTipWeight;
-        int christianTipCount = christianLoadingTips.length * christianLoadingTipsWeight;
+        int regTipCount = loadingTips.Length * regLoadingTipWeight;
+        int christianTipCount = christianLoadingTips.Length * christianLoadingTipWeight;
 
         int total = regTipCount + christianTipCount;
 
@@ -149,7 +149,7 @@ public class LoadingManager : NetworkBehaviour
 
         if (debugLoad)
         {
-            _loadingText.text = nextStepText + " <b><i><color=#ff0000>(DEBUG LOADING ON)</b></i></color>"
+            _LoadingText.text = nextStepText + " <b><i><color=#ff0000>(DEBUG LOADING ON)</b></i></color>";
         }
     }
 
@@ -174,7 +174,7 @@ public class LoadingManager : NetworkBehaviour
 
         if (debugLoad)
         {
-            currentBarValue = wanedBarValue;
+            currentBarValue = wantedBarValue;
         }
 
         _LoadingSlider.sizeDelta = new Vector2(currentBarValue * 1300, 32);
@@ -185,8 +185,8 @@ public class LoadingManager : NetworkBehaviour
         if (timeElapsed > nextHintChange)
         {
             // assuming 180 wpm read speed (slow), thats 3 word per sec, average word in english is 4.7 chars long, so we will round up to 5, so for every 15 chars we give 3 sec, or for every 5 char we give 1 sec
-            float odds = Unity.Random.Range(0,1)
-            string tip = "Uh oh... you should <b>NOT</b> be seeing this..."
+            float odds = UnityEngine.Random.Range(0, 1);
+            string tip = "Uh oh... you should <b>NOT</b> be seeing this...";
 
             if (odds < regTipOdds && allowChristianLoadingTips)
             {
