@@ -8,7 +8,7 @@
    Take out 100 enemies
 5. Fear The Reaper
    Take out 1000 enemies.
-6. You Are The One They Fear
+6. You Are The One They Fear-
    Take out 10,000 enemies.
 7. Wait it's been how long?
    Play a total of one hour
@@ -19,7 +19,7 @@
 10. Zinklof?
    Be in a session with the man himself.
 11. Zinklof.Dev
-   Be in the session with a Zinklof.Dev Employee.
+   Be in a session with a Zinklof.Dev Employee.
 12. Blub Blub
    Drown.
 13. It Came From Outer Space!
@@ -52,3 +52,28 @@
    Oldest trick in the book.
 27. Flatline
    Die for the first time.
+28. Karlson?
+   Type 'Karlson' in chat.
+29. Cranking 90's
+    Build a 2*2 building
+30. I have fallen and I cant get up!
+    Fall through the map
+31. I'm on a cut...
+    Die of hunger.
+32. You were the chosen one!
+    Be killed by a friend.
+33. Speedrun to the afterlife.
+    Die within 5 seconds of creating a server.
+34. How?
+    Beat a boss in less than 5 minutes...
+35. I'm learning!
+    Pick up a rock.
+36. Superhero landing!
+    Fall from a high place and somehow survive.
+37. Slasher.
+    Kill everyone in the server.
+38. What is this place?
+    Create and spawn in a server for the first time.
+39. Your opinion counts!
+    Rate the game.
+40. 
