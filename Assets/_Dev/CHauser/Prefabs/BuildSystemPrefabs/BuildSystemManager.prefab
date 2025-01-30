@@ -91,4 +91,10 @@ MonoBehaviour:
   foundationLayerMask:
     serializedVersion: 2
     m_Bits: 256
+  terrainLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
+  wallLayerMask:
+    serializedVersion: 2
+    m_Bits: 1024
   playerReach: 100

@@ -484,6 +484,8 @@ MonoBehaviour:
   _LoadingSlider: {fileID: 1393574140}
   _TreeGen: {fileID: 45186443}
   _TerrainGen: {fileID: 122584768}
+  allowChristianLoadingTips: 0
+  debugLoad: 0
   spawnPoints:
   - {x: 10, y: 0, z: 0}
   - {x: -10, y: 0, z: 0}
@@ -496,6 +498,10 @@ MonoBehaviour:
   wantedBarValue: 0
   timeElapsed: 0
   minTimeElapsed: 0
+  christianLoadingTips:
+  - Walk by faith, Doubt nothing
+  - Sometimes God lets you hit rock bottom so you realize he is the rock at the bottom.
+  - For God so loved the world, he gave his only begonten son.
 --- !u!114 &122584768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2940,11 +2946,6 @@ PrefabInstance:
         type: 3}
       propertyPath: ghostObjects.Array.size
       value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
-        type: 3}
-      propertyPath: terrainLayerMask.m_Bits
-      value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 6850739665459107250, guid: 704946c6568052745bab3b8096b6772e,
         type: 3}

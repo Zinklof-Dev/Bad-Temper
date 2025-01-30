@@ -36,18 +36,18 @@ public class NetworkTreeManager : NetworkBehaviour
     public List<Tree> trees;
 
     [Rpc(SendTo.Server)]
-    public void AskToRemoveTreeRpc(int treeID)
+    public void AskToRemoveTreeRPC(int treeID)
     { 
         if (trees[treeID].treeObject == null)
         {
             Debug.Log("Tree already removed!");
             return;
         }
-        RemoveTreeRpc(treeID);
+        RemoveTreeRPC(treeID);
     }
 
     [Rpc(SendTo.Everyone)]
-    public void RemoveTreeRpc(int treeID)
+    public void RemoveTreeRPC(int treeID)
     {
         if (trees[treeID].index != treeID)
         {
@@ -62,7 +62,7 @@ public class NetworkTreeManager : NetworkBehaviour
     public static void RemoveTree(int treeID)
     {
         NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
-        networkTreeManager.AskToRemoveTreeRpc(treeID);
+        networkTreeManager.AskToRemoveTreeRPC(treeID);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,18 +71,18 @@ public class NetworkTreeManager : NetworkBehaviour
 
 
     [Rpc(SendTo.Server)]
-    public void AskToRemoveRockRpc(int rockID)
+    public void AskToRemoveRockRPC(int rockID)
     {
         if (rocks[rockID].rockObject == null)
         {
             Debug.Log("Rock already removed!");
             return;
         }
-        RemoveRockRpc(rockID);
+        RemoveRockRPC(rockID);
     }
 
     [Rpc(SendTo.Everyone)]
-    public void RemoveRockRpc(int rockID)
+    public void RemoveRockRPC(int rockID)
     {
         if (rocks[rockID].index != rockID)
         {
@@ -97,6 +97,6 @@ public class NetworkTreeManager : NetworkBehaviour
     public static void RemoveRock(int rockID)
     {
         NetworkTreeManager networkTreeManager = FindAnyObjectByType<NetworkTreeManager>();
-        networkTreeManager.AskToRemoveRockRpc(rockID);
+        networkTreeManager.AskToRemoveRockRPC(rockID);
     }
 }
