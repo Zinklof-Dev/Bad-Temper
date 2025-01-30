@@ -15,6 +15,9 @@ public class LoadingManager : NetworkBehaviour
     [Header("Script References")]
     [SerializeField] TreeGeneration _TreeGen;
     [SerializeField] TerrainGeneration _TerrainGen;
+    [Header("LoadingSettings")]
+    [SerializeField] bool allowChristianLoadingTips;
+    [SerializeField] bool debugLoad;
     [Header("Player Spawn Points")]
     // To find circle of all points a distance from (0,0), do x^2 + y^2 = a^2
     [SerializeField] private Vector3[] spawnPoints;
@@ -80,8 +83,20 @@ public class LoadingManager : NetworkBehaviour
     "Don't let life's small setbacks make you feel like you've failed, just like a game, you have plenty of time to try again!",
     "What?",
     "HuH?",
-    "I made most of these loading screen tips motivational, because I, Zinklof, suffer with depression. I know what it's like to hurt, to feel alone. I want to remind you that you're not alone, life gets better, keep truckin onward, you'll find the light at that end of the tunnel, and be a cowpoke with a whole lotta stories to tell. And do tell them, let others know they aren't alone, and allow the trauma of the past to flow out of you, thats the best way to heal... alongside time of course. Have a blessed day :D."
+    "Carry on my wayward SOOOOON!",
+    "I made most of these loading screen tips motivational, because I, Zinklof, suffer with depression. I know what it's like to hurt, to feel alone. I want to remind you that you're not alone, life gets better, keep truckin onward, you'll find the light at that end of the tunnel, and be a cowpoke with a whole lotta stories to tell. And do tell them, let others know they aren't alone, and allow the trauma of the past to flow out of you, thats the best way to heal... alongside time of course. Have a blessed day :D.",
     };
+
+    public string[] christianLoadingTips = { // these are seperate as the user may turn them off in settings, I don't want to force God on anyone, but I'll die before I don't invite my savior into all I do.
+    "Walk by faith, Doubt nothing",
+    "Sometimes God lets you hit rock bottom so you realize he is the rock at the bottom.",
+    "For God so loved the world, he gave his only begonten son."
+    };
+
+    private int regLoadingTipWeight = 1;
+    private int christianLoadingTipWeight = 3; // make them a little more common, at least for now since there wont be many.
+
+    private float regTipOdds; // will calc in pre checklist, 0-1, used with rand.next to choose between either array, calc's based on size and weight.
 
     public override void OnNetworkSpawn()
     {
@@ -103,11 +118,27 @@ public class LoadingManager : NetworkBehaviour
 
     private void PreLoadChecklist()
     {
+        if (!UnityEngine.Debug.isDebugBuild)
+            debugLoad = false;
+        
         minTimeElapsed = UnityEngine.Random.Range(28,32);
         timeElapsed = 0;
         nextHintChange = -1;
         nextSnapCheck = -1;
         _LoadingText.text = "Generating/Fetching Seed";
+
+        if (debugLoad)
+        {
+            minTimeElapsed = -1
+            _LoadingText.text = "Generating/Fetching Seed <b><i><color=#ff0000>(DEBUG LOADING ON)</b></i></color>"
+        }
+
+        int regTipCount = loadingTips.length * regLoadingTipWeight;
+        int christianTipCount = christianLoadingTips.length * christianLoadingTipsWeight;
+
+        int total = regTipCount + christianTipCount;
+
+        regTipOdds = regTipCount / total;
     }
 
     public void FinishStep(string nextStepText)
@@ -115,6 +146,11 @@ public class LoadingManager : NetworkBehaviour
         stepsComplete++;
         wantedBarValue = (float)stepsComplete/(float)totalSteps;
         _LoadingText.text = nextStepText;
+
+        if (debugLoad)
+        {
+            _loadingText.text = nextStepText + " <b><i><color=#ff0000>(DEBUG LOADING ON)</b></i></color>"
+        }
     }
 
     private void EvaluateBar()
@@ -136,6 +172,11 @@ public class LoadingManager : NetworkBehaviour
             currentBarValue = 0.99f;
         }
 
+        if (debugLoad)
+        {
+            currentBarValue = wanedBarValue;
+        }
+
         _LoadingSlider.sizeDelta = new Vector2(currentBarValue * 1300, 32);
     }
 
@@ -144,11 +185,22 @@ public class LoadingManager : NetworkBehaviour
         if (timeElapsed > nextHintChange)
         {
             // assuming 180 wpm read speed (slow), thats 3 word per sec, average word in english is 4.7 chars long, so we will round up to 5, so for every 15 chars we give 3 sec, or for every 5 char we give 1 sec
+            float odds = Unity.Random.Range(0,1)
+            string tip = "Uh oh... you should <b>NOT</b> be seeing this..."
 
-            int index = UnityEngine.Random.Range(0, loadingTips.Length);
-            string tip = loadingTips[index];
+            if (odds < regTipOdds && allowChristianLoadingTips)
+            {
+                int index = UnityEngine.Random.Range(0, loadingTips.Length);
+                tip = loadingTips[index];
+            }
+            else
+            {
+                int index = UnityEngine.Random.Range(0, christianLoadingTips.Length);
+                tip = christianLoadingTips[index];
+            }
 
-            float length = (tip.Length / 5); // results in 1 for every 5 chars, thus 1 every average word length, resulting in 1 sec per word.
+            float length = Mathf.Clamp((tip.Length / 15), 4, 10); // results in 1 for every 5 chars, thus 1 every average word length, resulting in 1 sec per word.
+            // above has been changed to one for every 15 chars, making tips change 3 times faster because wow was it too long prior. they also must now be on screen at least 4 seconds, and at most 10 | Cameron
 
             nextHintChange = timeElapsed + length;
             _TipText.text = tip;
