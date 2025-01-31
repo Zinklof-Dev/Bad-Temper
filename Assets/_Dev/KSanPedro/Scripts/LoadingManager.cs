@@ -30,8 +30,8 @@ public class LoadingManager : NetworkBehaviour
 
     [SerializeField] private float timeElapsed;
     [SerializeField] private float minTimeElapsed;
-    private float nextSnapCheck;
-    private float nextHintChange;
+    private float nextSnapCheck = -2;
+    private float nextHintChange = -2;
 
     private bool _ServerHasSeed = false;
     private bool _CampfirePlaced = false;
@@ -185,24 +185,29 @@ public class LoadingManager : NetworkBehaviour
         if (timeElapsed > nextHintChange)
         {
             // assuming 180 wpm read speed (slow), thats 3 word per sec, average word in english is 4.7 chars long, so we will round up to 5, so for every 15 chars we give 3 sec, or for every 5 char we give 1 sec
-            float odds = UnityEngine.Random.Range(0, 1);
             string tip = "Uh oh... you should <b>NOT</b> be seeing this...";
 
-            if (odds < regTipOdds && allowChristianLoadingTips)
+            if (nextHintChange != -2;)
             {
-                int index = UnityEngine.Random.Range(0, loadingTips.Length);
-                tip = loadingTips[index];
+                float odds = UnityEngine.Random.Range(0, 1);
+            
+                if (odds > regTipOdds && allowChristianLoadingTips)
+                {
+                    int index = UnityEngine.Random.Range(0, christianLoadingTips.Length);
+                    tip = christianLoadingTips[index];
+                }
+                else
+                {
+                    int index = UnityEngine.Random.Range(0, loadingTips.Length);
+                    tip = loadingTips[index];
+                }
+    
+                float length = Mathf.Clamp((tip.Length / 15), 4, 10); // results in 1 for every 5 chars, thus 1 every average word length, resulting in 1 sec per word.
+                // above has been changed to one for every 15 chars, making tips change 3 times faster because wow was it too long prior. they also must now be on screen at least 4 seconds, and at most 10 | Cameron
+    
+                nextHintChange = timeElapsed + length;
             }
-            else
-            {
-                int index = UnityEngine.Random.Range(0, christianLoadingTips.Length);
-                tip = christianLoadingTips[index];
-            }
-
-            float length = Mathf.Clamp((tip.Length / 15), 4, 10); // results in 1 for every 5 chars, thus 1 every average word length, resulting in 1 sec per word.
-            // above has been changed to one for every 15 chars, making tips change 3 times faster because wow was it too long prior. they also must now be on screen at least 4 seconds, and at most 10 | Cameron
-
-            nextHintChange = timeElapsed + length;
+            
             _TipText.text = tip;
         }
     }
