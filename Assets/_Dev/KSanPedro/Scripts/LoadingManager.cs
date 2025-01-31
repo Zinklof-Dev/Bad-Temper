@@ -187,7 +187,7 @@ public class LoadingManager : NetworkBehaviour
             // assuming 180 wpm read speed (slow), thats 3 word per sec, average word in english is 4.7 chars long, so we will round up to 5, so for every 15 chars we give 3 sec, or for every 5 char we give 1 sec
             string tip = "Uh oh... you should <b>NOT</b> be seeing this...";
 
-            if (nextHintChange != -2;)
+            if (nextHintChange != -2)
             {
                 float odds = UnityEngine.Random.Range(0, 1);
             
