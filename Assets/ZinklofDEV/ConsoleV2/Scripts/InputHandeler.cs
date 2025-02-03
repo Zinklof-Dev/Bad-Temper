@@ -88,9 +88,9 @@ public class InputHandeler : MonoBehaviour
                 currentIndex = -1;
             }
 
-            if (Input.GetKeyDown(KeyCode.Tab)
+            if (Input.GetKeyDown(KeyCode.Tab))
             {
-                inputField.Text += tabfill;
+                inputField.text = tabfill;
             }
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -159,7 +159,7 @@ public class InputHandeler : MonoBehaviour
 
                 string total = partOne + partTwo + partThree;
 
-                if (partOne.length != 0)
+                if (partOne.Length != 0)
                 {
                     tabfill = partOne;
                     tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
