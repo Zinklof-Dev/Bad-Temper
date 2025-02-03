@@ -27,17 +27,17 @@ public class BuildSystem : NetworkBehaviour
     // All points are just offsets we then add to the positions of whatever base object we're building off of
     private static SnapPoint[] floorWallPoints = 
     { 
-        new SnapPoint(new Vector3(1.25f, 1.25f, 0), new Vector3(90, 0, 90)), 
-        new SnapPoint(new Vector3(-1.25f, 1.25f, 0), new Vector3(90, 0, 90)), 
+        new SnapPoint(new Vector3(1.25f, 1.25f, 0), new Vector3(0, 0, 90)), 
+        new SnapPoint(new Vector3(-1.25f, 1.25f, 0), new Vector3(0, 0, -90)), 
         new SnapPoint(new Vector3(0, 1.25f, 1.25f), new Vector3(90, 0, 0)),
-        new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(90, 0, 0))
+        new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(-90, 0, 0))
     };
     private static SnapPoint[] foundationWallPoints =
     {
-        new SnapPoint(new Vector3(1.25f, 1.75f, 0), new Vector3(90, 0, 90)),
-        new SnapPoint(new Vector3(-1.25f, 1.75f, 0), new Vector3(90, 0, 90)),
+        new SnapPoint(new Vector3(1.25f, 1.75f, 0), new Vector3(0, 0, 90)),
+        new SnapPoint(new Vector3(-1.25f, 1.75f, 0), new Vector3(0, 0, -90)),
         new SnapPoint(new Vector3(0, 1.75f, 1.25f), new Vector3(90, 0, 0)),
-        new SnapPoint(new Vector3(0, 1.75f, -1.25f), new Vector3(90, 0, 0))
+        new SnapPoint(new Vector3(0, 1.75f, -1.25f), new Vector3(-90, 0, 0))
     };
     private static SnapPoint[] foundationFoundationPoints =
     {
@@ -203,7 +203,7 @@ public class BuildSystem : NetworkBehaviour
 
             Collider closestWall = ClosestCollider(wallColliders, hit);
 
-            if(closestWall.transform.rotation.eulerAngles.z == 90)
+            if(closestWall.transform.rotation.eulerAngles.x == 90 || closestWall.transform.rotation.eulerAngles.x == -90)
             {
                 if(Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(0, 1.3f, 1.25f)) <= Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(0, 1.3f, -1.25f)))
                 {
@@ -215,7 +215,7 @@ public class BuildSystem : NetworkBehaviour
                     ghostObject.transform.position = closestWall.transform.position + new Vector3(0, 1.3f, -1.25f);
                 }
             }
-            if(closestWall.transform.rotation.eulerAngles.z == 0)
+            else if(closestWall.transform.rotation.eulerAngles.z == 90 || closestWall.transform.rotation.eulerAngles.z == -90)
             {
                 if(Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(1.25f, 1.3f, 0)) <= Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(-1.25f, 1.3f, 0)))
                 {
@@ -227,7 +227,11 @@ public class BuildSystem : NetworkBehaviour
                     ghostObject.transform.position = closestWall.transform.position + new Vector3(-1.25f, 1.3f, 0);
                 }
             }
-
+            else
+            {
+                ghostObjects[1].transform.position = ghostObject.defaultPosition;
+                Debug.Log("Invalid Rot");
+            }
         }
         else
         {
