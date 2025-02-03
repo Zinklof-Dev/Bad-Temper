@@ -29,6 +29,7 @@ public class InputHandeler : MonoBehaviour
     private int currentIndex;
 
     private string[] possibleCommands;
+    private string tabfill;
 
     private void Start()
     {
@@ -85,6 +86,11 @@ public class InputHandeler : MonoBehaviour
                 inputField.text = "";
                 inputField.ActivateInputField();
                 currentIndex = -1;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab)
+            {
+                inputField.Text += tabfill;
             }
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -153,6 +159,24 @@ public class InputHandeler : MonoBehaviour
 
                 string total = partOne + partTwo + partThree;
 
+                if (partOne.length != 0)
+                {
+                    tabfill = partOne;
+                    tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
+                    tabfill = tabfill.Split("(")[0]; // if we have a "(" then return everything before that "("
+                    tabfill += inputField.text;
+                }
+                else
+                {
+                    tabfill = partThree;
+                    tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
+                    tabfill = tabfill.Split("(")[0]; // if we have a "(" then return everything before that "("
+                    tabfill = inputField.text + tabfill;
+                }
+                
+                tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
+                tabfill = tabfill.Split("(")[0]; // if we have a "(" then return everything before that "("
+                
                 possibleCommands[i] = total;
             }
         }
