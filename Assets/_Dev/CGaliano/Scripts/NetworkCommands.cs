@@ -7,7 +7,7 @@ using UnityEngine;
 using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 
-public class NetworkCommands : NetworkBehavior
+public class NetworkCommands : NetworkBehaviour
 {
     private static NetworkCommands netCmd;
 
@@ -27,24 +27,24 @@ public class NetworkCommands : NetworkBehavior
 
     public void HandlePingOperation()
     {
-        SendPingRPC();
+        SendPingRPC(DateTime.UtcNow);
     }
     
-    (Rpc(SendTo.Server)
-    private void SendPingRPC()
+    [Rpc(SendTo.Server)]
+    private void SendPingRPC(DateTime pingSent)
     {
-        DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        int epochTime = DateTime.UtcNow - epoch;
+        DateTime pingRecieved = DateTime.UtcNow;
 
-        ReturnPingRPC(epochTime);
+        ReturnPingRPC(pingSent, pingRecieved);
     }
 
-    private void ReturnPingRPC(DateTime PingSent, DateTime PingRecieved)
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void ReturnPingRPC(DateTime PingSent, DateTime PingRecieved, RpcParams rpcParams = default)
     {
-        int returnMS = new TimeSpan(PingRecieved - DateTime.UtcNow).totalMiliseconds;
-        int sendMS = new TimeSpan(PingSent - PingRecieved).totalMiliseconds;
+        double returnMS = (PingSent - DateTime.Now).TotalMilliseconds;
+        double sendMS = (PingSent - PingRecieved).TotalMilliseconds;
 
-        ConsoleV2.Console.Log("Send: " + sendMS + "ms | Return: " + returnMS + "ms | Total: " + (sendMS + returnMS) + "ms", "Ping");
+        ZinklofDev.ConsoleV2.Console.Log("Send: " + sendMS + "ms | Return: " + returnMS + "ms | Total: " + (sendMS + returnMS) + "ms", "Ping");
     }
 
     LegacyCommand HOST =  new LegacyCommand("0001x8800000000", "host", "starts server", false, ()=>
@@ -60,17 +60,17 @@ public class NetworkCommands : NetworkBehavior
     [Command("Starts hosting", false, "Network.Host")]
     public static void host()
     {
-        ConsoleV2.Console.Log("Hosting network...", "Host");
+        ZinklofDev.ConsoleV2.Console.Log("Hosting network...", "Host");
         NetworkManager.Singleton.StartHost();
         Debug.Log(IPV4toHex.IPV4ToHexadecimal(Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToString()));
 
-        if (NetworkManager.IsNetworkActive)
+        if (netCmd.NetworkManager.isActiveAndEnabled)
         {
-            ConsoleV2.Console.Log("Network is live!", "Host");
+            ZinklofDev.ConsoleV2.Console.Log("Network is live!", "Host");
         }
         else
         {
-            ConsoleV2.Console.Log("Something went wrong, Network is not alive :(", "Host");
+            ZinklofDev.ConsoleV2.Console.Log("Something went wrong, Network is not alive :(", "Host");
         }
     }
 
@@ -79,18 +79,18 @@ public class NetworkCommands : NetworkBehavior
     {
         try
         {
-            ConsoleV2.Console.Log("Attempting to join network...", "Connect");
+            ZinklofDev.ConsoleV2.Console.Log("Attempting to join network...", "Connect");
             string targetIP = IPV4toHex.HexadecimalToIPV4(hostID);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(targetIP, 7777);
             NetworkManager.Singleton.StartClient();
 
-            if (NetworkManager.IsNetworkActive)
+            if (netCmd.NetworkManager.isActiveAndEnabled)
             {
-                ConsoleV2.Console.Log("Connected!?", "Connect");
+                ZinklofDev.ConsoleV2.Console.Log("Connected!?", "Connect");
             }
             else
             {
-                ConsoleV2.Console.Log("Not connected!?", "Connect");
+                ZinklofDev.ConsoleV2.Console.Log("Not connected!?", "Connect");
             }
         }
         catch (Exception e)
@@ -99,13 +99,14 @@ public class NetworkCommands : NetworkBehavior
         }
     }
 
-    public static void Disconnect()
+    [Command("Kicks a Client", false, "Network.Kick")]
+    public static void Kick(ulong id)
     {
         try
         {
-            ConsoleV2.Console.Log("Disconnecting...", "Disconnect");
-            NetworkManager.Singleton.DisconnectClient();
-            ConsoleV2.Console.Log("Disconnected!", "Disconnect");
+            ZinklofDev.ConsoleV2.Console.Log("Kicking...", "Kick");
+            NetworkManager.Singleton.DisconnectClient(id);
+            ZinklofDev.ConsoleV2.Console.Log("Kicked!", "Kick");
         }
         catch (Exception e)
         {
@@ -113,15 +114,15 @@ public class NetworkCommands : NetworkBehavior
         }
     }
 
-    [Command("Sends a ping and spits the send + re-receive Time back into the console", "Network.Ping")
+    [Command("Sends a ping and spits the send + re-receive Time back into the console", false, "Network.Ping")]
     public static void Ping()
     {
-        if (!NetworkManager.isNetworkActive)
+        if (!netCmd.NetworkManager.isActiveAndEnabled)
         {
-            ConsoleV2.Console.Log("No network to ping!", "Ping");
+            ZinklofDev.ConsoleV2.Console.Log("No network to ping!", "Ping");
         }
     
         netCmd.HandlePingOperation();
-        ConsoleV2.Console.Log("Ping started!", "Ping");
+        ZinklofDev.ConsoleV2.Console.Log("Ping started!", "Ping");
     }
 }
