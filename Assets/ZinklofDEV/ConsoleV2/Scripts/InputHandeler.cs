@@ -91,6 +91,8 @@ public class InputHandeler : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Tab))
             {
                 inputField.text = tabfill;
+                inputField.MoveTextEnd();
+                inputField.Text += ")";
             }
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -137,6 +139,9 @@ public class InputHandeler : MonoBehaviour
         string[] results = Shell.SearchForCommands(inputField.text);
         possibleCommands = results;
 
+        tabfill = results[0].Split("(")[0];
+        tabfill += "(";
+
         if (results.Length == 0)
         {
             possibleCommandsGUI.text = "";
@@ -158,24 +163,6 @@ public class InputHandeler : MonoBehaviour
                 partThree = results[i].Substring(index + inputField.text.Length);
 
                 string total = partOne + partTwo + partThree;
-
-                if (partOne.Length != 0)
-                {
-                    tabfill = partOne;
-                    tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
-                    tabfill = tabfill.Split("(")[0]; // if we have a "(" then return everything before that "("
-                    tabfill += inputField.text;
-                }
-                else
-                {
-                    tabfill = partThree;
-                    tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
-                    tabfill = tabfill.Split("(")[0]; // if we have a "(" then return everything before that "("
-                    tabfill = inputField.text + tabfill;
-                }
-                
-                tabfill = tabfill.Split(".")[0]; // should return all chars from start till first period.
-                tabfill = tabfill.Split("(")[0]; // if we have a "(" then return everything before that "("
                 
                 possibleCommands[i] = total;
             }
