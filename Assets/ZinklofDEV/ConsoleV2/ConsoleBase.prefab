@@ -552,10 +552,10 @@ MonoBehaviour:
   lerp: 0.08
   console: {fileID: 2161069241132597396}
   logContainer: {fileID: 4976549731654869441}
-  maxLogContainerY: 258
-  minLogContainerY: -258
+  maxLogContainerY: 0
+  minLogContainerY: -600
   logLerp: 0.5
-  changeAmmount: 0.2
+  changeAmmount: 9999
 --- !u!1 &5137241300207956719
 GameObject:
   m_ObjectHideFlags: 0

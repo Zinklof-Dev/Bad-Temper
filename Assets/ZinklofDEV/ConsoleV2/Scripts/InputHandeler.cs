@@ -77,7 +77,7 @@ public class InputHandeler : MonoBehaviour
             console.localPosition = Vector3.Lerp(console.localPosition, new Vector3(0, targetYOpen, 0), lerp);
             float y = Input.GetAxis("Mouse ScrollWheel") * changeAmmount * Time.deltaTime;
             targetLogContainerY = Mathf.Clamp(targetLogContainerY + y, minLogContainerY, maxLogContainerY);
-            logContainer.localPosition = Vector3.Lerp(logContainer.localPosition, new Vector3(0,0,0), logLerp);
+            logContainer.localPosition = Vector3.Lerp(logContainer.localPosition, new Vector3(0,targetLogContainerY,0), logLerp);
 
             if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
             {
@@ -91,8 +91,8 @@ public class InputHandeler : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Tab))
             {
                 inputField.text = tabfill;
-                inputField.MoveTextEnd();
-                inputField.Text += ")";
+                inputField.MoveTextEnd(false);
+                inputField.text += ")";
             }
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -139,8 +139,11 @@ public class InputHandeler : MonoBehaviour
         string[] results = Shell.SearchForCommands(inputField.text);
         possibleCommands = results;
 
-        tabfill = results[0].Split("(")[0];
-        tabfill += "(";
+        if (results.Length > 0)
+        {
+            tabfill = results[0].Split("(")[0];
+            tabfill += "(";
+        }
 
         if (results.Length == 0)
         {
