@@ -41,9 +41,9 @@ public class InputHandeler : MonoBehaviour
         string knownProblems = "Currently known problems in this version:\n" +
             "Wrong Variables cause exceptions that sometimes kill the Shell\n" +
             "Missformating of () causes exceptions that sometimes kill the shell\n" +
-            "GPU Driver may crash on particularly severe exceptions due to an issue on unity's end with texture math\n" +
-            "Help command doesn't exist\n" +
-            "Suggested commands don't tab auto fill, and freak out once you start entering variables\n" +
+            "<s>GPU Driver may crash on particularly severe exceptions due to an issue on unity's end with texture math</s> (One time issue?)\n" +
+            "<s>Help command doesn't exist</s>\n" +
+            "Suggested commands <s>don't tab auto fill, and</s> freak out once you start entering variables\n" +
             "Console may spazz to the corner, zero clue why\n" +
             "Log container doesn't scroll, code is in place, variables are not set yet.\n" +
             "Console causes slowdown on start, increases exponentially with the ammount of assemblies, classes, and methods you have, this is an issue with using reflection, and can only be worked around in the future.";
