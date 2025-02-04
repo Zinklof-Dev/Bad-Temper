@@ -205,6 +205,35 @@ namespace ZinklofDev.ConsoleV2
             Console.Log("Shell is live with " + registeredCommands.Count + " commands which matches the assembler and console expected number", "Shell");
         }
 
+        [Command("The Help Command", false, "Help")]
+        public static void Help()
+        {
+            string result = "";
+
+            foreach (ShellCommandClass cmd in registeredCommands)
+            {                
+                string variables = "";
+
+                if (cmd.genericCommandVariables.Length > 0)
+                {
+                    int i = 0;
+                    foreach (GenericCommandVariable variable in cmd.genericCommandVariables)
+                    {
+                        if (i != cmd.genericCommandVariables.Length-1)
+                            variables += variable.ToString() + ",";
+                        else
+                            variables += variable.ToString();
+                        i++;
+                    }
+                }
+                
+                result += "<b>" + cmd.callName + "(" + variables + ")</b>" + "\n";
+                result += cmd.helpDescription + "\n";
+            }
+
+            ZinklofDev.ConsoleV2.Console.Log(result, "Help");
+        }
+
         public static string[] SearchForCommands(string querry)
         {
             List<string> commands = new List<string>();
