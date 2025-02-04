@@ -11,7 +11,7 @@ namespace ZinklofDev.ConsoleV2
 
         public static bool isOpen = false;
         public static readonly string ReleaseType = "Experimental Build"; // Should be "Release Build" or "Experiemental Build"
-        public static readonly string ReleaseVersion = "E-2501A";
+        public static readonly string ReleaseVersion = "E-2501B";
         public static int CommandsRegistered = 0;
 
         struct ConsoleLog
