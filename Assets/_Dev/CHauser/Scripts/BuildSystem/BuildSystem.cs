@@ -5,6 +5,7 @@ using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
+using Unity.VisualScripting;
 
 [System.Serializable]
 public struct SnapPoint
@@ -23,6 +24,7 @@ public struct SnapPoint
 
 public class BuildSystem : NetworkBehaviour
 {
+    /*
     #region Snap Points
     // All points are just offsets we then add to the positions of whatever base object we're building off of
     private static SnapPoint[] floorWallPoints = 
@@ -197,6 +199,7 @@ public class BuildSystem : NetworkBehaviour
         // FLOOR IS ID 1
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach))
         {
@@ -209,6 +212,7 @@ public class BuildSystem : NetworkBehaviour
             }
 
             Collider closestWall = ClosestCollider(wallColliders, hit);
+            criticalObject = closestWall.gameObject;
 
             if(closestWall.transform.rotation.eulerAngles.z == 90)
             {
@@ -242,7 +246,9 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1);
+                GameObject placedObject = PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1);
+                BuildObject buildObject = placedObject.GetComponent<BuildObject>();
+                buildObject.criticalObject = criticalObject;
             }
         }
     }
@@ -392,10 +398,16 @@ public class BuildSystem : NetworkBehaviour
 
         if (Physics.Raycast(ray, out hit, playerReach, floorLayerMask + foundationLayerMask))
         {
-            //if()
-
-            ghostObjects[objectID].transform.position = hit.point;
-            ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+            if (hit.transform.gameObject.layer == 8 && hit.point.y == hit.transform.position.y + 0.5f)
+            {
+                ghostObjects[objectID].transform.position = hit.point;
+                ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+            }
+            if (hit.transform.gameObject.layer == 7 && hit.point.y >= hit.transform.position.y + 0.054f)
+            {
+                ghostObjects[objectID].transform.position = hit.point;
+                ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+            }
         }
         else
         {
@@ -427,10 +439,11 @@ public class BuildSystem : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID)
+    private GameObject PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID)
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, rotation);
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
+        return spawnedObject;
     }
 
     #region Commands
@@ -489,4 +502,5 @@ public class BuildSystem : NetworkBehaviour
         currentObjectID = t1;
     });
     #endregion
+    */
 }
