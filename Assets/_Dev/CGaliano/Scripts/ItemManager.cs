@@ -37,5 +37,5 @@ public static class ItemManager
         description = "Shiny, solid too, but sorta brittle... Gotta be something better than this.", 
         itemID = 3,
         imageFilePath = null
-    }
+    };
 }
