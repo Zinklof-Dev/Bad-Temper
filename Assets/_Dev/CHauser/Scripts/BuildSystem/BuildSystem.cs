@@ -449,6 +449,7 @@ public class BuildSystem : NetworkBehaviour
         if(hasCriticalObject)
         {
             BuildObject buildObject = spawnedObject.GetComponent<BuildObject>();
+            buildObject.hasCriticalObject = true;
             buildObject.criticalObject = criticalObject;
         }
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
