@@ -24,7 +24,6 @@ public struct SnapPoint
 
 public class BuildSystem : NetworkBehaviour
 {
-    /*
     #region Snap Points
     // All points are just offsets we then add to the positions of whatever base object we're building off of
     private static SnapPoint[] floorWallPoints = 
@@ -81,8 +80,6 @@ public class BuildSystem : NetworkBehaviour
     private static int currentObjectID;
     public static bool isBuilding;
 
-    private List<Vector3> DebugSnapPoints = new List<Vector3>();
-
     public override void OnNetworkSpawn()
     {
         // Cole | All legacy commands must be registered with the shell
@@ -92,15 +89,6 @@ public class BuildSystem : NetworkBehaviour
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         // Cole | Allows for the function to execute what it needs to do because of the ovveride.
         base.OnNetworkSpawn();
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.blue;
-        foreach (Vector3 v in DebugSnapPoints)
-        {
-            Gizmos.DrawSphere(v, 0.1f);
-        }
     }
 
     void Update()
@@ -163,8 +151,8 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, terrainLayerMask))
         {
             Collider[] foundationColliders = Physics.OverlapSphere(hit.point, 2.5f, foundationLayerMask);
-            
-            if(foundationColliders.Length == 0)
+
+            if (foundationColliders.Length == 0)
             {
                 ghostObject.gameObject.transform.position = hit.point;
             }
@@ -186,10 +174,6 @@ public class BuildSystem : NetworkBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 PlaceObjectInSceneRPC(ghostObject.transform.position, ghostObject.gameObject.transform.rotation, 0);
-                foreach (SnapPoint sp in foundationFoundationPoints)
-                {
-                    DebugSnapPoints.Add(sp.position + new Vector3(ghostObject.transform.position.x, ghostObject.transform.position.y, ghostObject.transform.position.z));
-                }
             }
         }
     }
@@ -246,7 +230,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                GameObject placedObject = PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1, true, criticalObject);
+                PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1, true, criticalObject);
             }
         }
     }
@@ -443,14 +427,15 @@ public class BuildSystem : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID, bool hasCriticalObject = false, GameObject criticalObject = null)
+    private void PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID, bool hasCriticalObject = false, NetworkObjectReference criticalObjectReference = new NetworkObjectReference())
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, rotation);
         if(hasCriticalObject)
         {
-            BuildObject buildObject = spawnedObject.GetComponent<BuildObject>();
-            buildObject.hasCriticalObject = true;
-            buildObject.criticalObject = criticalObject;
+                criticalObjectReference.TryGet(out NetworkObject criticalObject);
+                BuildObject buildObject = spawnedObject.GetComponent<BuildObject>();
+                buildObject.hasCriticalObject = true;
+                buildObject.criticalObject = criticalObject.gameObject;
         }
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
@@ -511,5 +496,4 @@ public class BuildSystem : NetworkBehaviour
         currentObjectID = t1;
     });
     #endregion
-    */
 }

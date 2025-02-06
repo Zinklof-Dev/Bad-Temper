@@ -5,7 +5,6 @@ using ZinklofDev.ConsoleV2;
 
 public class BuildObject : NetworkBehaviour
 {
-/*
     public float serverHealth = 100; // Health that is stored only on the server side. This is the main health that will be used in calculating when to break and other calculations based on health.
     public float localHealth = 100; // This health is stored on the client, and is the health that the client updates and reads. Can be used for health bar system or for potential healing that the client does
     public float prevServerHealth = 100; // This value will save the server health at the end of ServerUpdate so we only update the local health when the server health changes
@@ -31,7 +30,9 @@ public class BuildObject : NetworkBehaviour
 
         if (serverHealth <= 0)
         {
-            NetworkObject.Spawn(false);
+            Server server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
+            server.ServerTick -= ServerUpdate;
+            NetworkObject.Despawn();
             Destroy(gameObject);
         }
         
@@ -40,7 +41,9 @@ public class BuildObject : NetworkBehaviour
 
         if (criticalObject == null)
         {
-            NetworkObject.Spawn(false);
+            Server server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
+            server.ServerTick -= ServerUpdate;
+            NetworkObject.Despawn();
             Destroy(gameObject);
         }
 
@@ -51,5 +54,4 @@ public class BuildObject : NetworkBehaviour
     {
         localHealth = serverHealth;
     }
-    */
 }

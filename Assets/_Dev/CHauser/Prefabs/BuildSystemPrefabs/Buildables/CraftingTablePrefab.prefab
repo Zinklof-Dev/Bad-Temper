@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 75701275493157382}
   - component: {fileID: 5897682810148828307}
   - component: {fileID: -5306514441467709301}
+  - component: {fileID: 4829295500755902642}
   m_Layer: 0
   m_Name: CraftingTablePrefab
   m_TagString: BuildObjects
@@ -134,3 +135,21 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &4829295500755902642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6203676848952590560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9e3f53785037d741ae4fb38cba9ea88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  serverHealth: 100
+  localHealth: 100
+  prevServerHealth: 100
+  hasCriticalObject: 0
+  criticalObject: {fileID: 0}

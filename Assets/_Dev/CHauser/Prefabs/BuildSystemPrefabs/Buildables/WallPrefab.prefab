@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3157876279022740166}
   - component: {fileID: 1154334359843964451}
   - component: {fileID: -603829498780086281}
+  - component: {fileID: 9120276522142434846}
   m_Layer: 10
   m_Name: WallPrefab
   m_TagString: BuildObjects
@@ -353,3 +354,21 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &9120276522142434846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5092027943096200826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9e3f53785037d741ae4fb38cba9ea88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  serverHealth: 100
+  localHealth: 100
+  prevServerHealth: 100
+  hasCriticalObject: 0
+  criticalObject: {fileID: 0}
