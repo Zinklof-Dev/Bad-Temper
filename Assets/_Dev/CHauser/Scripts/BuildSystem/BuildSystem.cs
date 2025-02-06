@@ -246,9 +246,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                GameObject placedObject = PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1);
-                BuildObject buildObject = placedObject.GetComponent<BuildObject>();
-                buildObject.criticalObject = criticalObject;
+                GameObject placedObject = PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1, true, criticalObject);
             }
         }
     }
@@ -259,6 +257,7 @@ public class BuildSystem : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[2].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(ray, out hit, playerReach))
         {
@@ -271,6 +270,7 @@ public class BuildSystem : NetworkBehaviour
              }
 
             Collider closestFloor = ClosestCollider(floorColliders, hit);
+            criticalObject = closestFloor.gameObject;
 
             if(closestFloor.gameObject.layer == 7)
                 ghostObjects[2].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
@@ -288,7 +288,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[2].transform.position, ghostObject.rotation, 2);
+                PlaceObjectInSceneRPC(ghostObjects[2].transform.position, ghostObject.rotation, 2, true, criticalObject);
             }
         }
     }
@@ -298,6 +298,7 @@ public class BuildSystem : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[3].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(ray, out hit, playerReach))
         {
@@ -310,6 +311,7 @@ public class BuildSystem : NetworkBehaviour
             }
 
             Collider closestCollider = ClosestCollider(floorColliders, hit);
+            criticalObject = closestCollider.gameObject;
 
             if (closestCollider.gameObject.layer == 8) // Foundation Layer is Layer 8
             {
@@ -337,7 +339,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[3].transform.position, ghostObject.rotation, 3);
+                PlaceObjectInSceneRPC(ghostObjects[3].transform.position, ghostObject.rotation, 3, true, criticalObject);
             }
         }
     }
@@ -395,9 +397,11 @@ public class BuildSystem : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[objectID].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(ray, out hit, playerReach, floorLayerMask + foundationLayerMask))
         {
+            criticalObject = hit.transform.gameObject;
             if (hit.transform.gameObject.layer == 8 && hit.point.y == hit.transform.position.y + 0.5f)
             {
                 ghostObjects[objectID].transform.position = hit.point;
@@ -418,7 +422,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[objectID].transform.position, ghostObject.rotation, objectID);
+                PlaceObjectInSceneRPC(ghostObjects[objectID].transform.position, ghostObject.rotation, objectID, true, criticalObject);
             }
         }
     }
@@ -439,11 +443,15 @@ public class BuildSystem : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private GameObject PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID)
+    private void PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID, bool hasCriticalObject = false, GameObject criticalObject = null)
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, rotation);
+        if(hasCriticalObject)
+        {
+            BuildObject buildObject = spawnedObject.GetComponent<BuildObject>();
+            buildObject.criticalObject = criticalObject;
+        }
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
-        return spawnedObject;
     }
 
     #region Commands
