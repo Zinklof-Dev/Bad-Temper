@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 using TMPro;
-using Unity.Mathematics;
 
 public class LoadingManager : NetworkBehaviour
 {
