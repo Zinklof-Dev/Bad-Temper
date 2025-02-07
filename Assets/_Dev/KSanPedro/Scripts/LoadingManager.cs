@@ -260,10 +260,12 @@ public class LoadingManager : NetworkBehaviour
         if (!_ServerHasSeed) // if the server doesn't yet have the seed then deny the clients request
         {
             DenySeedRequestRpc(RpcTarget.Single(clientID, RpcTargetUse.Temp));
+            Debug.Log("Denied!");
             return;
         }
         else // otherwise provide the seed
             SendSeedRpc(_Seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
+        Debug.Log("Seed Sent!");
     }
 
     [Rpc(SendTo.SpecifiedInParams)]
