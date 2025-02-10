@@ -2,19 +2,40 @@ using UnityEngine;
 
 public class Item
 {
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public short ItemID { get; set; }
-    public string ImageFilePath { get; set; }
+    public string name { get; set; }
+    public string description { get; set; }
+    public ushort itemID { get; set; }
+    public string imageFilePath { get; set; }
 }
 
 public static class ItemManager
 {
-    static Item wood = new Item()
+    static public Item wood = new Item()
     {
-        Name = "Wood",
-        Description = "Let's stay mature here, its the corpse of a tree.",
-        ItemID = 0,
-        ImageFilePath = null
+        name = "Wood",
+        description = "Let's stay mature here, its the corpse of a tree.",
+        itemID = 0,
+        imageFilePath = null
+    };
+    static public Item stone = new Item()
+    {
+        name = "Stone",
+        description = "Rock? Unga Bunga!",
+        itemID = 1,
+        imageFilePath = null
+    };
+    static public Item coal = new Item()
+    {
+        name = "Coal",
+        description = "They say this is the remains of ancient creatures the size of mountains",
+        itemID = 2,
+        imageFilePath = null
+    };
+    static public Item copper = new Item()
+    {
+        name = "Copper",
+        description = "Shiny, solid too, but sorta brittle... Gotta be something better than this.", 
+        itemID = 3,
+        imageFilePath = null
     };
 }

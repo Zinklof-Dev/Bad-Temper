@@ -5,6 +5,7 @@ using ZinklofDev.Utils.Testing;
 using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
+using Unity.VisualScripting;
 
 [System.Serializable]
 public struct SnapPoint
@@ -28,16 +29,16 @@ public class BuildSystem : NetworkBehaviour
     private static SnapPoint[] floorWallPoints = 
     { 
         new SnapPoint(new Vector3(1.25f, 1.25f, 0), new Vector3(0, 0, 90)), 
-        new SnapPoint(new Vector3(-1.25f, 1.25f, 0), new Vector3(0, 0, -90)), 
+        new SnapPoint(new Vector3(-1.25f, 1.25f, 0), new Vector3(0, 0, 90)), 
         new SnapPoint(new Vector3(0, 1.25f, 1.25f), new Vector3(90, 0, 0)),
-        new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(-90, 0, 0))
+        new SnapPoint(new Vector3(0, 1.25f, -1.25f), new Vector3(90, 0, 0))
     };
     private static SnapPoint[] foundationWallPoints =
     {
         new SnapPoint(new Vector3(1.25f, 1.75f, 0), new Vector3(0, 0, 90)),
-        new SnapPoint(new Vector3(-1.25f, 1.75f, 0), new Vector3(0, 0, -90)),
+        new SnapPoint(new Vector3(-1.25f, 1.75f, 0), new Vector3(0, 0, 90)),
         new SnapPoint(new Vector3(0, 1.75f, 1.25f), new Vector3(90, 0, 0)),
-        new SnapPoint(new Vector3(0, 1.75f, -1.25f), new Vector3(-90, 0, 0))
+        new SnapPoint(new Vector3(0, 1.75f, -1.25f), new Vector3(90, 0, 0))
     };
     private static SnapPoint[] foundationFoundationPoints =
     {
@@ -46,7 +47,13 @@ public class BuildSystem : NetworkBehaviour
         new SnapPoint(new Vector3(0, 0, 2.5f), new Vector3(0,0,0)),
         new SnapPoint(new Vector3(0, 0, -2.5f), new Vector3(0,0,0))
     };
-
+    private static SnapPoint[] wallFloorPoints =
+    {
+        new SnapPoint(new Vector3(1.25f, 1.3f, 0), new Vector3(0, 0, 0)),
+        new SnapPoint(new Vector3(-1.25f, 1.3f, 0), new Vector3(0, 0, 0)),
+        new SnapPoint(new Vector3(0, 1.3f, 1.25f), new Vector3(0, 0, 0)),
+        new SnapPoint(new Vector3(0, 1.3f, -1.25f), new Vector3(0, 0, 0))
+    };
     #endregion
 
     [Header("Game Object Refrences (DON'T TOUCH YOURSELF)")]
@@ -73,8 +80,6 @@ public class BuildSystem : NetworkBehaviour
     private static int currentObjectID;
     public static bool isBuilding;
 
-    private List<Vector3> DebugSnapPoints = new List<Vector3>();
-
     public override void OnNetworkSpawn()
     {
         // Cole | All legacy commands must be registered with the shell
@@ -84,15 +89,6 @@ public class BuildSystem : NetworkBehaviour
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         // Cole | Allows for the function to execute what it needs to do because of the ovveride.
         base.OnNetworkSpawn();
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.blue;
-        foreach (Vector3 v in DebugSnapPoints)
-        {
-            Gizmos.DrawSphere(v, 0.1f);
-        }
     }
 
     void Update()
@@ -155,15 +151,16 @@ public class BuildSystem : NetworkBehaviour
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, terrainLayerMask))
         {
             Collider[] foundationColliders = Physics.OverlapSphere(hit.point, 2.5f, foundationLayerMask);
-            
-            if(foundationColliders.Length == 0)
+
+            if (foundationColliders.Length == 0)
             {
                 ghostObject.gameObject.transform.position = hit.point;
             }
             else
             {
-                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, foundationColliders[0].gameObject, hit);
-                ghostObject.transform.position = foundationColliders[0].transform.position + closestSnapPoint.position;
+                Collider closestCollider = ClosestCollider(foundationColliders, hit);
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationFoundationPoints, closestCollider.gameObject, hit);
+                ghostObject.transform.position = closestCollider.transform.position + closestSnapPoint.position;
                 ghostObject.rotation = closestSnapPoint.quaternionRotation;
             }
         }
@@ -177,10 +174,6 @@ public class BuildSystem : NetworkBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 PlaceObjectInSceneRPC(ghostObject.transform.position, ghostObject.gameObject.transform.rotation, 0);
-                foreach (SnapPoint sp in foundationFoundationPoints)
-                {
-                    DebugSnapPoints.Add(sp.position + new Vector3(ghostObject.transform.position.x, ghostObject.transform.position.y, ghostObject.transform.position.z));
-                }
             }
         }
     }
@@ -190,6 +183,7 @@ public class BuildSystem : NetworkBehaviour
         // FLOOR IS ID 1
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[1].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach))
         {
@@ -202,35 +196,29 @@ public class BuildSystem : NetworkBehaviour
             }
 
             Collider closestWall = ClosestCollider(wallColliders, hit);
+            criticalObject = closestWall.gameObject;
 
-            if(closestWall.transform.rotation.eulerAngles.x == 90 || closestWall.transform.rotation.eulerAngles.x == -90)
+            if(closestWall.transform.rotation.eulerAngles.z == 90)
             {
-                if(Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(0, 1.3f, 1.25f)) <= Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(0, 1.3f, -1.25f)))
+                if(Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[0].position) <= Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[1].position))
                 {
-                    ghostObject.transform.position = closestWall.transform.position + new Vector3(0, 1.3f, 1.25f);
+                    ghostObject.transform.position = closestWall.transform.position + wallFloorPoints[0].position;
                 }
-
-                else if(Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(0, 1.3f, 1.25f)) >= Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(0, 1.3f, -1.25f)))
+                if (Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[0].position) >= Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[1].position))
                 {
-                    ghostObject.transform.position = closestWall.transform.position + new Vector3(0, 1.3f, -1.25f);
+                    ghostObject.transform.position = closestWall.transform.position + wallFloorPoints[1].position;
                 }
             }
-            else if(closestWall.transform.rotation.eulerAngles.z == 90 || closestWall.transform.rotation.eulerAngles.z == -90)
+            if(closestWall.transform.rotation.eulerAngles.x == 90)
             {
-                if(Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(1.25f, 1.3f, 0)) <= Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(-1.25f, 1.3f, 0)))
+                if (Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[2].position) <= Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[3].position))
                 {
-                    ghostObject.transform.position = closestWall.transform.position + new Vector3(1.25f, 1.3f, 0);
+                    ghostObject.transform.position = closestWall.transform.position + wallFloorPoints[2].position;
                 }
-
-                else if (Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(1.25f, 1.3f, 0)) >= Vectors.SqrDist3f(hit.point, closestWall.transform.position + new Vector3(-1.25f, 1.3f, 0)))
+                if (Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[2].position) >= Vectors.SqrDist3f(hit.point, closestWall.transform.position + wallFloorPoints[3].position))
                 {
-                    ghostObject.transform.position = closestWall.transform.position + new Vector3(-1.25f, 1.3f, 0);
+                    ghostObject.transform.position = closestWall.transform.position + wallFloorPoints[3].position;
                 }
-            }
-            else
-            {
-                ghostObjects[1].transform.position = ghostObject.defaultPosition;
-                Debug.Log("Invalid Rot");
             }
         }
         else
@@ -242,7 +230,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1);
+                PlaceObjectInSceneRPC(ghostObjects[1].transform.position, transform.rotation, 1, true, criticalObject);
             }
         }
     }
@@ -253,6 +241,7 @@ public class BuildSystem : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[2].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(ray, out hit, playerReach))
         {
@@ -265,10 +254,11 @@ public class BuildSystem : NetworkBehaviour
              }
 
             Collider closestFloor = ClosestCollider(floorColliders, hit);
+            criticalObject = closestFloor.gameObject;
 
-            if(floorColliders[0].gameObject.layer == 7)
+            if(closestFloor.gameObject.layer == 7)
                 ghostObjects[2].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.25f, closestFloor.gameObject.transform.position.z);
-            if (floorColliders[0].gameObject.layer == 8)
+            if (closestFloor.gameObject.layer == 8)
                 ghostObjects[2].transform.position = new Vector3(closestFloor.gameObject.transform.position.x, closestFloor.gameObject.transform.position.y + 1.75f, closestFloor.gameObject.transform.position.z);
 
             ghostObject.rotation = Quaternion.Euler(-45f, RoundToMultipule(playerCamera.transform.eulerAngles.y, 90), 0);
@@ -282,7 +272,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[2].transform.position, ghostObject.rotation, 2);
+                PlaceObjectInSceneRPC(ghostObjects[2].transform.position, ghostObject.rotation, 2, true, criticalObject);
             }
         }
     }
@@ -292,6 +282,7 @@ public class BuildSystem : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[3].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
         if (Physics.Raycast(ray, out hit, playerReach))
         {
@@ -303,18 +294,19 @@ public class BuildSystem : NetworkBehaviour
                 return;
             }
 
-            if (floorColliders[0].gameObject.layer == 8) // Foundation Layer is Layer 8
+            Collider closestCollider = ClosestCollider(floorColliders, hit);
+            criticalObject = closestCollider.gameObject;
+
+            if (closestCollider.gameObject.layer == 8) // Foundation Layer is Layer 8
             {
-                Collider closestFoundation = ClosestCollider(floorColliders, hit);
-                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, closestFoundation.gameObject, hit);
-                ghostObject.transform.position = closestFoundation.gameObject.transform.position + closestSnapPoint.position;
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, closestCollider.gameObject, hit);
+                ghostObject.transform.position = closestCollider.gameObject.transform.position + closestSnapPoint.position;
                 ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
-            else if (floorColliders[0].gameObject.layer == 7) // Floor Layer is Layer 7
+            else if (closestCollider.gameObject.layer == 7) // Floor Layer is Layer 7
             {
-                Collider closestFloor = ClosestCollider(floorColliders, hit);
-                SnapPoint closestSnapPoint = FindClosestSnapPoint(floorWallPoints, closestFloor.gameObject, hit);
-                ghostObject.transform.position = closestFloor.gameObject.transform.position + closestSnapPoint.position;
+                SnapPoint closestSnapPoint = FindClosestSnapPoint(floorWallPoints, closestCollider.gameObject, hit);
+                ghostObject.transform.position = closestCollider.gameObject.transform.position + closestSnapPoint.position;
                 ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
             }
             else
@@ -331,7 +323,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[3].transform.position, ghostObject.rotation, 3);
+                PlaceObjectInSceneRPC(ghostObjects[3].transform.position, ghostObject.rotation, 3, true, criticalObject);
             }
         }
     }
@@ -385,15 +377,25 @@ public class BuildSystem : NetworkBehaviour
 
     private void FreePlace(int objectID)
     {
-        // FREE PLACE OBJECTS ARE ID 3+
+        // FREE PLACE OBJECTS ARE ID 4+
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
         GhostObject ghostObject = ghostObjects[objectID].GetComponent<GhostObject>();
+        GameObject criticalObject = null;
 
-        if (Physics.Raycast(ray, out hit, playerReach, layerMask))
+        if (Physics.Raycast(ray, out hit, playerReach, floorLayerMask + foundationLayerMask))
         {
-            ghostObjects[objectID].transform.position = hit.point;
-            ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+            criticalObject = hit.transform.gameObject;
+            if (hit.transform.gameObject.layer == 8 && hit.point.y == hit.transform.position.y + 0.5f)
+            {
+                ghostObjects[objectID].transform.position = hit.point;
+                ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+            }
+            if (hit.transform.gameObject.layer == 7 && hit.point.y >= hit.transform.position.y + 0.054f)
+            {
+                ghostObjects[objectID].transform.position = hit.point;
+                ghostObject.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
+            }
         }
         else
         {
@@ -404,7 +406,7 @@ public class BuildSystem : NetworkBehaviour
         {
             if (Input.GetMouseButtonDown(1))
             {
-                PlaceObjectInSceneRPC(ghostObjects[objectID].transform.position, ghostObject.rotation, objectID);
+                PlaceObjectInSceneRPC(ghostObjects[objectID].transform.position, ghostObject.rotation, objectID, true, criticalObject);
             }
         }
     }
@@ -425,9 +427,16 @@ public class BuildSystem : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID)
+    private void PlaceObjectInSceneRPC(Vector3 spawnPos, Quaternion rotation, int objectID, bool hasCriticalObject = false, NetworkObjectReference criticalObjectReference = new NetworkObjectReference())
     {
         GameObject spawnedObject = Instantiate(placeableObjects[objectID], spawnPos, rotation);
+        if(hasCriticalObject)
+        {
+                criticalObjectReference.TryGet(out NetworkObject criticalObject);
+                BuildObject buildObject = spawnedObject.GetComponent<BuildObject>();
+                buildObject.hasCriticalObject = true;
+                buildObject.criticalObject = criticalObject.gameObject;
+        }
         spawnedObject.GetComponent<NetworkObject>().Spawn(true);
     }
 

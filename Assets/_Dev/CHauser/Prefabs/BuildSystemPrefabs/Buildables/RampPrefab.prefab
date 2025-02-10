@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5240144321339419279}
   - component: {fileID: 2821886163050958693}
   - component: {fileID: 260988418986765160}
+  - component: {fileID: 4911905362189904936}
   m_Layer: 0
   m_Name: RampPrefab
   m_TagString: Untagged
@@ -353,3 +354,21 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &4911905362189904936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 609625293002624173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9e3f53785037d741ae4fb38cba9ea88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  serverHealth: 100
+  localHealth: 100
+  prevServerHealth: 100
+  hasCriticalObject: 0
+  criticalObject: {fileID: 0}
