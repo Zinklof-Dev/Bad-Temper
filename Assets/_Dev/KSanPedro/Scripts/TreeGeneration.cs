@@ -169,10 +169,12 @@ public class TreeGeneration : NetworkBehaviour
     private async Task GenTreesRuntime()
     {
         //Debug.Log("Entered the tree func");
+        // HIGHLANDS ARE GREATER THAN 20 AND LESS THAN 31
 
         List<Vector2> points = await Noise.PoissonSamplingAsync(_TreeRadius, _MapSize, _Seed, _TreeAccuracy);
         PerlinMap perlinMap = await Noise.GenPerlinMapAsnyc(_TreeImageSize, _TreeImageSize, _Seed, _TreePerlinScale, _TreeOctaves, _TreePersistance, _TreeLacunarity, _TreeOffset);
         System.Random randomRotationValue = new System.Random(_Seed);
+        System.Random randomTreeThinning = new System.Random(_Seed + 37);
         System.Random randomModel = new System.Random(_Seed + 2);
         int treeIndex = 0;
 
@@ -201,15 +203,33 @@ public class TreeGeneration : NetworkBehaviour
 
                 if (perlinMap.Map[(int)pointToPerlinSpace.x, (int)pointToPerlinSpace.y] <= _TreeCutoffPercent && Vectors.SqrDist3f(_Campfire.transform.position, hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
                 {
+                    if(hit.point.y < 20)
+                    {
+                        if(randomTreeThinning.Next(0, 2) == 0)
+                        {
+                            continue;
+                        }
+                    }
+
                     //Debug.Log("Tree Placed " + hit.point);
                     int randomRotation = randomRotationValue.Next(0, 360);
                     Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
                     Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                    //Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
                     GameObject tree = Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
                     _NetworkTreeManager.trees.Add(new Tree(tree, treeIndex));
                     treeIndex++;
-                    //_TreeManager.AddTree(Matrix4x4.TRS(new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation, Vector3.one), 0);
+                }
+                else if(hit.point.y >= 20 && Vectors.SqrDist3f(_Campfire.transform.position, hit.point) > Numbers.Sqr(_CampfireExclusionRadius))
+                {
+                    if (randomTreeThinning.Next(0, 2) == 0)
+                    {
+                        int randomRotation = randomRotationValue.Next(0, 360);
+                        Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
+                        Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
+                        GameObject tree = Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                        _NetworkTreeManager.trees.Add(new Tree(tree, treeIndex));
+                        treeIndex++;
+                    }
                 }
             }
         }

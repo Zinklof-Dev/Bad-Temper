@@ -1,11 +1,7 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using ZinklofDev.Utils.Testing;
-using ZinklofDev.Console;
 using ZinklofDev.ConsoleV2;
 using ZinklofDev.Utils.MathZ;
-using Unity.VisualScripting;
 
 [System.Serializable]
 public struct SnapPoint
@@ -82,9 +78,6 @@ public class BuildSystem : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Cole | All legacy commands must be registered with the shell
-        ZinklofDev.Console.Shell.RegisterCommand(IS_BUILDING);
-        ZinklofDev.Console.Shell.RegisterCommand(BUILD_ID);
         // Cole | Assigns the player camera refrence
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         // Cole | Allows for the function to execute what it needs to do because of the ovveride.
@@ -301,13 +294,13 @@ public class BuildSystem : NetworkBehaviour
             {
                 SnapPoint closestSnapPoint = FindClosestSnapPoint(foundationWallPoints, closestCollider.gameObject, hit);
                 ghostObject.transform.position = closestCollider.gameObject.transform.position + closestSnapPoint.position;
-                ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
+                ghostObject.rotation = closestSnapPoint.quaternionRotation;
             }
             else if (closestCollider.gameObject.layer == 7) // Floor Layer is Layer 7
             {
                 SnapPoint closestSnapPoint = FindClosestSnapPoint(floorWallPoints, closestCollider.gameObject, hit);
                 ghostObject.transform.position = closestCollider.gameObject.transform.position + closestSnapPoint.position;
-                ghostObject.rotation = Quaternion.Euler(closestSnapPoint.eulerRotation);
+                ghostObject.rotation = closestSnapPoint.quaternionRotation;
             }
             else
             {
@@ -455,45 +448,5 @@ public class BuildSystem : NetworkBehaviour
     {
         currentObjectID = ID;
     }
-    #endregion
-
-    #region Tests and Legacy Commands
-
-    // Tests and (Legacy) Commands
-
-    public static Test RoundToMultipuleTest = new Test("BuildSystem.cs", () => 
-    {
-        float x = RoundToMultipule(2.6f, 2.5f);
-        RoundToMultipuleTest.Expect(x, 2.5f);
-
-        x = RoundToMultipule(69, 2.5f);
-        RoundToMultipuleTest.Expect(x, 70f);
-
-        x = RoundToMultipule(420.69f, 8);
-        RoundToMultipuleTest.Expect(x, 424f);
-
-    });
-
-    public static Test RoundWithOffsetTest = new Test("BuildSystem.cs", () =>
-    {
-        float x = RoundToMultipule(0.1f, 5, 2.5f);
-        RoundWithOffsetTest.Expect(x, 2.5f);
-
-        x = RoundToMultipule(69, 6, 0.69f);
-        RoundWithOffsetTest.Expect(x, 66.69f);
-
-        x = RoundToMultipule(450, 420, 0.69f);
-        RoundWithOffsetTest.Expect(x, 420.69f);
-    });
-
-    public static LegacyCommand<bool> IS_BUILDING = new LegacyCommand<bool>("0001x1500000003", "is_building", "Activates or deactivates build system.", false, (t1) =>
-    {
-        isBuilding = t1;
-    });
-
-    public static LegacyCommand<int> BUILD_ID = new LegacyCommand<int>("0001x1500000004", "build_id", "Changes the object you are placing in the scene", false, (t1) =>
-    {
-        currentObjectID = t1;
-    });
     #endregion
 }
