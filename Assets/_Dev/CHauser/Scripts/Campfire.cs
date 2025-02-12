@@ -21,6 +21,7 @@ public class Campfire : NetworkBehaviour
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private Server server;
     [SerializeField] private float campfireHealthRefrence;
+    private SpriteRenderer healthBarSpriteRenderer;
 
     [Space(10)]
 
@@ -56,6 +57,7 @@ public class Campfire : NetworkBehaviour
         healTimer = healTime;
         //Instantiate(campfirePrefab);
         healthBar = GameObject.FindGameObjectWithTag("CampfireHealthBar");
+        healthBarSpriteRenderer = healthBar.GetComponent<SpriteRenderer>();
         playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
         server = GameObject.FindGameObjectWithTag("Server").GetComponent<Server>();
         campfireHealthRefrence = campfireHealth.Value;
@@ -119,6 +121,22 @@ public class Campfire : NetworkBehaviour
     {
         float percentage = campfireHealthRefrence / maxHealth;
         healthBar.transform.localScale = new Vector3(percentage * .96f, 0.65f, 1);
+        if(percentage > 0.75f)
+        {
+            healthBarSpriteRenderer.color = Color.green;
+        }
+        else if(percentage > 0.5f)
+        {
+            healthBarSpriteRenderer.color = Color.yellow;
+        }
+        else if(percentage > 0.25f)
+        {
+            healthBarSpriteRenderer.color = new Color(1, 0.5f, 0); // Orange
+        }
+        else
+        {
+            healthBarSpriteRenderer.color = Color.red;
+        }
     }
 
     /* private void CheckIfEndGame()
