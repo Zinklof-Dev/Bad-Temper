@@ -19,20 +19,41 @@ Namespace BadTemper
     [SerializeField] float waterDrag;
     [SerializeField] float friction;
     [SerializeField] float terminalVelocity;
+    [Header("Perspective")]
+    [SerializeField] Vector3 TPVCamOffset
+    [SerializeField] float TPVCamLerpT;
     [Header("Settings Overriden")]
     [SerializeField] float sensitivity;
     
     Vector2 playerLookXY;
-    bool TPV = false; // third person view, likely debug only
+    public bool TPV = false; // third person view, likely debug only
 
-    Vector3 linearVelocity;
+    public Vector3 linearVelocity;
     float lastJumpInput;
+
+    static BadTemper.Player playerRef;
+
+    private void Start() // change to on network spawn later
+    {
+      playerRef = this;
+    }
     
     private void CameraHandeler()
     {
       if (!TPV)
       {
         firstPerson();
+      }
+      else // this is not the most efficient method but TPV will likely only be a debug tool. if ever implimented properly will make more efficent code.
+      {
+        Vector3 cameraCurrentPos = cameraObject.transform.localPosition;
+
+        Vector3 cameraTargetPos = new Vector3(0,0,0) + (cameraObject.transform.forward * TPVCamOffset.Z) + (cameraObject.transform.right * TPVCamOffset.X) + (cameraObject.transform.up * TPVCamOffset.Y)
+        
+        cameraObject.transform.localPosition = new Vector3(0,0,0);
+        firstPerson();
+        cameraObject.transform.localPosition = cameraCurrentPos;
+        cameraObject.transorm.localPosition = Vector3.Lerp(camerObject.transform.localPosition, cameraTargetPos, TPVCamLerpT);
       }
     }
 
@@ -47,6 +68,17 @@ Namespace BadTemper
 
     private void MovementHandeler()
     {
+      if (Input.GetKey(KeyCode.Space))
+      {
+        lastJumpInput = jumpMem;
+      }
+      else if (lastJumpInput != -1)
+      {
+        lastJumpInput -= Time.deltaTime;
+        if (lastJumpInput < 0)
+          lastJumpInput = -1;
+      }
+    
       float pms = 0;
     
       if (Input.GetKey(KeyCode.LeftShift)
@@ -69,14 +101,14 @@ Namespace BadTemper
       linearVelocity += addedMovement;
     }
 
-    public void DFT() // Drag - Friction - Terminal Velocity
+    public void AFT() // Air Resistance - Friction - Terminal Velocity
     {
       // Terminal Velocity
       linearVelocity.x = Mathf.Clamp(linearVelocity.x, -terminalVelocity, terminalVelocity);
       linearVelocity.y = Mathf.Clamp(linearVelocity.y, -terminalVelocity, terminalVelocity);
       linearVelocity.z = Mathf.Clamp(linearVelocity.z, -terminalVelocity, terminalVelocity);
     
-      // Drag
+      // Air Resistance (Drag)
       linearVelocity = linearVelocity - ((linearVelocity * drag) * Time.feltaTime);
 
       // Friction (Drag again, but only if grounded)
@@ -88,8 +120,44 @@ Namespace BadTemper
     {
       CameraHandeler();
       MovementHandeler();
-      DFT();
+      AFT();
       cc.Move(linearVelocity);
+    }
+
+    //////// COMMANDS ////////
+
+    [Command("Toggles Third Person View, really only a debug tool, not optimized for gameplay.")]
+    static private void ToggleThirdPerson()
+    {
+      if (playerRef = null || playerRef == null)
+      {
+        Debug.LogError("No Player");
+        return;
+      }
+      
+      playerRef.TPV = !TPV;
+    }
+
+    static private void TP(float x, float y, float z) // likely to not work currently like the old one wasn't working.
+    {
+      if (playerRef = null || playerRef == null)
+      {
+        Debug.LogError("No Player");
+        return;
+      }
+      
+      playerRef.transform.position = new Vector3(x,y,z);
+    }
+
+    static public void AddVelocity(float x, float y, float z)
+    {
+      if (playerRef = null || playerRef == null)
+      {
+        Debug.LogError("No Player");
+        return;
+      }
+      
+      playerRef.linearVelocity += new Vector3(x,y,z)
     }
   }
 }
