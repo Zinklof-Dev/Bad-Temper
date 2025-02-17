@@ -205,7 +205,8 @@ public class TreeGeneration : NetworkBehaviour
                 {
                     if(hit.point.y < 20)
                     {
-                        if(randomTreeThinning.Next(0, 2) == 0)
+                        int r = randomTreeThinning.Next(0, 3);
+                        if (r == 0 || r == 1)
                         {
                             continue;
                         }

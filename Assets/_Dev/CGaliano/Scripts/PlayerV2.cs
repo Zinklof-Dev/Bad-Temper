@@ -1,12 +1,8 @@
 using System;
 using UnityEngine;
 using Unity.Netcode;
-using ZinklofDev.ConsoleV2;
 using TMPro;
 using Unity.Collections;
-using System.Text;
-using UnityEditor.PackageManager.Requests;
-using Mono.Cecil;
 
 public class PlayerV2 : NetworkBehaviour
 {
