@@ -35,7 +35,7 @@ public class TerrainGeneration : MonoBehaviour
     public async Task Initialize(int seed)
     {
         // !!!!!! Troll is here :D
-        _HeightScale = 99.9f;
+        //_HeightScale = 99999f;
     
         Polygon polygon = new Polygon();
 
@@ -113,6 +113,7 @@ public class TerrainGeneration : MonoBehaviour
 
     async Task GenerateMesh()
     {
+
         float halfWidth = _RegionSize.x / 2;
         float halfHeight = _RegionSize.y / 2;
 
@@ -124,8 +125,11 @@ public class TerrainGeneration : MonoBehaviour
 
         IEnumerator<Triangle> triangleEnum = _Mesh.triangles.GetEnumerator();
 
+        Debug.Log("Thread About to Start");
         await Task.Run(() =>
         {
+            Debug.Log("Thread Started");
+
             for (int i = 0; i < _Mesh.triangles.Count; i++)
             {
                 if (!triangleEnum.MoveNext())
@@ -162,7 +166,9 @@ public class TerrainGeneration : MonoBehaviour
             }
         });
 
-        Debug.Log("Unity Mesh Creation");
+        Debug.Log(vertices.Count + " Verts to be meshed");
+        Debug.Log(triangles.Count + " Tris to be meshed");
+        
         _UnityMesh = new UnityEngine.Mesh();
         _UnityMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         _UnityMesh.vertices = vertices.ToArray();

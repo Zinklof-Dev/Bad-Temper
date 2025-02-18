@@ -216,7 +216,7 @@ public class LoadingManager : NetworkBehaviour
         EvaluateBar();
         ChangeLoadingTip();
 
-        ZinklofDev.ConsoleV2.Console.Log("PEEETAAAAAHHH THE HORSE IS HERE!");
+        //ZinklofDev.ConsoleV2.Console.Log("PEEETAAAAAHHH THE HORSE IS HERE!");
 
         if (wantedBarValue >= 0.99f && timeElapsed > minTimeElapsed)
         {
