@@ -225,9 +225,9 @@ public class TreeGeneration : NetworkBehaviour
                     if (randomTreeThinning.Next(0, 2) == 0)
                     {
                         int randomRotation = randomRotationValue.Next(0, 360);
-                        Vector3 eulerRandomRotation = new Vector3(0, randomRotation, 0);
+                        Vector3 eulerRandomRotation = new Vector3(randomRotation, randomRotation, randomRotation);
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                        GameObject tree = Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                        GameObject tree = Instantiate(_TreePrefab, new Vector3(hit.point.x, hit.point.y + 4.2069f, hit.point.z), quaternionRandomRotation);
                         _NetworkTreeManager.trees.Add(new Tree(tree, treeIndex));
                         treeIndex++;
                     }
@@ -276,9 +276,9 @@ public class TreeGeneration : NetworkBehaviour
                             continue;
                         }
 
-                        Vector3 eulerRandomRotation = new Vector3(0, randomRoation.Next(0, 360), 0);
+                        Vector3 eulerRandomRotation = new Vector3(randomRoation.Next(0, 360), randomRoation.Next(0, 360), randomRoation.Next(0, 360)); // fixed this, it should actually randomize all rot values in order to make rocks seem less repetative. one low poly rock model can suprisingly seem like hundreds with different rots and scales.
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
-                        GameObject rock = Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y, hit.point.z), quaternionRandomRotation);
+                        GameObject rock = Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y + randomRotation.Next(1, 5), hit.point.z), quaternionRandomRotation);
                         _NetworkTreeManager.rocks.Add(new Rock(rock, rockIndex));
                         rockIndex++;
                     }
