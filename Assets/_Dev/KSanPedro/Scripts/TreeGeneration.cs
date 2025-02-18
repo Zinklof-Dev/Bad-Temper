@@ -276,7 +276,7 @@ public class TreeGeneration : NetworkBehaviour
                             continue;
                         }
 
-                        Vector3 eulerRandomRotation = new Vector3(randomRoation.Next(0, 360), randomRoation.Next(0, 360), randomRoation.Next(0, 360)); // fixed this, it should actually randomize all rot values in order to make rocks seem less repetative. one low poly rock model can suprisingly seem like hundreds with different rots and scales.
+                        Vector3 eulerRandomRotation = new Vector3(randomRoation.Next(0, 360), randomRoation.Next(0, 360), randomRoation.Next(0, 360)); // Cameron | fixed this, it should actually randomize all rot values in order to make rocks seem less repetative. one low poly rock model can suprisingly seem like hundreds with different rots and scales.
                         Quaternion quaternionRandomRotation = Quaternion.Euler(eulerRandomRotation);
                         GameObject rock = Instantiate(_RockPrefab, new Vector3(hit.point.x, hit.point.y + randomRotation.Next(1, 5), hit.point.z), quaternionRandomRotation);
                         _NetworkTreeManager.rocks.Add(new Rock(rock, rockIndex));
