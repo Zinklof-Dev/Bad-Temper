@@ -34,6 +34,9 @@ public class TerrainGeneration : MonoBehaviour
 
     public async Task Initialize(int seed)
     {
+        // !!!!!! Troll is here :D
+        _HeightScale = 99.9f;
+    
         Polygon polygon = new Polygon();
 
         Debug.Log("Perlin, poisson, and falloff");
