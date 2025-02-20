@@ -35,7 +35,7 @@ public class TerrainGeneration : MonoBehaviour
     public async Task Initialize(int seed)
     {
         // !!!!!! Troll is here :D
-        //_HeightScale = 99999f;
+        _HeightScale = 99999f;
     
         Polygon polygon = new Polygon();
 
@@ -58,7 +58,7 @@ public class TerrainGeneration : MonoBehaviour
             _Mesh = polygon.Triangulate(options) as TriangleNet.Mesh;
         });
 
-        Debug.Log("genMesh");
+        //Debug.Log("genMesh");
         await GenerateMesh();
 
         //clearing memory
@@ -166,18 +166,35 @@ public class TerrainGeneration : MonoBehaviour
             }
         });
 
-        Debug.Log(vertices.Count + " Verts to be meshed");
-        Debug.Log(triangles.Count + " Tris to be meshed");
-        
-        _UnityMesh = new UnityEngine.Mesh();
-        _UnityMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        _UnityMesh.vertices = vertices.ToArray();
-        _UnityMesh.triangles = triangles.ToArray();
-        _UnityMesh.uv = uvs.ToArray();
-        _UnityMesh.colors = colors.ToArray();
-        _UnityMesh.normals = normals.ToArray();
+        try
+        {
+            Debug.Log(vertices.Count + " Verts to be meshed");
+            Debug.Log(triangles.Count + " Tris to be meshed");
 
-        _MeshCollider.sharedMesh = _UnityMesh;
-        _MeshFilter.mesh = _UnityMesh;
+            _UnityMesh = new UnityEngine.Mesh();
+            Debug.Log("Empty Mesh Made");
+            _UnityMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            Debug.Log("Format set to UInt32");
+            _UnityMesh.vertices = vertices.ToArray();
+            Debug.Log("Verts assigned to array");
+            _UnityMesh.triangles = triangles.ToArray();
+            Debug.Log("Tris assigned to array");
+            _UnityMesh.uv = uvs.ToArray();
+            Debug.Log("UVs assigned to array");
+            _UnityMesh.colors = colors.ToArray();
+            Debug.Log("Colors assigned to array");
+            _UnityMesh.normals = normals.ToArray();
+            Debug.Log("Normals aissnged to Array");
+
+            _MeshCollider.sharedMesh = _UnityMesh;
+            Debug.Log("Collision Mesh Created");
+            _MeshFilter.mesh = _UnityMesh;
+            Debug.Log("Mesh assigned to filter");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
+        Debug.Log("Mesh Creation Finished");
     }
 }
