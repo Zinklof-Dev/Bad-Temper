@@ -86,10 +86,8 @@ public class Campfire : NetworkBehaviour
         _position = transform.position;
 
         // Makes sure we aren't executing the code and getting a million error messages from Unity before the health bar gets refrenced when Network Spawn happens
-        if (healthBar == null)
-            return;
-
-        HealthBarLookAtCamera();
+        if (healthBar != null)
+            HealthBarLookAtCamera();
     }
 
     private void HealCampfire()
@@ -179,40 +177,35 @@ public class Campfire : NetworkBehaviour
         System.Random random = new System.Random(seed * 69 / 420 + 69);
 
         MeshFilter terrainMeshFilter = loadingManagerObject.GetComponent<MeshFilter>();
-        UnityEngine.Mesh mesh = terrainMeshFilter.sharedMesh;
 
-        Vector3[] vertices = mesh.vertices;
-        int[] triangles = mesh.triangles;
+        Vector3[] vertices = terrainMeshFilter.sharedMesh.vertices;
+        int[] triangles = terrainMeshFilter.sharedMesh.triangles;
 
 
         RaycastHit hit;
-        int i = 0;
-        int fails = 0;
 
-        while (i < _positions.Length)
+        foreach (Vector3 pos in _positions)
         {
 
-            if (Physics.Raycast(new Vector3(_positions[i].x, 9999, _positions[i].y), Vector3.down, out hit))
+            if (Physics.Raycast(new Vector3(pos.x, 9999, pos.y), Vector3.down, out hit))
             {
                 if(hit.point.y <= 0)
                 {
                     continue;
                 }
 
-                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, mesh);
+                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
 
                 if (trianglePosition.y <= 0)
                 {
-                    i++;
                     continue;
                 }
 
-                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, mesh);
+                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
                 Vector3 triangleEulerRotation = triangleQuaternionRotation.eulerAngles;
 
                 if((triangleEulerRotation.x > 20 && triangleEulerRotation.x < 340) || (triangleEulerRotation.z > 20 && triangleEulerRotation.z < 340))
                 {
-                    i++;
                     Debug.Log("Failed because of incline");
                     continue;
                 }
@@ -224,24 +217,27 @@ public class Campfire : NetworkBehaviour
             }
         }
 
-        while (fails < 30)
+        for(int fails = 0; fails < 30; fails++)
         {
             if (Physics.Raycast(new Vector3(random.Next(0, 1000), 9999, random.Next(0, 1000)), Vector3.down, out hit))
             {
-                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, mesh);
-
-                if (trianglePosition.y <= 0)
+                if (hit.transform.gameObject.GetComponent<MeshFilter>() == null)
                 {
-                    i++;
                     continue;
                 }
 
-                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, mesh);
+                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+
+                if (trianglePosition.y <= 0)
+                {
+                    continue;
+                }
+
+                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
                 Vector3 triangleEulerRotation = triangleQuaternionRotation.eulerAngles;
 
                 if ((triangleEulerRotation.x > 20 && triangleEulerRotation.x < 340) || (triangleEulerRotation.z > 20 && triangleEulerRotation.z < 340))
                 {
-                    i++;
                     Debug.Log("Failed because of incline");
                     continue;
                 }
@@ -252,7 +248,6 @@ public class Campfire : NetworkBehaviour
                 return;
             }
         }
-
         Debug.Log("Critical Campfire Failure");
     }
 

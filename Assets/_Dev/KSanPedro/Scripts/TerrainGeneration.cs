@@ -35,7 +35,7 @@ public class TerrainGeneration : MonoBehaviour
     public async Task Initialize(int seed)
     {
         // !!!!!! Troll is here :D
-        _HeightScale = 99999f;
+        _HeightScale = 45;
     
         Polygon polygon = new Polygon();
 
