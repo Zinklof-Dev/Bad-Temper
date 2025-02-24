@@ -30,3 +30,4 @@ namespace ZinklofDev.KinematicZ
 }
 
 // as of current this system is on pause till i can confirm if EASYIK still works in newer unity versions (AKA im too lazy to solve IK myself.
+*/

@@ -6,6 +6,7 @@ using TriangleNet.Geometry;
 using TriangleNet.Meshing;
 using TriangleNet.Topology;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class TerrainGeneration : MonoBehaviour
 {
@@ -126,32 +127,135 @@ public class TerrainGeneration : MonoBehaviour
         }
     }
 
-    /*
-    async task SplitVerts()
+    
+    async Task SplitVerts(List<Vector2> verticies)
     {
         // Idea: find a point where the center of each mesh would be, then assign each vert to its closest mesh (in the xy plane ignoring Y height)
         Vector2 halfRegionSize = _RegionSize / 2;
-        List<Vector2> meshOrigins = new List<Vector2>();
+        List<Vector2>[] meshes = null;
 
-        
+        // Gonna hard code the 4 mesh divide first
+
+        await Task.Run(() =>
+        {
+            if (meshCount == 4)
+            {
+                Vector2[] meshOrigins = new Vector2[4];
+
+                meshOrigins[0] = new Vector2(0 + halfRegionSize.x, 0 + halfRegionSize.y);
+                meshOrigins[1] = new Vector2(0 + halfRegionSize.x, 0 - halfRegionSize.y);
+                meshOrigins[2] = new Vector2(0 - halfRegionSize.x, 0 + halfRegionSize.y);
+                meshOrigins[3] = new Vector2(0 - halfRegionSize.x, 0 - halfRegionSize.y);
+
+                meshes = new List<Vector2>[4];
+
+                foreach (Vector2 vertex in verticies)
+                {
+                    int closestMesh = -1;
+                    float closestMeshDistance = 999999999f;
+
+                    for (int i = 0; i < meshOrigins.Length; i++)
+                    {
+                        if (Vector2.Distance(vertex, meshOrigins[i]) < closestMeshDistance)
+                        {
+                            closestMesh = i;
+                        }
+                    }
+
+                    meshes[closestMesh].Add(vertex);
+                }
+            }
+        });
+
+        if (meshes != null)
+            await TriangulateMeshes(meshes);
+        else
+            Debug.LogError("Null meshes list");
     }
-    
-    async task GenerateDividedMeshes()
+
+    async Task TriangulateMeshes(List<Vector2>[] meshes)
     {
-        // start by spliting mesh
-        foreach(Vector3 Vert)
-    
-        Vector2 halfRegionSize = _RegionSize / 2;
+        List<TriangleNet.Mesh> triNetMeshes = new List<TriangleNet.Mesh>();
 
-        List<Vetor3> v = new List<Vector3>();
-        List<Vector3> n = new List<Vector3>();
-        List<Vector2> u = new List<Vector2>();
-        List<Color> c = new List<Color>();
-        List<int> t = new List<int>();
+        await Task.Run(() =>
+        {
+            for (int i = 0; i < meshes.Length; i++)
+            {
+                Polygon polygon = new Polygon();
 
-        IEnumerator<Triangle> triangleEnum = _Mesh.triangles.GetEnumerator();
+                for (int j = 0; j < meshes[i].Count; j++)
+                {
+                    polygon.Add(new Vertex(meshes[i][j].x, meshes[i][j].y));
+
+                    ConstraintOptions options = new ConstraintOptions();
+                    options.ConformingDelaunay = true;
+
+                    triNetMeshes[i] = polygon.Triangulate(options) as TriangleNet.Mesh;
+                }
+            }
+        });
+
+
     }
-    */
+    
+    /*async Task GenerateDividedMeshes(List<TriangleNet.Mesh> triNetMeshes)
+    {
+        float halfWidth = _RegionSize.x / 2;
+        float halfHeight = _RegionSize.y / 2;
+
+        foreach (TriangleNet.Mesh mesh in triNetMeshes)
+        {
+            List<Vector3> v = new List<Vector3>();
+            List<Vector3> n = new List<Vector3>();
+            List<Vector2> u = new List<Vector2>();
+            List<Color> c = new List<Color>();
+            List<int> t = new List<int>();
+
+            IEnumerator<Triangle> triangleEnum = mesh.triangles.GetEnumerator();
+
+            Debug.Log("Thread About to Start");
+            await Task.Run(() =>
+            {
+                Debug.Log("Thread Started");
+
+                for (int i = 0; i < mesh.triangles.Count; i++)
+                {
+                    if (!triangleEnum.MoveNext())
+                    {
+                        break;
+                    }
+
+                    Triangle currentTriangle = triangleEnum.Current;
+
+                    Vector3 v0 = new Vector3((float)currentTriangle.vertices[2].x - halfWidth, GetVertexHeight((float)currentTriangle.vertices[2].x, (float)currentTriangle.vertices[2].y) - 90, (float)currentTriangle.vertices[2].y - halfHeight);
+                    Vector3 v1 = new Vector3((float)currentTriangle.vertices[1].x - halfWidth, GetVertexHeight((float)currentTriangle.vertices[1].x, (float)currentTriangle.vertices[1].y) - 90, (float)currentTriangle.vertices[1].y - halfHeight);
+                    Vector3 v2 = new Vector3((float)currentTriangle.vertices[0].x - halfWidth, GetVertexHeight((float)currentTriangle.vertices[0].x, (float)currentTriangle.vertices[0].y) - 90, (float)currentTriangle.vertices[0].y - halfHeight);
+
+                    t.Add(v.Count);
+                    t.Add(v.Count + 1);
+                    t.Add(v.Count + 2);
+
+                    v.Add(v0);
+                    v.Add(v1);
+                    v.Add(v2);
+
+                    var normal = Vector3.Cross(v1 - v0, v2 - v0);
+
+                    float averageY = ((GetVertexHeight((float)currentTriangle.vertices[2].x, (float)currentTriangle.vertices[2].y) + GetVertexHeight((float)currentTriangle.vertices[1].x, (float)currentTriangle.vertices[1].y) + GetVertexHeight((float)currentTriangle.vertices[0].x, (float)currentTriangle.vertices[0].y)) / 3f) - 90;
+
+                    var color = EvaluateTriangleColor(currentTriangle, normal, averageY);
+
+                    for (int x = 0; x < 3; x++)
+                    {
+                        n.Add(normal);
+                        u.Add(Vector3.zero);
+                        c.Add(color);
+                    }
+                }
+            });
+        }
+    }*/
+    
 
     async Task GenerateMesh()
     {
