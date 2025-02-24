@@ -25,6 +25,8 @@ public class TerrainGeneration : MonoBehaviour
     [SerializeField] Vector2 _RegionSize;
     [Header("Misc")]
     [SerializeField] float _HeightScale;
+    [SerializeField] int meshCount = 4;
+    [SerializeField] bool divideMesh;
 
     private TriangleNet.Mesh _Mesh;
     private UnityEngine.Mesh _UnityMesh;
@@ -35,8 +37,14 @@ public class TerrainGeneration : MonoBehaviour
     public async Task Initialize(int seed)
     {
         // !!!!!! Troll is here :D
-        _HeightScale = 45;
-    
+        //_HeightScale = 45;
+
+        if (meshCount % 4 != 0)
+        {
+            Debug.LogError("MeshCount must be divisible by four");
+            return;
+        }
+        
         Polygon polygon = new Polygon();
 
         Debug.Log("Perlin, poisson, and falloff");
@@ -44,22 +52,29 @@ public class TerrainGeneration : MonoBehaviour
         List<Vector2> points = await Noise.PoissonSamplingAsync(_Radius, _RegionSize, seed + 69);
         _FalloffMap = Noise.GenerateFalloffMap(_imageSize, 3, 25);
 
-        Debug.Log("thread to triangulate");
-        await Task.Run(() =>
+        if (!divideMesh)
         {
-            for (int i = 0; i < points.Count; i++)
+            Debug.Log("thread to triangulate");
+            await Task.Run(() =>
             {
-                polygon.Add(new Vertex(points[i].x, points[i].y));
-            }
+                for (int i = 0; i < points.Count; i++)
+                {
+                    polygon.Add(new Vertex(points[i].x, points[i].y));
+                }
+    
+                ConstraintOptions options = new ConstraintOptions();
+                options.ConformingDelaunay = true;
+    
+                _Mesh = polygon.Triangulate(options) as TriangleNet.Mesh;
+            });
 
-            ConstraintOptions options = new ConstraintOptions();
-            options.ConformingDelaunay = true;
-
-            _Mesh = polygon.Triangulate(options) as TriangleNet.Mesh;
-        });
-
-        //Debug.Log("genMesh");
-        await GenerateMesh();
+            //Debug.Log("genMesh");
+            await GenerateMesh();
+        }
+        else
+        {
+            
+        }
 
         //clearing memory
         _PerlinMap = null;
@@ -110,6 +125,33 @@ public class TerrainGeneration : MonoBehaviour
             return new Color(0.560f, 0.4980f, 0.3019f);
         }
     }
+
+    /*
+    async task SplitVerts()
+    {
+        // Idea: find a point where the center of each mesh would be, then assign each vert to its closest mesh (in the xy plane ignoring Y height)
+        Vector2 halfRegionSize = _RegionSize / 2;
+        List<Vector2> meshOrigins = new List<Vector2>();
+
+        
+    }
+    
+    async task GenerateDividedMeshes()
+    {
+        // start by spliting mesh
+        foreach(Vector3 Vert)
+    
+        Vector2 halfRegionSize = _RegionSize / 2;
+
+        List<Vetor3> v = new List<Vector3>();
+        List<Vector3> n = new List<Vector3>();
+        List<Vector2> u = new List<Vector2>();
+        List<Color> c = new List<Color>();
+        List<int> t = new List<int>();
+
+        IEnumerator<Triangle> triangleEnum = _Mesh.triangles.GetEnumerator();
+    }
+    */
 
     async Task GenerateMesh()
     {
