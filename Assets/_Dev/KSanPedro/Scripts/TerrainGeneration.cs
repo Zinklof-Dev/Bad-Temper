@@ -173,51 +173,52 @@ public class TerrainGeneration : MonoBehaviour
             Debug.LogError("Null meshes list");
     }
 
-    async Task ReTriangulateEdges(List<TriangleNet.Mesh> meshes) // gets rid of gap between meshes by gathering edges and connecting them
+    async Task<List<TriangleNet.Mesh>> ReTriangulateEdges(List<TriangleNet.Mesh> meshes) // gets rid of gap between meshes by gathering edges and connecting them
     { // the ammount of if statements inside other if/for statements here hurts me... | Cameron
-      /*
-        list<Vector2> potentialEdgeVectors = new List<Vector2>;
-        list<Vector2> discreditedVectors = new List<Vector2>;
+        /*
+          list<Vector2> potentialEdgeVectors = new List<Vector2>;
+          list<Vector2> discreditedVectors = new List<Vector2>;
 
-        IEnumerator<Triangle> triangleEnum = meshes[0].triangles.GetEnumerator();
-        
-        for (int i = 0; i < meshes[0].triangles.Count; i++)
-        {
-            if (!triangleEnum.MoveNext())
-            {
-                break;
-            }
+          IEnumerator<Triangle> triangleEnum = meshes[0].triangles.GetEnumerator();
 
-            Triangle currentTriangle = triangleEnum.Current;
-            
-            for (int i = 0; i < currentTriangle.Verticies.Length; i++)
-            {
-                byte result = await PointIsValid(New vector2(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z), potentialEdgeVectors, discreditedVectors);
-            
-                if (result == 1)
-                {
-                    potentialEdgeVectors.Add(New vector2(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z));
-                }
-                else if (result == 0)
-                {
-                    potentialEdgeVectors.Remove(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z));
-                    discreditedVectors.Add(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z));
-                }
-                else // aka result = 2
-                {
-                }
-            }
-        }
+          for (int i = 0; i < meshes[0].triangles.Count; i++)
+          {
+              if (!triangleEnum.MoveNext())
+              {
+                  break;
+              }
 
-        */
+              Triangle currentTriangle = triangleEnum.Current;
+
+              for (int i = 0; i < currentTriangle.Verticies.Length; i++)
+              {
+                  byte result = await PointIsValid(New vector2(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z), potentialEdgeVectors, discreditedVectors);
+
+                  if (result == 1)
+                  {
+                      potentialEdgeVectors.Add(New vector2(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z));
+                  }
+                  else if (result == 0)
+                  {
+                      potentialEdgeVectors.Remove(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z));
+                      discreditedVectors.Add(currentTriangle.Verticies[i].x, currentTriangle.Verticies[i].z));
+                  }
+                  else // aka result = 2
+                  {
+                  }
+              }
+          }
+
+          */
+        return null;
     }
 
-    async Task<byte> PointIsValid(Vector2 p, list<Vector2> potentialEdgeVectors, List<Vector2> discreditedVectors) // 1 = point is valid | 0 = point must be discredited | 2 = point was already discredited
+    async Task<byte> PointIsValid(Vector2 p, List<Vector2> potentialEdgeVectors, List<Vector2> discreditedVectors) // 1 = point is valid | 0 = point must be discredited | 2 = point was already discredited
     {
-        if (await !PointIsNotDiscredited(v, discreditedVectors)) // check if discredited
+        if (!await PointIsNotDiscredited(p, discreditedVectors)) // check if discredited
             return 2; // this only runs if the point was already discredited, so we inform our calling function it was;
     
-        foreach (Vector2 v in potentailEdgeVectors)
+        foreach (Vector2 v in potentialEdgeVectors)
         {
             if (p == v) // check if our point already has a triangle
                 return 0; // in the case it does, inform the calling function it needs to be discredited
@@ -259,7 +260,7 @@ public class TerrainGeneration : MonoBehaviour
             }
         });
 
-        triNetMeshes = ReTriangulateEdges(TriNetMeshes);
+        triNetMeshes = await ReTriangulateEdges(triNetMeshes);
     }
     
     /*async Task GenerateDividedMeshes(List<TriangleNet.Mesh> triNetMeshes)
