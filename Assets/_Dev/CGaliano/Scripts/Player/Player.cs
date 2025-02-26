@@ -39,11 +39,22 @@ namespace BadTemper
         [SerializeField] float friction;
         [SerializeField] float terminalVelocity;
         [SerializeField] float waterLevel; // universal since the game only has an ocean and no lakes (as of now) so we don't need any complex system to check for water (would probably just set up a Volume system for that if ever needed)
+        [Header("IK")]
+        [SerializeField] Transform[] footTargets; // 0 is left | 1 is right
+        [SerializeField] float maxDist;
+        [SerializeField] float overShoot;
+        [SerializeField] AnimationCurve stepHeightCurve;
+        [SerializeField] Vector3[] homePositions; // this is an offset from root | 0 is left | 1 is right
         [Header("Perspective")]
         [SerializeField] Vector3 TPVCamOffset;
         [SerializeField] float TPVCamLerpT;
         [Header("Settings Overriden")]
         [SerializeField] float sensitivity;
+        [Header("Debug")]
+        [SerializeField] bool gizmos;
+        [SerializeField] bool ikGizmos;
+        [SerializeField] bool physicsGizmos;
+        [SerializeField] float gizmosSize;
     
         Vector2 playerLookXY;
         public bool TPV = false; // third person view, likely debug only
@@ -51,9 +62,65 @@ namespace BadTemper
         public Vector3 linearVelocity;
         float lastJumpInput;
 
-        private float waterHeight = -1;
-
         static BadTemper.Player playerRef;
+
+        private Void OnDrawGizmos()
+        {
+            if (!gizmos)
+                Return;
+
+            if (ikGizmos)
+            {
+                foreach (Transform t in footTargets)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawSphere(t.position, gizmosSize);
+                }
+                foreach (Vector3 v in homePositons)
+                {
+                    Gizmos.color = Color.blue
+                    Gizmos.DrawSphere(transform.position + v, gizmosSize);
+                }
+                Gizmos.color = Color.black;
+                Gizmos.DrawLine(footTargets[0].position, transform.position + homePositions[0]);
+                Gizmos.DrawLine(footTargets[1].position, transform.position + homePositions[1]);
+            }
+            if (physicsGizmos)
+            {
+                Gizmos.color = Color.black;
+                Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) + linearVelocity);
+
+                // Figure out what the friction would be
+                Vector3 frictionV = new Vector3(0,0,0);
+                frictionV.x = linearVelocity.x - ((linearVelocity.x * friction) * Time.deltaTime);
+                frictionV.z = linearVelocity.z - ((linearVelocity.z * friction) * Time.deltaTime);
+
+                frictionV.x -= linearVelocity;
+                frictionV.z -= linearVelocity;
+                    
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - frictionV);
+
+                // Figure out what the air resistance would be
+                Vector3 dragV = linearVelocity - ((linearVelocity * drag) * Time.deltaTime);
+
+                dragV -= linearVelocity;
+
+                Gizmos.color = Color.yellow;
+                if (dragV.y < -0.1f && dragV > 0.1f)
+                    Gizmos.DrawLine(transform.position + New Vector3(0,1,0) - friction, (transform.position + New Vector3(0,1,0) - friction) - dragV);
+                else
+                    Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - dragV);
+
+                // Water Drag
+                Vector3 waterDragV = linearVelocity - ((linearVelocity * waterDrag) * Time.deltaTime);
+
+                waterDragV -= linearVelocity;
+                
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - waterDragV);
+            }
+        }
 
         private void Start() // change to on network spawn later
         {
@@ -158,7 +225,7 @@ namespace BadTemper
 
             Vector3 addedMovement = ((Input.GetAxis("Horizontal") * transform.right) + (Input.GetAxis("Vertical") * transform.forward)) * mm;
 
-            if (transform.position.y <= waterHeight && lastJumpInput != -1)
+            if (transform.position.y <= waterLevel && lastJumpInput != -1)
                 addedMovement.y = jumpForce; // water drag will make this cause less force than a reg jump later
             else if (cc.isGrounded && lastJumpInput != -1)
                 addedMovement.y = jumpForce;
@@ -188,7 +255,7 @@ namespace BadTemper
             }
 
             // Water Drag (Drag again, but only if under water)
-            if (transform.position.y <= waterHeight)
+            if (transform.position.y <= waterLevel)
                 linearVelocity = linearVelocity - ((linearVelocity * waterDrag) * Time.deltaTime);
         }
 
