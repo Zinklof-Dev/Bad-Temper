@@ -63,6 +63,9 @@ namespace BadTemper
         public Vector3 linearVelocity;
         float lastJumpInput;
 
+        private Quaternion midSpineStartRot;
+        private Quaternion topSpineStartRot;
+
         static BadTemper.Player playerRef;
 
         private Void OnDrawGizmos()
@@ -125,6 +128,9 @@ namespace BadTemper
             cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
             cameraObject.transform.SetParent(jointReferences[0]);
             cameraObject.transform.localPosition = Vector3.zero;
+
+            midSpineStartRot = jointReferences[2].localRotation;
+            topSpineStartRot =  jointReferences[3].localRotation;
         }
     
         private void CameraHandeler()
@@ -187,6 +193,9 @@ namespace BadTemper
             //jointReferences[2].localRotation = Quaternion.Euler(new Vector3(spineTopRot, jointReferences[2].localRotation.y, jointReferences[2].localRotation.z));
             //jointReferences[3].localRotation = Quaternion.Euler(new Vector3(spineMidRot, jointReferences[3].localRotation.y, jointReferences[3].localRotation.z));
 
+            jointReferences[2].localRotation = Quaternion.Euler(spineTopRot, 0, 0) * topSpineStartRot;
+            jointReferences[3].localRotation = Quaternion.Euler(spineMidRot, 0, 0) * midSpineStartRot;
+            
             transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.x, playerLookXY.y, transform.rotation.z));
         }
 
