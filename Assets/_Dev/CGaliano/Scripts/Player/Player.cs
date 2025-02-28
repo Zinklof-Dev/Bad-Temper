@@ -38,6 +38,7 @@ namespace BadTemper
         [SerializeField] float waterDrag;
         [SerializeField] float friction;
         [SerializeField] float terminalVelocity;
+        [SerializeField] float gravityMult;
         [SerializeField] float waterLevel; // universal since the game only has an ocean and no lakes (as of now) so we don't need any complex system to check for water (would probably just set up a Volume system for that if ever needed)
         [Header("IK")]
         [SerializeField] Transform[] footTargets; // 0 is left | 1 is right
@@ -61,19 +62,19 @@ namespace BadTemper
         public bool TPV = false; // third person view, likely debug only
 
         public Vector3 linearVelocity;
-        float lastJumpInput;
+        [SerializeField] float lastJumpInput;
 
         private Quaternion midSpineStartRot;
         private Quaternion topSpineStartRot;
 
         static BadTemper.Player playerRef;
 
-        private Void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             // expensive stuff, only used in editor with a toggle though so it wont really matter once the game is compiled and a build is made.
         
             if (!gizmos)
-                Return;
+                return;
 
             if (ikGizmos)
             {
@@ -82,9 +83,9 @@ namespace BadTemper
                     Gizmos.color = Color.yellow;
                     Gizmos.DrawSphere(t.position, gizmosSize);
                 }
-                foreach (Vector3 v in homePositons)
+                foreach (Vector3 v in homePositions)
                 {
-                    Gizmos.color = Color.blue
+                    Gizmos.color = Color.blue;
                     Gizmos.DrawSphere(transform.position + v, gizmosSize);
                 }
                 Gizmos.color = Color.black;
@@ -94,30 +95,30 @@ namespace BadTemper
             if (physicsGizmos)
             {
                 Gizmos.color = Color.black;
-                Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) + linearVelocity);
+                Gizmos.DrawLine(transform.position + new Vector3(0,1,0), transform.position + new Vector3(0,1,0) + linearVelocity);
 
                 // Figure out what the friction would be
                 Vector3 frictionV = new Vector3(0,0,0);
-                frictionV.x = (linearVelocity.x - ((linearVelocity.x * friction) * Time.deltaTime) - linearVelocity;
-                frictionV.z = (linearVelocity.z - ((linearVelocity.z * friction) * Time.deltaTime) - linearVelocity;
+                frictionV.x = (linearVelocity.x - ((linearVelocity.x * friction) * Time.deltaTime)) - linearVelocity.x;
+                frictionV.z = (linearVelocity.z - ((linearVelocity.z * friction) * Time.deltaTime)) - linearVelocity.y;
                     
                 Gizmos.color = Color.red;
-                Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - frictionV);
+                Gizmos.DrawLine(transform.position + new Vector3(0,1,0), transform.position + new Vector3(0,1,0) - frictionV);
 
                 // Figure out what the air resistance would be
                 Vector3 dragV = (linearVelocity - ((linearVelocity * drag) * Time.deltaTime)) - linearVelocity;
 
                 Gizmos.color = Color.yellow;
-                if (dragV.y < -0.1f && dragV > 0.1f)
-                    Gizmos.DrawLine(transform.position + New Vector3(0,1,0) - friction, (transform.position + New Vector3(0,1,0) - friction) - dragV);
+                if (dragV.y < -0.1f && dragV.y > 0.1f)
+                    Gizmos.DrawLine(transform.position + new Vector3(0,1,0), transform.position + new Vector3(0,1,0) - dragV);
                 else
-                    Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - dragV);
+                    Gizmos.DrawLine(transform.position + new Vector3(0,1,0), transform.position + new Vector3(0,1,0) - dragV);
 
                 // Water Drag
                 Vector3 waterDragV = (linearVelocity - ((linearVelocity * waterDrag) * Time.deltaTime)) - linearVelocity;
                 
                 Gizmos.color = Color.blue;
-                Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - waterDragV);
+                Gizmos.DrawLine(transform.position + new Vector3(0,1,0), transform.position + new Vector3(0,1,0) - waterDragV);
             }
         }
 
@@ -144,14 +145,14 @@ namespace BadTemper
             }
             else // this is not the most efficient method but TPV will likely only be a debug tool. if ever implimented properly will make more efficent code.
             {
-                Vector3 cameraCurrentPos = cameraObject.transform.localPosition;
+                //Vector3 cameraCurrentPos = cameraObject.transform.localPosition;
 
                 Vector3 cameraTargetPos = new Vector3(0, 0, 0) + (cameraObject.transform.forward * TPVCamOffset.z) + (cameraObject.transform.right * TPVCamOffset.x) + (cameraObject.transform.up * TPVCamOffset.y);
         
-                cameraObject.transform.localPosition = new Vector3(0,0,0);
+                //cameraObject.transform.localPosition = new Vector3(0,0,0);
                 FPB();
-                cameraObject.transform.localPosition = cameraCurrentPos;
-                cameraObject.transform.localPosition = Vector3.Lerp(cameraObject.transform.localPosition, cameraTargetPos, TPVCamLerpT);
+                //cameraObject.transform.localPosition = cameraCurrentPos;
+                cameraObject.transform.localPosition = Vector3.Lerp(cameraObject.transform.localPosition, TPVCamOffset, TPVCamLerpT);
             }
         }
 
@@ -193,8 +194,8 @@ namespace BadTemper
             //jointReferences[2].localRotation = Quaternion.Euler(new Vector3(spineTopRot, jointReferences[2].localRotation.y, jointReferences[2].localRotation.z));
             //jointReferences[3].localRotation = Quaternion.Euler(new Vector3(spineMidRot, jointReferences[3].localRotation.y, jointReferences[3].localRotation.z));
 
-            jointReferences[2].localRotation = Quaternion.Euler(spineTopRot, 0, 0) * topSpineStartRot;
-            jointReferences[3].localRotation = Quaternion.Euler(spineMidRot, 0, 0) * midSpineStartRot;
+            //jointReferences[2].localRotation = Quaternion.Euler(spineTopRot, 0, 0) * topSpineStartRot;
+            //jointReferences[3].localRotation = Quaternion.Euler(spineMidRot, 0, 0) * midSpineStartRot;
             
             transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.x, playerLookXY.y, transform.rotation.z));
         }
@@ -211,15 +212,15 @@ namespace BadTemper
 
         private void MovementHandeler()
         {
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space))
                 lastJumpInput = jumpMem;
             else if (lastJumpInput != -1)
                 lastJumpInput -= Time.deltaTime;
             if (lastJumpInput < 0)
                 lastJumpInput = -1;
-    
+
             float mm = 0; // stands for "movement multiplier"
-    
+
             if (Input.GetKey(KeyCode.LeftShift))
                 mm = moveSpeed * sprintMult * Time.deltaTime;
             else
@@ -231,13 +232,19 @@ namespace BadTemper
             Vector3 addedMovement = ((Input.GetAxis("Horizontal") * transform.right) + (Input.GetAxis("Vertical") * transform.forward)) * mm;
 
             if (transform.position.y <= waterLevel && lastJumpInput != -1)
+            {                 
                 addedMovement.y = jumpForce; // water drag will make this cause less force than a reg jump later
+                lastJumpInput -= 999;
+            }
             else if (cc.isGrounded && lastJumpInput != -1)
+            {
                 addedMovement.y = jumpForce;
+                lastJumpInput -= 999;
+            }               
             else if (cc.isGrounded)
                 addedMovement.y = -0.01f;
             else
-                addedMovement = Physics.gravity;
+                addedMovement += Physics.gravity * gravityMult * Time.deltaTime;
 
             linearVelocity += addedMovement;
         }

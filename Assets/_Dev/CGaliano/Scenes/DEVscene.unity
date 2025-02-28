@@ -1755,18 +1755,35 @@ MonoBehaviour:
   moveSpeed: 1.5
   sprintMult: 2.25
   inAirMult: 0.05
-  jumpForce: 17
+  jumpForce: 2
   jumpMem: 1
   drag: 5
   waterDrag: 15
   friction: 15
   terminalVelocity: 50
-  waterLevel: 0
-  TPVCamOffset: {x: 0, y: 0, z: 0}
-  TPVCamLerpT: 0
+  gravityMult: 0.005
+  waterLevel: -1
+  footTargets: []
+  maxDist: 0
+  overShoot: 0
+  stepHeightCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  homePositions: []
+  pelvis: {fileID: 0}
+  TPVCamOffset: {x: 2, y: -5, z: 2}
+  TPVCamLerpT: 0.01
   sensitivity: 500
+  gizmos: 1
+  ikGizmos: 0
+  physicsGizmos: 1
+  gizmosSize: 0.05
   TPV: 0
   linearVelocity: {x: 0, y: 0, z: 0}
+  lastJumpInput: 0
 --- !u!143 &399152589
 CharacterController:
   m_ObjectHideFlags: 0
