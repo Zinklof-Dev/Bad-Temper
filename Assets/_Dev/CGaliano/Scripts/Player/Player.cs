@@ -45,6 +45,7 @@ namespace BadTemper
         [SerializeField] float overShoot;
         [SerializeField] AnimationCurve stepHeightCurve;
         [SerializeField] Vector3[] homePositions; // this is an offset from root | 0 is left | 1 is right
+        [SerializeField] Transform pelvis; // used to add some weight and exagerated momentum when falling and jumping
         [Header("Perspective")]
         [SerializeField] Vector3 TPVCamOffset;
         [SerializeField] float TPVCamLerpT;
@@ -66,6 +67,8 @@ namespace BadTemper
 
         private Void OnDrawGizmos()
         {
+            // expensive stuff, only used in editor with a toggle though so it wont really matter once the game is compiled and a build is made.
+        
             if (!gizmos)
                 Return;
 
@@ -92,19 +95,14 @@ namespace BadTemper
 
                 // Figure out what the friction would be
                 Vector3 frictionV = new Vector3(0,0,0);
-                frictionV.x = linearVelocity.x - ((linearVelocity.x * friction) * Time.deltaTime);
-                frictionV.z = linearVelocity.z - ((linearVelocity.z * friction) * Time.deltaTime);
-
-                frictionV.x -= linearVelocity;
-                frictionV.z -= linearVelocity;
+                frictionV.x = (linearVelocity.x - ((linearVelocity.x * friction) * Time.deltaTime) - linearVelocity;
+                frictionV.z = (linearVelocity.z - ((linearVelocity.z * friction) * Time.deltaTime) - linearVelocity;
                     
                 Gizmos.color = Color.red;
                 Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - frictionV);
 
                 // Figure out what the air resistance would be
-                Vector3 dragV = linearVelocity - ((linearVelocity * drag) * Time.deltaTime);
-
-                dragV -= linearVelocity;
+                Vector3 dragV = (linearVelocity - ((linearVelocity * drag) * Time.deltaTime)) - linearVelocity;
 
                 Gizmos.color = Color.yellow;
                 if (dragV.y < -0.1f && dragV > 0.1f)
@@ -113,9 +111,7 @@ namespace BadTemper
                     Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - dragV);
 
                 // Water Drag
-                Vector3 waterDragV = linearVelocity - ((linearVelocity * waterDrag) * Time.deltaTime);
-
-                waterDragV -= linearVelocity;
+                Vector3 waterDragV = (linearVelocity - ((linearVelocity * waterDrag) * Time.deltaTime)) - linearVelocity;
                 
                 Gizmos.color = Color.blue;
                 Gizmos.DrawLine(transform.positon + new Vector3(0,1,0), transform.position + New Vector3(0,1,0) - waterDragV);
