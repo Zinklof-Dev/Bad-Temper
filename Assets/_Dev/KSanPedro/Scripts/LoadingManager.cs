@@ -108,7 +108,7 @@ public class LoadingManager : NetworkBehaviour
         }
         else
         {
-            AskForSeedRpc();
+            AskForSeedRPC();
         }
 
         base.OnNetworkSpawn();
@@ -243,33 +243,33 @@ public class LoadingManager : NetworkBehaviour
 
         await _TreeGen.Initialize(_Seed);
         FinishStep("Teleporting Player Object");
-        AskToTeleportRpc();
+        AskToTeleportRPC();
         FinishStep("Awaiting Server...");
     }
 
     private async void AskAgain()
     {
         await Task.Delay(1000); // wait 500 ms, aka 0.5 secconds
-        AskForSeedRpc(); // ask again
+        AskForSeedRPC(); // ask again
     }
 
     [Rpc(SendTo.Server)]
-    private void AskForSeedRpc(RpcParams rpcParams = default)
+    private void AskForSeedRPC(RpcParams rpcParams = default)
     {
         ulong clientID = rpcParams.Receive.SenderClientId; // get client ID
         if (!_ServerHasSeed) // if the server doesn't yet have the seed then deny the clients request
         {
-            DenySeedRequestRpc(RpcTarget.Single(clientID, RpcTargetUse.Temp));
+            DenySeedRequestRPC(RpcTarget.Single(clientID, RpcTargetUse.Temp));
             Debug.Log("Denied!");
             return;
         }
         else // otherwise provide the seed
-            SendSeedRpc(_Seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
+            SendSeedRPC(_Seed, RpcTarget.Single(clientID, RpcTargetUse.Temp));
         Debug.Log("Seed Sent!");
     }
 
     [Rpc(SendTo.SpecifiedInParams)]
-    private void SendSeedRpc(int seed, RpcParams rpcParams = default)
+    private void SendSeedRPC(int seed, RpcParams rpcParams = default)
     {
         this._Seed = seed;
         StartWorldGeneration();
@@ -277,18 +277,18 @@ public class LoadingManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.SpecifiedInParams)]
-    private void DenySeedRequestRpc(RpcParams rpcParams = default) // the server has denied our request. so lets wait and ask again
+    private void DenySeedRequestRPC(RpcParams rpcParams = default) // the server has denied our request. so lets wait and ask again
     {
         AskAgain();
     }
 
     [Rpc(SendTo.Server)]
-    private void AskToTeleportRpc(RpcParams rpcParams = default)
+    private void AskToTeleportRPC(RpcParams rpcParams = default)
     {
         ulong clientID = rpcParams.Receive.SenderClientId;
         if(!_CampfirePlaced)
         {
-            DenyTeleportationRpc(RpcTarget.Single(clientID, RpcTargetUse.Temp));
+            DenyTeleportationRPC(RpcTarget.Single(clientID, RpcTargetUse.Temp));
             return;
         }
         else
@@ -297,17 +297,17 @@ public class LoadingManager : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Vector3(Campfire._position.x += spawnPoints[clientID].x, 9999, Campfire._position.z += spawnPoints[clientID].z), Vector3.down, out hit))
             {
-                TeleportPlayerRpc(hit.point, RpcTarget.Single(clientID, RpcTargetUse.Temp));
+                TeleportPlayerRPC(hit.point, RpcTarget.Single(clientID, RpcTargetUse.Temp));
             }
         }
     }
     [Rpc(SendTo.SpecifiedInParams)]
-    private void DenyTeleportationRpc(RpcParams rpcParams = default)
+    private void DenyTeleportationRPC(RpcParams rpcParams = default)
     {
         AskToTeleportAgain();
     }
     [Rpc(SendTo.SpecifiedInParams)] 
-    private void TeleportPlayerRpc(Vector3 position, RpcParams rpcParams = default)
+    private void TeleportPlayerRPC(Vector3 position, RpcParams rpcParams = default)
     {
         Debug.Log("Player Position: " + position);
         Player.Teleport(position);
@@ -315,6 +315,6 @@ public class LoadingManager : NetworkBehaviour
     private async void AskToTeleportAgain()
     {
         await Task.Delay(1000);
-        AskToTeleportRpc();
+        AskToTeleportRPC();
     }
 }
