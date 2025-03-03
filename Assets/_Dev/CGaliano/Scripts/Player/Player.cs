@@ -130,8 +130,8 @@ namespace BadTemper
             cameraObject.transform.SetParent(jointReferences[0]);
             cameraObject.transform.localPosition = Vector3.zero;
 
-            midSpineStartRot = jointReferences[2].localRotation;
-            topSpineStartRot =  jointReferences[3].localRotation;
+            midSpineStartRot = jointReferences[3].localRotation;
+            topSpineStartRot =  jointReferences[2].localRotation;
         }
     
         private void CameraHandeler()
@@ -179,9 +179,9 @@ namespace BadTemper
 
             if (x < 0)
             {
-                neckRot = x * 0.95f;
-                spineTopRot = x * 0.025f;
-                spineMidRot = x * 0.025f;
+                neckRot = x * 0.50f;
+                spineTopRot = x * 0.25f;
+                spineMidRot = x * 0.25f;
             }
             else if (x > 0)
             {
@@ -194,8 +194,8 @@ namespace BadTemper
             //jointReferences[2].localRotation = Quaternion.Euler(new Vector3(spineTopRot, jointReferences[2].localRotation.y, jointReferences[2].localRotation.z));
             //jointReferences[3].localRotation = Quaternion.Euler(new Vector3(spineMidRot, jointReferences[3].localRotation.y, jointReferences[3].localRotation.z));
 
-            jointReferences[2].localRotation = Quaternion.Euler(spineTopRot, 0, 0) * topSpineStartRot;
-            jointReferences[3].localRotation = Quaternion.Euler(spineMidRot, 0, 0) * midSpineStartRot;
+            jointReferences[2].localRotation = topSpineStartRot * Quaternion.Euler(-spineTopRot, 0, 0);
+            jointReferences[3].localRotation =  midSpineStartRot * Quaternion.Euler(0, -spineMidRot, 0);
 
             transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.x, playerLookXY.y, transform.rotation.z));
         }
