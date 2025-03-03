@@ -193,8 +193,8 @@ namespace BadTemper
             //jointReferences[2].localRotation = Quaternion.Euler(new Vector3(spineTopRot, jointReferences[2].localRotation.y, jointReferences[2].localRotation.z));
             //jointReferences[3].localRotation = Quaternion.Euler(new Vector3(spineMidRot, jointReferences[3].localRotation.y, jointReferences[3].localRotation.z));
 
-            jointReferences[2].localRotation = Quaternion.Euler(spineTopRot, 0, 0) * topSpineStartRot;
-            jointReferences[3].localRotation = Quaternion.Euler(spineMidRot, 0, 0) * midSpineStartRot;
+            jointReferences[2].localRotation = Quaternion.AngleAxis(spineTopRot, Vector3.up) * topSpineStartRot;
+            jointReferences[3].localRotation = Quaternion.AngleAxis(spineMidRot, Vector3.up) * midSpineStartRot;
             
             transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.x, playerLookXY.y, transform.rotation.z));
         }
