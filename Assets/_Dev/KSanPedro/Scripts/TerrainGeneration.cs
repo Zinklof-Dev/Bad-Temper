@@ -23,7 +23,7 @@ public class TerrainGeneration : MonoBehaviour
     [SerializeField] AnimationCurve heightCurve;
     [Header("Poisson Sampling Settings")]
     [SerializeField] float _Radius;
-    [SerializeField] Vector2 _RegionSize;
+    [SerializeField] public Vector2 _RegionSize;
     [Header("Misc")]
     [SerializeField] float _HeightScale;
     [SerializeField] int meshCount = 4;

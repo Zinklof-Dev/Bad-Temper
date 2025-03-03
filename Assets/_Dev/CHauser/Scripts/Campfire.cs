@@ -1,12 +1,13 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Netcode;
-using System.Threading.Tasks;
 using ZinklofDev.ConsoleV2;
 
 public class Campfire : NetworkBehaviour
 {
-    [SerializeField] private Vector2[] positions;
-    private static Vector2[] _positions;
+    [SerializeField] private List<Vector2> positions;
+    private static List<Vector2> _positions;
     private static GameObject _gameObject;
     public static Campfire campfire;
     public static Vector3 _position;
@@ -178,11 +179,14 @@ public class Campfire : NetworkBehaviour
 
         MeshFilter terrainMeshFilter = loadingManagerObject.GetComponent<MeshFilter>();
 
-        Vector3[] vertices = terrainMeshFilter.sharedMesh.vertices;
-        int[] triangles = terrainMeshFilter.sharedMesh.triangles;
-
-
         RaycastHit hit;
+
+        TerrainGeneration terrainGeneration = loadingManagerObject.GetComponent<TerrainGeneration>();
+
+        for(int i = 0; i < terrainGeneration._RegionSize.x; i++)
+        {
+
+        }
 
         foreach (Vector3 pos in _positions)
         {
