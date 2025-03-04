@@ -6,8 +6,7 @@ using ZinklofDev.ConsoleV2;
 
 public class Campfire : NetworkBehaviour
 {
-    [SerializeField] private List<Vector2> positions;
-    private static List<Vector2> _positions;
+    private static Vector2[] _positions = { };
     private static GameObject _gameObject;
     public static Campfire campfire;
     public static Vector3 _position;
@@ -45,7 +44,6 @@ public class Campfire : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         campfire = this;
-        _positions = positions;
         _gameObject = gameObject;
 
         // Server Only- first write to the synced campfireHealth network variable
@@ -182,11 +180,6 @@ public class Campfire : NetworkBehaviour
         RaycastHit hit;
 
         TerrainGeneration terrainGeneration = loadingManagerObject.GetComponent<TerrainGeneration>();
-
-        for(int i = 0; i < terrainGeneration._RegionSize.x; i++)
-        {
-
-        }
 
         foreach (Vector3 pos in _positions)
         {
