@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.ConsoleV2;
+using static UnityEditor.PlayerSettings;
 
 public class Campfire : NetworkBehaviour
 {
@@ -11,6 +11,13 @@ public class Campfire : NetworkBehaviour
     public static Campfire campfire;
     public static Vector3 _position;
 
+    // Variables to go through coords of placement
+    static int incremental = 10;
+    static int distanceToTravel = 10;
+    static int distanceTraveled = 0;
+    static int direction = 0;
+    static int x = 0;
+    static int y = 0;
 
     // Refrences to Game Objects and variables that are used client side
     // Can be effected by Network Variables, but aren't synced across the network
@@ -171,6 +178,60 @@ public class Campfire : NetworkBehaviour
         return new Vector3((v0.x + v1.x + v2.x) / 3, (v0.y + v1.y + v2.y) / 3, (v0.z + v1.z + v2.z) / 3);
     }
 
+    public static async Task GetNextCoordinates()
+    {
+        // Right
+        if (direction == 0)
+        {
+            x += incremental;
+            distanceTraveled += incremental;
+
+            if (distanceTraveled == distanceToTravel)
+            {
+                direction++;
+                distanceTraveled = 0;
+            }
+        }
+        // Up
+        else if (direction == 1)
+        {
+            y += incremental;
+            distanceTraveled += incremental;
+
+            if (distanceTraveled == distanceToTravel)
+            {
+                direction++;
+                distanceTraveled = 0;
+                distanceToTravel += incremental;
+            }
+        }
+        // Left
+        else if (direction == 2)
+        {
+            x -= incremental;
+            distanceTraveled += incremental;
+
+            if (distanceTraveled == distanceToTravel)
+            {
+                direction++;
+                distanceTraveled = 0;
+            }
+        }
+        // down
+        else if (direction == 3)
+        {
+            y -= incremental;
+            distanceTraveled += incremental;
+
+            if (distanceTraveled == distanceToTravel)
+            {
+                direction = 0;
+                distanceTraveled = 0;
+                distanceToTravel += incremental;
+            }
+        }
+    }
+
     public static async Task Initialize(int seed, GameObject loadingManagerObject)
     {
         System.Random random = new System.Random(seed * 69 / 420 + 69);
@@ -179,15 +240,16 @@ public class Campfire : NetworkBehaviour
 
         RaycastHit hit;
 
-        TerrainGeneration terrainGeneration = loadingManagerObject.GetComponent<TerrainGeneration>();
 
-        foreach (Vector3 pos in _positions)
+
+        for (int i = 0; i < 6000; i++)
         {
 
-            if (Physics.Raycast(new Vector3(pos.x, 9999, pos.y), Vector3.down, out hit))
+            if (Physics.Raycast(new Vector3(x, 9999, y), Vector3.down, out hit))
             {
-                if(hit.point.y <= 0)
+                if (/*hit.point.y <= 0*/ true)
                 {
+                    await GetNextCoordinates();
                     continue;
                 }
 
@@ -195,13 +257,15 @@ public class Campfire : NetworkBehaviour
 
                 if (trianglePosition.y <= 0)
                 {
+                    await GetNextCoordinates();
                     continue;
                 }
 
                 Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
 
-                if((triangleQuaternionRotation.eulerAngles.x > 20 && triangleQuaternionRotation.eulerAngles.x < 340) || (triangleQuaternionRotation.eulerAngles.z > 20 && triangleQuaternionRotation.eulerAngles.z < 340))
+                if ((triangleQuaternionRotation.eulerAngles.x > 20 && triangleQuaternionRotation.eulerAngles.x < 340) || (triangleQuaternionRotation.eulerAngles.z > 20 && triangleQuaternionRotation.eulerAngles.z < 340))
                 {
+                    await GetNextCoordinates();
                     Debug.Log("Failed because of incline");
                     continue;
                 }
@@ -209,11 +273,14 @@ public class Campfire : NetworkBehaviour
                 _gameObject.transform.position = trianglePosition;
                 _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
 
+
                 return;
             }
         }
 
-        for(int fails = 0; fails < 30; fails++)
+        Debug.Log("X: " + x + " Y: " + y);
+
+        for (int fails = 0; fails < 30; fails++)
         {
             if (Physics.Raycast(new Vector3(random.Next(0, 1000), 9999, random.Next(0, 1000)), Vector3.down, out hit))
             {
