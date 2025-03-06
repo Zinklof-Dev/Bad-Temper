@@ -2,11 +2,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Netcode;
 using ZinklofDev.ConsoleV2;
-using static UnityEditor.PlayerSettings;
 
 public class Campfire : NetworkBehaviour
 {
-    private static Vector2[] _positions = { };
     private static GameObject _gameObject;
     public static Campfire campfire;
     public static Vector3 _position;
@@ -156,6 +154,96 @@ public class Campfire : NetworkBehaviour
         campfireHealth.Value -= damage;
     }
 
+    #region Campfire Placement Code
+
+    public static async Task Initialize(int seed, GameObject loadingManagerObject)
+    {
+        System.Random random = new System.Random(seed * 69 / 420 + 69);
+        MeshFilter terrainMeshFilter = loadingManagerObject.GetComponent<MeshFilter>();
+        RaycastHit hit;
+
+
+        for (int i = 0; i < 9800 /*Dialed this in to be the perfect number of iterations to cheeck every single point on the terrain that is 10 units apart (500 units out is excluded) */; i++)
+        {
+            if (Physics.Raycast(new Vector3(x, 9999, y), Vector3.down, out hit))
+            {
+                if (hit.point.y <= 0)
+                {
+                    await GetNextCoordinates();
+                    continue;
+                }
+
+                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+
+                if (trianglePosition.y <= 0)
+                {
+                    await GetNextCoordinates();
+                    continue;
+                }
+
+                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+
+                if ((triangleQuaternionRotation.eulerAngles.x > 20 && triangleQuaternionRotation.eulerAngles.x < 340) || (triangleQuaternionRotation.eulerAngles.z > 20 && triangleQuaternionRotation.eulerAngles.z < 340))
+                {
+                    await GetNextCoordinates();
+                    Debug.Log("Failed because of incline");
+                    continue;
+                }
+
+                _gameObject.transform.position = trianglePosition;
+                _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
+
+                return;
+            }
+        }
+
+        // Debug.Log("Campfire position: \n X: " + x + " Y: " + y);
+
+        for (int fails = 0; fails < 30; fails++)
+        {
+            if (Physics.Raycast(new Vector3(random.Next(0, 1000), 9999, random.Next(0, 1000)), Vector3.down, out hit))
+            {
+                if (hit.transform.gameObject.GetComponent<MeshFilter>() == null)
+                {
+                    continue;
+                }
+
+                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+
+                if (trianglePosition.y <= 0)
+                {
+                    continue;
+                }
+
+                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+
+                if ((triangleQuaternionRotation.eulerAngles.x > 20 && triangleQuaternionRotation.eulerAngles.x < 340) || (triangleQuaternionRotation.eulerAngles.z > 20 && triangleQuaternionRotation.eulerAngles.z < 340))
+                {
+                    Debug.Log("Failed because of incline");
+                    continue;
+                }
+
+                _gameObject.transform.position = trianglePosition;
+                _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
+
+                return;
+            }
+        }
+
+        Debug.Log("Critical Campfire Failure, Campfire will be placed at 0,0");
+
+        // If all else fails, the campfire will just be put at (0,0). If no mesh is collided with, than the y value is automatically 0.
+        if (Physics.Raycast(new Vector3(0, 999, 0), Vector3.down, out hit))
+        {
+            if (hit.transform.gameObject.GetComponent<MeshFilter>() == null)
+                return;
+            Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+            Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
+            _gameObject.transform.position = trianglePosition;
+            _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
+        }
+    }
+
     private static async Task<Quaternion> GetTriangleQuaternionRotation(int index, Mesh mesh)
     {
         Vector3 v0 = mesh.vertices[mesh.triangles[index * 3]];
@@ -163,8 +251,8 @@ public class Campfire : NetworkBehaviour
         Vector3 v2 = mesh.vertices[mesh.triangles[index * 3 + 2]];
         Vector3 normal = Vector3.Cross(v1 - v0, v2 - v0).normalized;
         Quaternion quaternionRotation = Quaternion.FromToRotation(normal, Vector3.up);
-        Debug.Log("Triangle Positions: " + v0 + v1 + v2+ "\nRotation of triangle: " +  quaternionRotation.eulerAngles);
 
+        //Debug.Log("Triangle Positions: " + v0 + v1 + v2+ "\nRotation of triangle: " +  quaternionRotation.eulerAngles);
 
         return quaternionRotation;
     }
@@ -232,97 +320,7 @@ public class Campfire : NetworkBehaviour
         }
     }
 
-    public static async Task Initialize(int seed, GameObject loadingManagerObject)
-    {
-        System.Random random = new System.Random(seed * 69 / 420 + 69);
-
-        MeshFilter terrainMeshFilter = loadingManagerObject.GetComponent<MeshFilter>();
-
-        RaycastHit hit;
-
-
-
-        for (int i = 0; i < 6000; i++)
-        {
-
-            if (Physics.Raycast(new Vector3(x, 9999, y), Vector3.down, out hit))
-            {
-                if (/*hit.point.y <= 0*/ true)
-                {
-                    await GetNextCoordinates();
-                    continue;
-                }
-
-                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
-
-                if (trianglePosition.y <= 0)
-                {
-                    await GetNextCoordinates();
-                    continue;
-                }
-
-                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
-
-                if ((triangleQuaternionRotation.eulerAngles.x > 20 && triangleQuaternionRotation.eulerAngles.x < 340) || (triangleQuaternionRotation.eulerAngles.z > 20 && triangleQuaternionRotation.eulerAngles.z < 340))
-                {
-                    await GetNextCoordinates();
-                    Debug.Log("Failed because of incline");
-                    continue;
-                }
-
-                _gameObject.transform.position = trianglePosition;
-                _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
-
-
-                return;
-            }
-        }
-
-        Debug.Log("X: " + x + " Y: " + y);
-
-        for (int fails = 0; fails < 30; fails++)
-        {
-            if (Physics.Raycast(new Vector3(random.Next(0, 1000), 9999, random.Next(0, 1000)), Vector3.down, out hit))
-            {
-                if (hit.transform.gameObject.GetComponent<MeshFilter>() == null)
-                {
-                    continue;
-                }
-
-                Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
-
-                if (trianglePosition.y <= 0)
-                {
-                    continue;
-                }
-
-                Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
-
-                if ((triangleQuaternionRotation.eulerAngles.x > 20 && triangleQuaternionRotation.eulerAngles.x < 340) || (triangleQuaternionRotation.eulerAngles.z > 20 && triangleQuaternionRotation.eulerAngles.z < 340))
-                {
-                    Debug.Log("Failed because of incline");
-                    continue;
-                }
-
-                _gameObject.transform.position = trianglePosition;
-                _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
-
-                return;
-            }
-        }
-        Debug.Log("Critical Campfire Failure, Campfire will be placed at 0,0");
-
-        // If all else fails, the campfire will just be put at (0,0). If no mesh is collided with, than the y value is automatically 0.
-        if (Physics.Raycast(new Vector3(0, 999, 0), Vector3.down, out hit))
-        {
-            if (hit.transform.gameObject.GetComponent<MeshFilter>() == null)
-                    return;
-            Vector3 trianglePosition = await GetTrianglePosition(hit.triangleIndex, terrainMeshFilter.sharedMesh);
-            Quaternion triangleQuaternionRotation = await GetTriangleQuaternionRotation(hit.triangleIndex, terrainMeshFilter.sharedMesh);
-            _gameObject.transform.position = trianglePosition;
-            _gameObject.transform.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
-        }
-    }
+    #endregion
 
     [Command("Changes the health of the campfire")]
     public static void ChangeHealth(float health)
