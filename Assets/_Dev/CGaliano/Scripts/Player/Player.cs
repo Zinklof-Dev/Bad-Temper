@@ -18,6 +18,7 @@ using UnityEngine.Networking;
 using System;
 using Unity.Netcode;
 using ZinklofDev.ConsoleV2;
+using ZinklofDev.Utils.MathZ;
 
 namespace BadTemper
 {
@@ -40,11 +41,12 @@ namespace BadTemper
         [SerializeField] float terminalVelocity;
         [SerializeField] float gravityMult;
         [SerializeField] float waterLevel; // universal since the game only has an ocean and no lakes (as of now) so we don't need any complex system to check for water (would probably just set up a Volume system for that if ever needed)
-        [Header("IK")]
+        [Header("Leg IK")]
         [SerializeField] Transform[] footTargets; // 0 is left | 1 is right
         [SerializeField] float maxDist;
         [SerializeField] float overShoot;
         [SerializeField] AnimationCurve stepHeightCurve;
+        [SerializeField] float StepTime;
         [SerializeField] Vector3[] homePositions; // this is an offset from root | 0 is left | 1 is right
         [SerializeField] Transform pelvis; // used to add some weight and exagerated momentum when falling and jumping
         [Header("Perspective")]
@@ -68,6 +70,11 @@ namespace BadTemper
         private Quaternion topSpineStartRot;
 
         static BadTemper.Player playerRef;
+
+        private float[] stepProgress;
+        private int currentlySteppingLeg;
+        private vector3 currentLegTargetPos;
+        private vector3 currentLegStartPos;
 
         private void OnDrawGizmos()
         {
@@ -132,6 +139,8 @@ namespace BadTemper
 
             midSpineStartRot = jointReferences[3].localRotation;
             topSpineStartRot =  jointReferences[2].localRotation;
+
+            stepProgress = new float[footTargets.length];
         }
     
         private void CameraHandeler()
@@ -203,11 +212,47 @@ namespace BadTemper
         private void IKHandeler() // NOTE 2/20/2025 CURRENT MODEL DOES NOT HAVE ANY IK JOINTS! WILL ADD TO THE MODEL SOON!
         {
             // neat little resource, explains about what I thought i'd have to do going into this, but also clarifies what I wasn't quite sure on: https://weaverdev.io/projects/bonehead-procedural-animation/
-    
-            // only planning to do IK for legs, meaning the only joints not controlled by code are the arm hierarchies. which will allow for more fluid animation for attacks and such rather than wonky procedural IK.
+            
+            // Check which legs should be moved;
+            for (int i = 0; i < footTargets.length; i++)
+            {
+                if (currentlySteppingLeg != -1) // if currently in process of moving a leg, don't check for others, only one leg may leave the grond at any given moment
+                        break;
+                        
+                if (Vectors.SqrDist3(footTargets[i].position, homePositions[i] + transform.position) > (maxDist * maxDist))
+                {
+                    currentlySteppingLeg = i; // save which leg needs to move
+                    stepProgress -= Time.deltaTime; // this just ensures the foot doesn't start to move this frame but rather next frame
+                    currentLegStartPos = footTargets[i].position; // save our starting position
 
-            // Once IK is set up on the model this should be as simple as moving a foot joints world POS to the direction of the velocity when it gets too far away, and ensuring to alternate between legs.
-            // could go a little more complex and have a system to ensure that the foot joints don't enter a "bad area" (like the left foot going to the right side of the character)
+                    // evaluate how far we need to move
+                    Vector3 difference = (homePositions[i] + transform.positon) - footTargets[i].position;
+
+                    // add overshoot
+                    difference.x = (difference.x >= 0) ? difference.x + overShoot : difference.x - overshoot;
+                    difference.y = (difference.y >= 0> ? difference.y + overShoot : difference.y - overshoot;
+
+                    // save new position
+                    currentLegTargetPos = footTargets[i].position + difference;
+                }
+            }
+
+            if (currentlySteppingLeg == -1)
+                return;
+
+            stepProgress += Time.deltaTime; // if first run, should evaluate to zero
+            float progress = stepProgress / stepTime;
+
+            Vector3 evaluatedPosition = currentLegStartPos - (currentLegStartPos + currentLegTargetPos) * progress;
+            evaluatedPosition.y = stepHeightCurve.evaluate(progress);
+
+            footTargets[currentlySteppingLeg].position = evaluatedPosition;
+
+            if (stepProgress >= stepTime)
+            {
+                stepProgress = 0;
+                currentlySteppingLeg = -1;
+            }
         }
 
         private void MovementHandeler()
