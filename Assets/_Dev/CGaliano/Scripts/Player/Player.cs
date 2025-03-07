@@ -46,9 +46,10 @@ namespace BadTemper
         [SerializeField] float maxDist;
         [SerializeField] float overShoot;
         [SerializeField] AnimationCurve stepHeightCurve;
-        [SerializeField] float StepTime;
+        [SerializeField] float stepTime;
         [SerializeField] Vector3[] homePositions; // this is an offset from root | 0 is left | 1 is right
         [SerializeField] Transform pelvis; // used to add some weight and exagerated momentum when falling and jumping
+        [SerializeField] float TargetOffset; // since the IK system uses the ankle as the final joint and not the foot we need to have a y offset to keep the foot above ground.
         [Header("Perspective")]
         [SerializeField] Vector3 TPVCamOffset;
         [SerializeField] float TPVCamLerpT;
@@ -72,9 +73,9 @@ namespace BadTemper
         static BadTemper.Player playerRef;
 
         private float[] stepProgress;
-        private int currentlySteppingLeg;
-        private vector3 currentLegTargetPos;
-        private vector3 currentLegStartPos;
+        private int currentlySteppingLeg = -1;
+        private Vector3 currentLegTargetPos;
+        private Vector3 currentLegStartPos;
 
         private void OnDrawGizmos()
         {
@@ -85,19 +86,23 @@ namespace BadTemper
 
             if (ikGizmos)
             {
-                foreach (Transform t in footTargets)
+                for (int i = 0; i < footTargets.Length; i++)
                 {
                     Gizmos.color = Color.yellow;
-                    Gizmos.DrawSphere(t.position, gizmosSize);
-                }
-                foreach (Vector3 v in homePositions)
-                {
+                    Gizmos.DrawSphere(footTargets[i].position + (transform.up * TargetOffset), gizmosSize);
+
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(transform.position + v, gizmosSize);
+                    Gizmos.DrawSphere(transform.position + homePositions[i], gizmosSize);
+                    Gizmos.DrawLine(transform.position + homePositions[i], footTargets[i].position + (transform.up * TargetOffset));
+                    Gizmos.DrawWireSphere(transform.position + homePositions[i], maxDist);
+
+                    if (currentlySteppingLeg != -1)
+                    {
+                        Gizmos.color = Color.black;
+                        Gizmos.DrawSphere(currentLegTargetPos, gizmosSize);
+                        Gizmos.DrawLine(currentLegTargetPos, footTargets[currentlySteppingLeg].position + (transform.up * TargetOffset));
+                    }
                 }
-                Gizmos.color = Color.black;
-                Gizmos.DrawLine(footTargets[0].position, transform.position + homePositions[0]);
-                Gizmos.DrawLine(footTargets[1].position, transform.position + homePositions[1]);
             }
             if (physicsGizmos)
             {
@@ -140,7 +145,7 @@ namespace BadTemper
             midSpineStartRot = jointReferences[3].localRotation;
             topSpineStartRot =  jointReferences[2].localRotation;
 
-            stepProgress = new float[footTargets.length];
+            stepProgress = new float[footTargets.Length];
         }
     
         private void CameraHandeler()
@@ -214,7 +219,7 @@ namespace BadTemper
             // neat little resource, explains about what I thought i'd have to do going into this, but also clarifies what I wasn't quite sure on: https://weaverdev.io/projects/bonehead-procedural-animation/
             
             // Check which legs should be moved;
-            for (int i = 0; i < footTargets.length; i++)
+            for (int i = 0; i < footTargets.Length; i++)
             {
                 if (currentlySteppingLeg != -1) // if currently in process of moving a leg, don't check for others, only one leg may leave the grond at any given moment
                         break;
@@ -222,15 +227,19 @@ namespace BadTemper
                 if (Vectors.SqrDist3(footTargets[i].position, homePositions[i] + transform.position) > (maxDist * maxDist))
                 {
                     currentlySteppingLeg = i; // save which leg needs to move
-                    stepProgress -= Time.deltaTime; // this just ensures the foot doesn't start to move this frame but rather next frame
+                    stepProgress[i] -= Time.deltaTime; // this just ensures the foot doesn't start to move this frame but rather next frame
                     currentLegStartPos = footTargets[i].position; // save our starting position
 
                     // evaluate how far we need to move
-                    Vector3 difference = (homePositions[i] + transform.positon) - footTargets[i].position;
+                    Vector3 difference = (homePositions[i] + transform.position) - footTargets[i].position;
+
+                    //calc mult for overshoot
+                    float multX = Mathf.Clamp(Mathf.Abs(difference.x) / maxDist, 0, 1);
+                    float multZ = Mathf.Clamp(Mathf.Abs(difference.z) / maxDist, 0, 1);
 
                     // add overshoot
-                    difference.x = (difference.x >= 0) ? difference.x + overShoot : difference.x - overshoot;
-                    difference.y = (difference.y >= 0> ? difference.y + overShoot : difference.y - overshoot;
+                    difference.x = (difference.x >= 0) ? difference.x + (overShoot * multX) : difference.x - (overShoot * multX);
+                    difference.z = (difference.z >= 0) ? difference.z + (overShoot * multZ) : difference.z - (overShoot * multZ);
 
                     // save new position
                     currentLegTargetPos = footTargets[i].position + difference;
@@ -240,17 +249,17 @@ namespace BadTemper
             if (currentlySteppingLeg == -1)
                 return;
 
-            stepProgress += Time.deltaTime; // if first run, should evaluate to zero
-            float progress = stepProgress / stepTime;
+            stepProgress[currentlySteppingLeg] += Time.deltaTime; // if first run, should evaluate to zero
+            float progress = stepProgress[currentlySteppingLeg] / stepTime;
 
-            Vector3 evaluatedPosition = currentLegStartPos - (currentLegStartPos + currentLegTargetPos) * progress;
-            evaluatedPosition.y = stepHeightCurve.evaluate(progress);
+            Vector3 evaluatedPosition = Vector3.Lerp(currentLegStartPos, currentLegTargetPos, progress);
+            evaluatedPosition.y = stepHeightCurve.Evaluate(progress) + TargetOffset;
 
             footTargets[currentlySteppingLeg].position = evaluatedPosition;
 
-            if (stepProgress >= stepTime)
+            if (stepProgress[currentlySteppingLeg] >= stepTime)
             {
-                stepProgress = 0;
+                stepProgress[currentlySteppingLeg] = 0;
                 currentlySteppingLeg = -1;
             }
         }
