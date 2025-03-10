@@ -92,9 +92,9 @@ namespace BadTemper
                     Gizmos.DrawSphere(footTargets[i].position + (transform.up * TargetOffset), gizmosSize);
 
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawSphere(transform.position + homePositions[i], gizmosSize);
-                    Gizmos.DrawLine(transform.position + homePositions[i], footTargets[i].position + (transform.up * TargetOffset));
-                    Gizmos.DrawWireSphere(transform.position + homePositions[i], maxDist);
+                    Gizmos.DrawSphere(HPtoWorld(homePositions[i]), gizmosSize);
+                    Gizmos.DrawLine(HPtoWorld(homePositions[i]), footTargets[i].position + (transform.up * TargetOffset));
+                    Gizmos.DrawWireSphere(HPtoWorld(homePositions[i]), maxDist);
 
                     if (currentlySteppingLeg != -1)
                     {
@@ -197,7 +197,7 @@ namespace BadTemper
                 spineTopRot = x * 0.25f;
                 spineMidRot = x * 0.25f;
             }
-            else if (x > 0)
+            else if (x > 0) // else if as we want nothing to happen if x does just straight up equal zero
             {
                 neckRot = x * 0.75f;
                 spineTopRot = x * 0.10f;
@@ -214,7 +214,7 @@ namespace BadTemper
             transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.x, playerLookXY.y, transform.rotation.z));
         }
 
-        private void IKHandeler() // NOTE 2/20/2025 CURRENT MODEL DOES NOT HAVE ANY IK JOINTS! WILL ADD TO THE MODEL SOON!
+        private void IKHandeler()
         {
             // neat little resource, explains about what I thought i'd have to do going into this, but also clarifies what I wasn't quite sure on: https://weaverdev.io/projects/bonehead-procedural-animation/
             
@@ -231,9 +231,10 @@ namespace BadTemper
                     currentLegStartPos = footTargets[i].position; // save our starting position
 
                     // evaluate how far we need to move
-                    Vector3 difference = (homePositions[i] + transform.position) - footTargets[i].position;
+                    Vector3 difference = HPtoWorld(HomePositions[i]) - footTargets[i].position;
 
-                    //calc mult for overshoot
+                    // calc mult for overshoot
+                    // this prevents a funny issue where if the leg is off from the home position to the right by even a little bit, evey sequential step will make it overshoot more and more and more until your legs are flopping side to side. by making the overshoot smaller the closer we are to the home position we ensure that it ends up making its way to basically the home position after a few steps if its drastically off to the right.
                     float multX = Mathf.Clamp(Mathf.Abs(difference.x) / maxDist, 0, 1);
                     float multZ = Mathf.Clamp(Mathf.Abs(difference.z) / maxDist, 0, 1);
 
@@ -256,12 +257,18 @@ namespace BadTemper
             evaluatedPosition.y = stepHeightCurve.Evaluate(progress) + TargetOffset;
 
             footTargets[currentlySteppingLeg].position = evaluatedPosition;
+            footTargets[currentlySteppingLeg].rotation = transform.rotation;
 
             if (stepProgress[currentlySteppingLeg] >= stepTime)
             {
                 stepProgress[currentlySteppingLeg] = 0;
                 currentlySteppingLeg = -1;
             }
+        }
+
+        private Vector3 HPtoWorld(Vector3 offset) // Home Position to World
+        {
+            return new Vector3(offset.x * transform.right, offset.y * transform.up, offset.z * transform.forward) + transform.position;
         }
 
         private void MovementHandeler()
