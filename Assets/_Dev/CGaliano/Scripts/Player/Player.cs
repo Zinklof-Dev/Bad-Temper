@@ -221,9 +221,11 @@ namespace BadTemper
             // Check which legs should be moved;
             for (int i = 0; i < footTargets.Length; i++)
             {
+                footTargets[i].rotation = transform.rotation;
+
                 if (currentlySteppingLeg != -1) // if currently in process of moving a leg, don't check for others, only one leg may leave the grond at any given moment
                         break;
-                        
+
                 if (Vectors.SqrDist3(footTargets[i].position, homePositions[i] + transform.position) > (maxDist * maxDist))
                 {
                     currentlySteppingLeg = i; // save which leg needs to move
@@ -231,7 +233,7 @@ namespace BadTemper
                     currentLegStartPos = footTargets[i].position; // save our starting position
 
                     // evaluate how far we need to move
-                    Vector3 difference = HPtoWorld(HomePositions[i]) - footTargets[i].position;
+                    Vector3 difference = HPtoWorld(homePositions[i]) - footTargets[i].position;
 
                     // calc mult for overshoot
                     // this prevents a funny issue where if the leg is off from the home position to the right by even a little bit, evey sequential step will make it overshoot more and more and more until your legs are flopping side to side. by making the overshoot smaller the closer we are to the home position we ensure that it ends up making its way to basically the home position after a few steps if its drastically off to the right.
@@ -268,7 +270,7 @@ namespace BadTemper
 
         private Vector3 HPtoWorld(Vector3 offset) // Home Position to World
         {
-            return new Vector3(offset.x * transform.right, offset.y * transform.up, offset.z * transform.forward) + transform.position;
+            return (offset.x * transform.right) + (offset.y * transform.up) + (offset.z * transform.forward) + transform.position;
         }
 
         private void MovementHandeler()
