@@ -1,3 +1,4 @@
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 using ZinklofDev.Utils.MathZ;
 
@@ -13,22 +14,108 @@ public class SpooderAnimation : MonoBehaviour
     [SerializeField] private Transform RB_Target_Offset;
     [SerializeField] private Transform RF_Target_Offset;
 
+    [SerializeField] private Vector3 LB_Target_IK_Start;
+    [SerializeField] private Vector3 LF_Target_IK_Start;
+    [SerializeField] private Vector3 RB_Target_IK_Start;
+    [SerializeField] private Vector3 RF_Target_IK_Start;
+
+    [SerializeField] private bool isMovingLB;
+    [SerializeField] private bool isMovingLF;
+    [SerializeField] private bool isMovingRB;
+    [SerializeField] private bool isMovingRF;
+
+    [SerializeField] private bool group1Moved;
+    [SerializeField] private bool group2Moved;
+
+    [SerializeField] private float timeElapsed1;
+    [SerializeField] private float timeElapsed2;
+
     [SerializeField] private float moveDistance;
     [SerializeField] private float moveSpeed;
 
-    private void Update()
+    private void Start()
     {
-        CheckLegDistance(LB_Target_IK, LB_Target_Offset);
-        CheckLegDistance(LF_Target_IK, LF_Target_Offset);
-        CheckLegDistance(RB_Target_IK, RB_Target_Offset);
-        CheckLegDistance(RF_Target_IK, RF_Target_Offset);
+        LB_Target_IK_Start = LB_Target_IK.position;
+        LF_Target_IK_Start = LF_Target_IK.position;
+        RB_Target_IK_Start = RB_Target_IK.position;
+        RF_Target_IK_Start = RF_Target_IK.position;
     }
 
-    void CheckLegDistance(Transform IK, Transform Offset)
+    private void Update()
     {
-        if(Vectors.SqrDist3f(IK.position, Offset.position) > Mathf.Sqrt(moveDistance))
+        if (group2Moved)
         {
-            IK.position = Offset.position;
+            AnimateLeg(LF_Target_IK, LF_Target_Offset, ref isMovingLF, ref LF_Target_IK_Start, ref timeElapsed1);
+            AnimateLeg(RB_Target_IK, RB_Target_Offset, ref isMovingRB, ref RB_Target_IK_Start, ref timeElapsed1);
         }
+        if(group2Moved && !isMovingLF && !isMovingRB) 
+        { 
+            group2Moved = false;
+            group1Moved = true;
+        }
+
+        if (group1Moved)
+        {
+            AnimateLeg(LB_Target_IK, LB_Target_Offset, ref isMovingLB, ref LB_Target_IK_Start, ref timeElapsed2);
+            AnimateLeg(RF_Target_IK, RF_Target_Offset, ref isMovingRF, ref RF_Target_IK_Start, ref timeElapsed2);
+        }
+        if (group1Moved && !isMovingLB && !isMovingRF)
+        {
+            group2Moved = true;
+            group1Moved = false;
+        }
+
+        VerticalMovment(LF_Target_Offset);
+        VerticalMovment(RB_Target_Offset);
+        VerticalMovment(LB_Target_Offset);
+        VerticalMovment(RF_Target_Offset);
+    }
+
+    void AnimateLeg(Transform IK, Transform Offset, ref bool isMoving, ref Vector3 start, ref float timeElapsed)
+    {
+        if (isMoving)
+        {
+            timeElapsed += Time.deltaTime;
+
+            if (timeElapsed > 0.5f)
+            {
+                isMoving = false;
+            }
+
+            IK.position = Vector3.Slerp(IK.position, Offset.position, moveSpeed * Time.deltaTime);
+
+            if (Vectors.SqrDist3f(IK.position, Offset.position) < 0.1f)
+            {
+                isMoving = false;
+            }
+            return;
+        }
+
+        if (Vectors.SqrDist3f(IK.position, Offset.position) > Mathf.Sqrt(moveDistance))
+        {
+            isMoving = true;
+            start = IK.position;
+            timeElapsed = 0;
+        }
+    }
+
+    void VerticalMovment(Transform Offset)
+    {
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(LB_Target_IK.position, 0.15f);
+        Gizmos.DrawSphere(LF_Target_IK.position, 0.15f);
+        Gizmos.DrawSphere(RB_Target_IK.position, 0.15f);
+        Gizmos.DrawSphere(RF_Target_IK.position, 0.15f);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(LB_Target_Offset.position, 0.15f);
+        Gizmos.DrawSphere(LF_Target_Offset.position, 0.15f);
+        Gizmos.DrawSphere(RB_Target_Offset.position, 0.15f);
+        Gizmos.DrawSphere(RF_Target_Offset.position, 0.15f);
     }
 }
