@@ -109,7 +109,7 @@ public class SpooderAnimation : MonoBehaviour
     void VerticalMovment(Transform Offset)
     {
         RaycastHit hit;
-        if(Physics.Raycast(new Vector3(Offset.position.x, Offset.position.y + 1, Offset.position.z), Vector3.Down, out hit))
+        if(Physics.Raycast(new Vector3(Offset.position.x, Offset.position.y + 1, Offset.position.z), Vector3.down, out hit))
         {
             Offset.position = new Vector3(Offset.position.x, hit.point.y, Offset.position.z);
         }
