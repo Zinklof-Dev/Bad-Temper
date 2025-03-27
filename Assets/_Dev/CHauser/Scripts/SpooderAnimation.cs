@@ -109,7 +109,7 @@ public class SpooderAnimation : MonoBehaviour
             Offset.position = new Vector3(Offset.position.x, hit.point.y, Offset.position.z);
         }
 
-        body.position = new Vector3((LB_Target_IK.position.x + RB_Target_IK.position.x + LF_Target_IK.position.x + RF_Target_IK.position.x +  LB_Target_Offset.position.x + RB_Target_Offset.position.x + LF_Target_Offset.position.x + RF_Target_Offset.position.x) / 8, (LB_Target_IK.position.y + RB_Target_IK.position.y + LF_Target_IK.position.y + RF_Target_IK.position.y +  LB_Target_Offset.position.y + RB_Target_Offset.position.y + LF_Target_Offset.position.y + RF_Target_Offset.position.y) / 8, (LB_Target_IK.position.z + RB_Target_IK.position.z + LF_Target_IK.position.z + RF_Target_IK.position.z +  LB_Target_Offset.position.z + RB_Target_Offset.position.z + LF_Target_Offset.position.z + RF_Target_Offset.position.z) / 8);
+        body.position = new Vector3(body.position.x, (LB_Target_IK.position.y + RB_Target_IK.position.y + LF_Target_IK.position.y + RF_Target_IK.position.y +  LB_Target_Offset.position.y + RB_Target_Offset.position.y + LF_Target_Offset.position.y + RF_Target_Offset.position.y) / 8, body.position.z);
     }
 
     private void OnDrawGizmos()
