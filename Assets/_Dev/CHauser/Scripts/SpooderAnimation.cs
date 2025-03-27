@@ -36,6 +36,8 @@ public class SpooderAnimation : MonoBehaviour
     [SerializeField] private float moveDistance;
     [SerializeField] private float moveSpeed;
 
+    [SerializeField] private LayerMask ignoreRaycast;
+
     private void Start()
     {
         LB_Target_IK_Start = LB_Target_IK.position;
@@ -46,6 +48,16 @@ public class SpooderAnimation : MonoBehaviour
 
     private void Update()
     {
+        SyncOffset(LF_Target_Offset, 1.184392f, 1.411505f);
+        SyncOffset(RB_Target_Offset, -1.184392f, -1.411505f);
+        SyncOffset(LB_Target_Offset, -1.184392f, 1.411505f);
+        SyncOffset(RF_Target_Offset, 1.184392f, -1.411505f);
+
+        VerticalMovment(LF_Target_Offset);
+        VerticalMovment(RB_Target_Offset);
+        VerticalMovment(LB_Target_Offset);
+        VerticalMovment(RF_Target_Offset);
+
         if (group2Moved)
         {
             AnimateLeg(LF_Target_IK, LF_Target_Offset, ref isMovingLF, ref LF_Target_IK_Start, ref timeElapsed1);
@@ -68,11 +80,6 @@ public class SpooderAnimation : MonoBehaviour
             group1Moved = false;
         }
 
-        VerticalMovment(LF_Target_Offset);
-        VerticalMovment(RB_Target_Offset);
-        VerticalMovment(LB_Target_Offset);
-        VerticalMovment(RF_Target_Offset);
-
         previousBodyPosition = body.position;
     }
 
@@ -82,14 +89,14 @@ public class SpooderAnimation : MonoBehaviour
         {
             // timeElapsed += Time.deltaTime; Unused, need to test further in Unity
             
-            float speedMultiplier = (Vectors.SqrDist3f(body.position, previousBodyPosition) * Vectors.SqrDist3f(body.position, previousBodyPosition)) / Time.deltaTime;
+            float speedMultiplier = (Vectors.SqrDist3f(start, Offset.position) * Vectors.SqrDist3f(start, Offset.position)) / Time.deltaTime;
 
            /* if (timeElapsed > 0.5f) // Ditto as 83
             {
                 isMoving = false;
             }*/
 
-            IK.position = Vector3.Slerp(IK.position, Offset.position, moveSpeed * speedMultiplier); // Need to test if Slerp or Lerp is better, it seems like Slerp gives better results but costs more based just on a google search
+            IK.position = Vector3.Lerp(IK.position, Offset.position, moveSpeed * speedMultiplier); // Need to test if Slerp or Lerp is better, it seems like Slerp gives better results but costs more based just on a google search
 
             if (Vectors.SqrDist3f(IK.position, Offset.position) < 0.1f)
             {
@@ -98,7 +105,7 @@ public class SpooderAnimation : MonoBehaviour
             return;
         }
 
-        if (Vectors.SqrDist3f(IK.position, Offset.position) > Mathf.Sqrt(moveDistance))
+        if (Vectors.SqrDist2f(new Vector2(IK.position.x, IK.position.z), new Vector2(Offset.position.x, Offset.position.z)) > Mathf.Sqrt(moveDistance))
         {
             isMoving = true;
             start = IK.position;
@@ -109,12 +116,19 @@ public class SpooderAnimation : MonoBehaviour
     void VerticalMovment(Transform Offset)
     {
         RaycastHit hit;
-        if(Physics.Raycast(new Vector3(Offset.position.x, Offset.position.y + 1, Offset.position.z), Vector3.down, out hit))
+        if(Physics.Raycast(new Vector3(Offset.position.x, Offset.position.y + 1, Offset.position.z), Vector3.down, out hit, float.PositiveInfinity, ignoreRaycast))
         {
             Offset.position = new Vector3(Offset.position.x, hit.point.y, Offset.position.z);
         }
 
-        body.position = new Vector3(body.position.x, (LB_Target_IK.position.y + RB_Target_IK.position.y + LF_Target_IK.position.y + RF_Target_IK.position.y +  LB_Target_Offset.position.y + RB_Target_Offset.position.y + LF_Target_Offset.position.y + RF_Target_Offset.position.y) / 8, body.position.z);
+        body.position = new Vector3(body.position.x, (LB_Target_IK.position.y + RB_Target_IK.position.y + LF_Target_IK.position.y + RF_Target_IK.position.y /* + LB_Target_Offset.position.y + RB_Target_Offset.position.y + LF_Target_Offset.position.y + RF_Target_Offset.position.y*/) / /*8*/ 4, body.position.z);
+
+        //body.rotation = Campfire.GetTriangleQuaternionRotation(hit.triangleIndex, hit.position.transform.gameObject.GetComponent<Mesh>());
+    }
+
+    void SyncOffset(Transform offset, float x, float y)
+    {
+        offset.position = new Vector3(body.position.x + x, transform.position.y, body.position.z + y);
     }
 
     private void OnDrawGizmos()

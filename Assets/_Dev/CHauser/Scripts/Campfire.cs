@@ -244,7 +244,7 @@ public class Campfire : NetworkBehaviour
         }
     }
 
-    private static async Task<Quaternion> GetTriangleQuaternionRotation(int index, Mesh mesh)
+    public static async Task<Quaternion> GetTriangleQuaternionRotation(int index, Mesh mesh)
     {
         Vector3 v0 = mesh.vertices[mesh.triangles[index * 3]];
         Vector3 v1 = mesh.vertices[mesh.triangles[index * 3 + 1]];
