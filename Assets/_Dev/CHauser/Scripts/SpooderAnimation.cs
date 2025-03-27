@@ -15,6 +15,7 @@ public class SpooderAnimation : MonoBehaviour
     [SerializeField] private Transform RF_Target_Offset;
 
     [SerializeField] private Transform body;
+    [SerializaField] private Vector3 previousBodyPosition;
 
     [SerializeField] private Vector3 LB_Target_IK_Start;
     [SerializeField] private Vector3 LF_Target_IK_Start;
@@ -71,20 +72,24 @@ public class SpooderAnimation : MonoBehaviour
         VerticalMovment(RB_Target_Offset);
         VerticalMovment(LB_Target_Offset);
         VerticalMovment(RF_Target_Offset);
+
+        previousBodyPosition = body.position;
     }
 
     void AnimateLeg(Transform IK, Transform Offset, ref bool isMoving, ref Vector3 start, ref float timeElapsed)
     {
         if (isMoving)
         {
-            timeElapsed += Time.deltaTime;
+            // timeElapsed += Time.deltaTime; Unused, need to test further in Unity
+            
+            float speedMultiplier = (Vecotrs.SqrDist3f(body.position, previousBodyPosition) * Vecotrs.SqrDist3f(body.position, previousBodyPosition)) / Time.deltaTime;
 
-            if (timeElapsed > 0.5f)
+           /* if (timeElapsed > 0.5f) // Ditto as 83
             {
                 isMoving = false;
-            }
+            }*/
 
-            IK.position = Vector3.Slerp(IK.position, Offset.position, moveSpeed * Time.deltaTime);
+            IK.position = Vector3.Slerp(IK.position, Offset.position, moveSpeed * speedMultiplier); // Need to test if Slerp or Lerp is better, it seems like Slerp gives better results but costs more based just on a google search
 
             if (Vectors.SqrDist3f(IK.position, Offset.position) < 0.1f)
             {
