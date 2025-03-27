@@ -15,7 +15,7 @@ public class SpooderAnimation : MonoBehaviour
     [SerializeField] private Transform RF_Target_Offset;
 
     [SerializeField] private Transform body;
-    [SerializaField] private Vector3 previousBodyPosition;
+    [SerializeField] private Vector3 previousBodyPosition;
 
     [SerializeField] private Vector3 LB_Target_IK_Start;
     [SerializeField] private Vector3 LF_Target_IK_Start;
@@ -82,7 +82,7 @@ public class SpooderAnimation : MonoBehaviour
         {
             // timeElapsed += Time.deltaTime; Unused, need to test further in Unity
             
-            float speedMultiplier = (Vecotrs.SqrDist3f(body.position, previousBodyPosition) * Vecotrs.SqrDist3f(body.position, previousBodyPosition)) / Time.deltaTime;
+            float speedMultiplier = (Vectors.SqrDist3f(body.position, previousBodyPosition) * Vectors.SqrDist3f(body.position, previousBodyPosition)) / Time.deltaTime;
 
            /* if (timeElapsed > 0.5f) // Ditto as 83
             {
