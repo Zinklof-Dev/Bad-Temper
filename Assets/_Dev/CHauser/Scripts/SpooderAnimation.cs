@@ -14,6 +14,8 @@ public class SpooderAnimation : MonoBehaviour
     [SerializeField] private Transform RB_Target_Offset;
     [SerializeField] private Transform RF_Target_Offset;
 
+    [SerializeField] private Transform body;
+
     [SerializeField] private Vector3 LB_Target_IK_Start;
     [SerializeField] private Vector3 LF_Target_IK_Start;
     [SerializeField] private Vector3 RB_Target_IK_Start;
@@ -101,7 +103,13 @@ public class SpooderAnimation : MonoBehaviour
 
     void VerticalMovment(Transform Offset)
     {
+        RaycastHit hit;
+        if(Physics.Raycast(new Vector3(Offset.position.x, Offset.position.y + 1, Offset.position.z), Vector3.Down, out hit))
+        {
+            Offset.position = new Vector3(Offset.position.x, hit.point.y, Offset.position.z);
+        }
 
+        body.position = new Vector3((LB_Target_IK.position.x + RB_Target_IK.position.x + LF_Target_IK.position.x + RF_Target_IK.position.x +  LB_Target_Offset.position.x + RB_Target_Offset.position.x + LF_Target_Offset.position.x + RF_Target_Offset.position.x) / 8, (LB_Target_IK.position.y + RB_Target_IK.position.y + LF_Target_IK.position.y + RF_Target_IK.position.y +  LB_Target_Offset.position.y + RB_Target_Offset.position.y + LF_Target_Offset.position.y + RF_Target_Offset.position.y) / 8, (LB_Target_IK.position.z + RB_Target_IK.position.z + LF_Target_IK.position.z + RF_Target_IK.position.z +  LB_Target_Offset.position.z + RB_Target_Offset.position.z + LF_Target_Offset.position.z + RF_Target_Offset.position.z) / 8);
     }
 
     private void OnDrawGizmos()
