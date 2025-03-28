@@ -1,3 +1,4 @@
+using System;
 using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 using ZinklofDev.Utils.MathZ;
@@ -36,6 +37,8 @@ public class SpooderAnimation : MonoBehaviour
     [SerializeField] private float moveDistance;
     [SerializeField] private float moveSpeed;
 
+    [SerializeField] private MeshFilter meshFilter;
+
     [SerializeField] private LayerMask ignoreRaycast;
 
     private void Start()
@@ -44,6 +47,7 @@ public class SpooderAnimation : MonoBehaviour
         LF_Target_IK_Start = LF_Target_IK.position;
         RB_Target_IK_Start = RB_Target_IK.position;
         RF_Target_IK_Start = RF_Target_IK.position;
+        meshFilter = GetComponent<MeshFilter>();
     }
 
     private void Update()
@@ -53,10 +57,10 @@ public class SpooderAnimation : MonoBehaviour
         SyncOffset(LB_Target_Offset, -1.184392f, 1.411505f);
         SyncOffset(RF_Target_Offset, 1.184392f, -1.411505f);
 
-        VerticalMovment(LF_Target_Offset);
+        VerticalMovment(RF_Target_Offset);
         VerticalMovment(RB_Target_Offset);
         VerticalMovment(LB_Target_Offset);
-        VerticalMovment(RF_Target_Offset);
+        VerticalMovment(LF_Target_Offset);
 
         if (group2Moved)
         {
@@ -122,8 +126,23 @@ public class SpooderAnimation : MonoBehaviour
         }
 
         body.position = new Vector3(body.position.x, (LB_Target_IK.position.y + RB_Target_IK.position.y + LF_Target_IK.position.y + RF_Target_IK.position.y /* + LB_Target_Offset.position.y + RB_Target_Offset.position.y + LF_Target_Offset.position.y + RF_Target_Offset.position.y*/) / /*8*/ 4, body.position.z);
+        Quaternion triangleQuaternionRotation = GetTriangleQuaternionRotation(hit.triangleIndex, meshFilter.sharedMesh);
 
-        //body.rotation = Campfire.GetTriangleQuaternionRotation(hit.triangleIndex, hit.position.transform.gameObject.GetComponent<Mesh>());
+        body.rotation = Quaternion.Euler(-triangleQuaternionRotation.eulerAngles.x, 0, -triangleQuaternionRotation.eulerAngles.z);
+    }
+
+    Quaternion GetTriangleQuaternionRotation(int triangleIndex, Mesh mesh)
+    {
+
+        Vector3 v0 = mesh.vertices[mesh.triangles[triangleIndex * 3]];
+        Vector3 v1 = mesh.vertices[mesh.triangles[triangleIndex * 3 + 1]];
+        Vector3 v2 = mesh.vertices[mesh.triangles[triangleIndex * 3 + 2]];
+        Vector3 normal = Vector3.Cross(v1 - v0, v2 - v0).normalized;
+        Quaternion quaternionRotation = Quaternion.FromToRotation(normal, Vector3.up);
+
+        //Debug.Log("Triangle Positions: " + v0 + v1 + v2+ "\nRotation of triangle: " +  quaternionRotation.eulerAngles);
+
+        return quaternionRotation;
     }
 
     void SyncOffset(Transform offset, float x, float y)
