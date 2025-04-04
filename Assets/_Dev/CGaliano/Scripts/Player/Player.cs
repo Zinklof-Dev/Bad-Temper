@@ -38,7 +38,7 @@ namespace BadTemper
         [SerializeField] float drag;
         [SerializeField] float waterDrag;
         [SerializeField] float friction;
-        [SerializeField] float terminalVelocity;
+        [SerializeField] Vector3 terminalVelocity;
         [SerializeField] float gravityMult;
         [SerializeField] float waterLevel; // universal since the game only has an ocean and no lakes (as of now) so we don't need any complex system to check for water (would probably just set up a Volume system for that if ever needed)
         [Header("Leg IK")]
@@ -59,8 +59,10 @@ namespace BadTemper
         [SerializeField] bool gizmos;
         [SerializeField] bool ikGizmos;
         [SerializeField] bool physicsGizmos;
+        [SerializeField] bool calcRealVelocity;
         [SerializeField] float gizmosSize;
-    
+        [SerializeField] private Vector3 realVelocity; //calculates velocity mathmatically since the linearvelocity variable is delta timed and thus doesn't give correct results when viewed in inspector
+
         Vector2 playerLookXY;
         public bool TPV = false; // third person view, likely debug only
 
@@ -297,17 +299,17 @@ namespace BadTemper
             if (transform.position.y <= waterLevel && lastJumpInput != -1)
             {                 
                 addedMovement.y = jumpForce; // water drag will make this cause less force than a reg jump later
-                lastJumpInput -= 999;
+                lastJumpInput = -1;
             }
             else if (cc.isGrounded && lastJumpInput != -1)
             {
                 addedMovement.y = jumpForce;
-                lastJumpInput -= 999;
+                lastJumpInput = -1;
             }               
             else if (cc.isGrounded)
                 addedMovement.y = -0.01f;
             else
-                addedMovement += Physics.gravity * gravityMult * Time.deltaTime;
+                addedMovement += new Vector3(0, -9.81f, 0) * gravityMult * Time.deltaTime; // if gravity mult is 1 this will compute to 9.81 m/s^2 of acceleration
 
             linearVelocity += addedMovement;
         }
@@ -315,9 +317,9 @@ namespace BadTemper
         public void WAFT() // Water Drag - Air Resistance - Friction - Terminal Velocity
         {
             // Terminal Velocity
-            linearVelocity.x = Mathf.Clamp(linearVelocity.x, -terminalVelocity, terminalVelocity);
-            linearVelocity.y = Mathf.Clamp(linearVelocity.y, -terminalVelocity, terminalVelocity);
-            linearVelocity.z = Mathf.Clamp(linearVelocity.z, -terminalVelocity, terminalVelocity);
+            linearVelocity.x = Mathf.Clamp(linearVelocity.x, -terminalVelocity.x * Time.deltaTime, terminalVelocity.x * Time.deltaTime);
+            linearVelocity.y = Mathf.Clamp(linearVelocity.y, -terminalVelocity.z * Time.deltaTime, terminalVelocity.z * Time.deltaTime);
+            linearVelocity.z = Mathf.Clamp(linearVelocity.z, -terminalVelocity.y * Time.deltaTime, terminalVelocity.y * Time.deltaTime);
     
             // Air Resistance (Drag)
             linearVelocity = linearVelocity - ((linearVelocity * drag) * Time.deltaTime);
@@ -341,6 +343,11 @@ namespace BadTemper
             WAFT();
             cc.Move(linearVelocity);
             IKHandeler();
+
+            if (calcRealVelocity)
+            {
+                realVelocity = (1 / Time.deltaTime) * linearVelocity; // basically just undoing the delta time calculations.
+            }
         }
 
         //////// COMMANDS ////////
