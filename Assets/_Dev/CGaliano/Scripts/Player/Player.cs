@@ -298,16 +298,16 @@ namespace BadTemper
 
             if (transform.position.y <= waterLevel && lastJumpInput != -1)
             {                 
-                addedMovement.y = jumpForce; // water drag will make this cause less force than a reg jump later
+                linearVelocity.y = jumpForce * Time.deltaTime; // water drag will make this cause less force than a reg jump later
                 lastJumpInput = -1;
             }
             else if (cc.isGrounded && lastJumpInput != -1)
             {
-                addedMovement.y = jumpForce;
+                linearVelocity.y = jumpForce * Time.deltaTime; // delta time is not needed here, but it keeps consistency for when we undo delta later for the debug velocity view (and ensures this is aligned with the force of gravity)
                 lastJumpInput = -1;
             }               
             else if (cc.isGrounded)
-                addedMovement.y = -0.01f;
+                linearVelocity.y = -0.01f * Time.deltaTime;
             else
                 addedMovement += new Vector3(0, -9.81f, 0) * gravityMult * Time.deltaTime; // if gravity mult is 1 this will compute to 9.81 m/s^2 of acceleration
 
@@ -347,6 +347,7 @@ namespace BadTemper
             if (calcRealVelocity)
             {
                 realVelocity = (1 / Time.deltaTime) * linearVelocity; // basically just undoing the delta time calculations.
+                Debug.Log(realVelocity.y);
             }
         }
 
