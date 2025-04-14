@@ -40,6 +40,12 @@ public class DataPersistanceManager : MonoBehaviour
     public ProfileData GetData()
     { return gameData; }
 
+    public void ForceSaveThisData(ProfileData forceSave)
+    {
+        gameData = forceSave;
+        dataHandeler.Save(gameData);
+    }
+
     public void NewGame()
     {
         this.gameData = new ProfileData();
