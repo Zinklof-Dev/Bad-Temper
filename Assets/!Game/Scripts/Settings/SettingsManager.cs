@@ -29,6 +29,7 @@ public class SettingsManager : MonoBehaviour
 
     public void SaveButton()
     {
+        profile.username = usernameInputField.text;
         dataPersistanceManager.ForceSaveThisData(profile);
     }
 
@@ -38,15 +39,15 @@ public class SettingsManager : MonoBehaviour
 
         charCount = (short)temp.Length;
 
-        if (charCount > 12)
+        if (charCount > 24)
         {
-            charLimitText.text = "<color=#ff0000>" + charCount + "/" + 12 + "</color>";
+            charLimitText.text = "<color=#ff0000>" + charCount + "/" + 24 + "</color>";
             saveButton.interactable = false;
             canSaveText.SetActive(true);
         }
         else
         {
-            charLimitText.text = charCount + "/" + 12;
+            charLimitText.text = charCount + "/" + 24;
             saveButton.interactable = true;
             canSaveText.SetActive(false);
         }   
