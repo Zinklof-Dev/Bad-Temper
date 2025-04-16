@@ -48,6 +48,8 @@ public class Stats : NetworkBehaviour
         else if (health < 0)
             Death();
 
+        timeSinceDamage = 0;
+
         UpdateUI();
     }
 
@@ -56,6 +58,7 @@ public class Stats : NetworkBehaviour
         if (mana - val > 0)
         {
             mana -= val;
+            timeSinceMana = 0;
             return true;
         }
         else
@@ -67,6 +70,7 @@ public class Stats : NetworkBehaviour
         if (stam - val > 0)
         {
             stam -= val;
+            timeSinceStam = 0;
 
             return true;
         }
@@ -86,9 +90,13 @@ public class Stats : NetworkBehaviour
         if (timeSinceDamage > timeBeforeHeal)
             health += healthRate * Time.deltaTime;
         if (timeSinceStam > timeBeforeStam)
-            health += stamRate * Time.deltaTime;
+            stam += stamRate * Time.deltaTime;
         if (timeSinceMana > timeBeforeMana)
             mana += manaRate * Time.deltaTime;
+
+        health =  Mathf.Clamp(health, -100, maxHealth);
+        stam = Mathf.Clamp(stam, -100, maxStam);
+        mana = Mathf.Clamp(mana, -100, maxMana);
     }
 
     public void Update()

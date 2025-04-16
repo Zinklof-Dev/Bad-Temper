@@ -136,7 +136,7 @@ namespace BadTemper
             }
         }
 
-        private void Start() // change to on network spawn later
+        public override void OnNetworkSpawn() // change to on network spawn later
         {
             playerRef = this;
 
@@ -148,6 +148,7 @@ namespace BadTemper
             topSpineStartRot =  jointReferences[2].localRotation;
 
             stepProgress = new float[footTargets.Length];
+            base.OnNetworkSpawn();
         }
     
         private void CameraHandeler()
@@ -211,7 +212,7 @@ namespace BadTemper
             //jointReferences[3].localRotation = Quaternion.Euler(new Vector3(spineMidRot, jointReferences[3].localRotation.y, jointReferences[3].localRotation.z));
 
             jointReferences[2].localRotation = topSpineStartRot * Quaternion.Euler(-spineTopRot, 0, 0);
-            jointReferences[3].localRotation =  midSpineStartRot * Quaternion.Euler(0, -spineMidRot, 0);
+            jointReferences[3].localRotation = midSpineStartRot * Quaternion.Euler(0, -spineMidRot, 0);
 
             transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.x, playerLookXY.y, transform.rotation.z));
         }
@@ -296,20 +297,17 @@ namespace BadTemper
 
             Vector3 addedMovement = ((Input.GetAxis("Horizontal") * transform.right) + (Input.GetAxis("Vertical") * transform.forward)) * mm;
 
-            if (transform.position.y <= waterLevel && lastJumpInput != -1)
-            {                 
-                linearVelocity.y = jumpForce * Time.deltaTime; // water drag will make this cause less force than a reg jump later
-                lastJumpInput = -1;
-            }
-            else if (cc.isGrounded && lastJumpInput != -1)
+            if (cc.isGrounded && lastJumpInput != -1)
             {
-                linearVelocity.y = jumpForce * Time.deltaTime; // delta time is not needed here, but it keeps consistency for when we undo delta later for the debug velocity view (and ensures this is aligned with the force of gravity)
+                linearVelocity.y = jumpForce;
                 lastJumpInput = -1;
             }               
             else if (cc.isGrounded)
-                linearVelocity.y = -0.01f * Time.deltaTime;
+            {
+                linearVelocity.y = -0.001f;
+            }
             else
-                addedMovement += new Vector3(0, -9.81f, 0) * gravityMult * Time.deltaTime; // if gravity mult is 1 this will compute to 9.81 m/s^2 of acceleration
+                addedMovement.y = -9.81f * gravityMult * Time.deltaTime; // if gravity mult is 1 this will compute to 9.81 m/s^2 of acceleration
 
             linearVelocity += addedMovement;
         }
@@ -317,9 +315,9 @@ namespace BadTemper
         public void WAFT() // Water Drag - Air Resistance - Friction - Terminal Velocity
         {
             // Terminal Velocity
-            linearVelocity.x = Mathf.Clamp(linearVelocity.x, -terminalVelocity.x * Time.deltaTime, terminalVelocity.x * Time.deltaTime);
-            linearVelocity.y = Mathf.Clamp(linearVelocity.y, -terminalVelocity.z * Time.deltaTime, terminalVelocity.z * Time.deltaTime);
-            linearVelocity.z = Mathf.Clamp(linearVelocity.z, -terminalVelocity.y * Time.deltaTime, terminalVelocity.y * Time.deltaTime);
+            linearVelocity.x = Mathf.Clamp(linearVelocity.x, -terminalVelocity.x, terminalVelocity.x);
+            linearVelocity.y = Mathf.Clamp(linearVelocity.y, -terminalVelocity.y, terminalVelocity.y + 500);
+            linearVelocity.z = Mathf.Clamp(linearVelocity.z, -terminalVelocity.z, terminalVelocity.z);
     
             // Air Resistance (Drag)
             linearVelocity = linearVelocity - ((linearVelocity * drag) * Time.deltaTime);
@@ -338,16 +336,18 @@ namespace BadTemper
 
         private void Update()
         {
+            if (!IsOwner) return;
+
             CameraHandeler();
             MovementHandeler();
             WAFT();
             cc.Move(linearVelocity);
-            IKHandeler();
+            //IKHandeler();
 
             if (calcRealVelocity)
             {
                 realVelocity = (1 / Time.deltaTime) * linearVelocity; // basically just undoing the delta time calculations.
-                Debug.Log(realVelocity.y);
+                //Debug.Log(realVelocity.y);
             }
         }
 
