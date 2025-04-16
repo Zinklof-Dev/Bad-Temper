@@ -16,7 +16,7 @@ public class Stats : NetworkBehaviour
     [SerializeField] float manaRate = 5;
     [SerializeField] float timeBeforeStam = 2;
     [SerializeField] float timeBeforeHeal = 5;
-    [SerializeField] float timeBeforeMana = 1.5;
+    [SerializeField] float timeBeforeMana = 1.5f;
     [Header("UI")]
     // [SerializeField] 
 
@@ -43,7 +43,7 @@ public class Stats : NetworkBehaviour
         
         if (health > maxHealth)
         {
-            health = maxHealth
+            health = maxHealth;
         }
         else if (health < 0)
             Death();
@@ -56,7 +56,7 @@ public class Stats : NetworkBehaviour
         if (mana - val > 0)
         {
             mana -= val;
-            return true
+            return true;
         }
         else
             return false;
@@ -70,6 +70,8 @@ public class Stats : NetworkBehaviour
 
             return true;
         }
+        else 
+            return false;
     }
 
     public void Death()
@@ -82,11 +84,11 @@ public class Stats : NetworkBehaviour
     public void Regenerate()
     {
         if (timeSinceDamage > timeBeforeHeal)
-            health += healthRate * time.deltaTime;
+            health += healthRate * Time.deltaTime;
         if (timeSinceStam > timeBeforeStam)
-            health += stamRate * time.deltaTime;
+            health += stamRate * Time.deltaTime;
         if (timeSinceMana > timeBeforeMana)
-            mana += manaRate * time.deltaTime;
+            mana += manaRate * Time.deltaTime;
     }
 
     public void Update()

@@ -32,9 +32,9 @@ public class Sword : NetworkBehaviour
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.MouseOne))
+        if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (stats.UseStamina)
+            if (stats.UseStamina(stamUsage))
             {
 
             }
@@ -54,7 +54,7 @@ public class Sword : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void AskForOwnerRPC()
+    public void AskForOwnerRPC(RpcParams rpcParams = default)
     {
         if (OwnerClientId != 0)
         {

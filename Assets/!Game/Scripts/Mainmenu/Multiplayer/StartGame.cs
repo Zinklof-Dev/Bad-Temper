@@ -1,21 +1,22 @@
 using Unity;
 using Unity.Netcode;
 using System;
+using UnityEngine;
 
 public class StartGame : NetworkBehaviour
 {
-    [SerializeField] string[] sceneNames
+    [SerializeField] string[] sceneNames;
     
     public void ForceLoadScene(int type)
     {
-        Debug.LogWarning("Game is being started from ForceLoadScene, may cause problems if not all players are truly ready.")
+        Debug.LogWarning("Game is being started from ForceLoadScene, may cause problems if not all players are truly ready.");
         
-        if (type < 0 || type > sceneNames.length-1)
+        if (type < 0 || type > sceneNames.Length-1)
         {
-            Debug.LogError("StartGame.cs was told to load a scene type outside of its bounds")
+            Debug.LogError("StartGame.cs was told to load a scene type outside of its bounds");
             return;
         }
-        else
-            NetworkManager.NetworkSceneManger.Load(sceneNames(type));
+        //else
+            //NetworkManager.SceneManager.LoadScene(sceneNames[type]);
     }
 }
