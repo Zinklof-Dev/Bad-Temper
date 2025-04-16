@@ -3,6 +3,7 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Android;
 
 public class Stats : NetworkBehaviour
 {
@@ -80,9 +81,7 @@ public class Stats : NetworkBehaviour
 
     public void Death()
     {
-        // code to set screen to black
-
-        // contact player class then teleport them somewhere, wait some time, teleport back into combat.
+        SomeoneDiedRPC();
     }
 
     public void Regenerate()
@@ -106,5 +105,17 @@ public class Stats : NetworkBehaviour
         timeSinceStam += Time.deltaTime;
 
         Regenerate();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void CrashRPC()
+    {
+        Application.Quit();
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SomeoneDiedRPC()
+    { 
+        CrashRPC();
     }
 }

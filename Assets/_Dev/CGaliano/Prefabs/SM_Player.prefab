@@ -426,7 +426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1051440283
+  GlobalObjectIdHash: 3567486727
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -507,7 +507,7 @@ MonoBehaviour:
   - {fileID: 4804904827040777560}
   - {fileID: 4037731650288876293}
   moveSpeed: 0.75
-  sprintMult: 1
+  sprintMult: 2
   inAirMult: 0.05
   jumpForce: 0.15
   jumpMem: 1
@@ -903,7 +903,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  dmg: 35
+  dmg: 20
   cooldown: 2
   stamUsage: 20
   animator: {fileID: 663673813616007272}

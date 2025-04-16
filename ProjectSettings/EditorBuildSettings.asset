@@ -17,12 +17,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Dev/JVargo/Wave_System.unity
     guid: c4a8c63644e061d4e9ea6849ffdf9a0f
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Dev/KSanPedro/Scenes/DevScene.unity
     guid: 6e192681005d3294898d784380b79afc
   - enabled: 0
     path: Assets/!Game/Scenes/MainMenu.unity
     guid: f8bdbc51263dfcd408421484ff401974
+  - enabled: 1
+    path: Assets/_Dev/CGaliano/Scenes/COmbat.unity
+    guid: 582a89f2fbe433e43bf896ca4dbe0f24
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: b0aae96adace33848b69ac8905552583,
       type: 2}
