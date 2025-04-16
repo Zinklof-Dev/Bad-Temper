@@ -138,6 +138,8 @@ namespace BadTemper
 
         public override void OnNetworkSpawn() // change to on network spawn later
         {
+            if (!IsOwner) return;
+
             playerRef = this;
 
             cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
