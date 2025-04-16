@@ -10,20 +10,20 @@ public class LookAt : NetworkBehaviour
     
     public void FixedUpdate()
     {
-        //if (playerCamera == null && overrideObj == null)
-        //{
-        //    playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        //}
+        if (playerCamera == null && overrideObj == null)
+        {
+            playerCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        }
 
-        //if (overrideObj == null)
-        //{
-        //    transform.LookAt(playerCamera.transform);
-        //}
-        //else
-        //{
+        if (overrideObj == null)
+        {
+            transform.LookAt(playerCamera.transform);
+        }
+        else
+        {
             transform.LookAt(overrideObj.transform.position);
 
             transform.localRotation = transform.localRotation * Quaternion.Euler(0, -90, 0);
-        //}
+        }
     }
 }
