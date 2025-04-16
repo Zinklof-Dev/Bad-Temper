@@ -10,6 +10,13 @@ public class Stats : NetworkBehaviour
     [SerializeField] float health = 100;
     [SerializeField] float stam = 100;
     [SerializeField] float mana = 150;
+    [Header("Regen Stats")]
+    [SerializeField] float healthRate = 1;
+    [SerializeField] float stamRate = 10;
+    [SerializeField] float manaRate = 5;
+    [SerializeField] float timeBeforeStam = 2;
+    [SerializeField] float timeBeforeHeal = 5;
+    [SerializeField] float timeBeforeMana = 1.5;
     [Header("UI")]
     // [SerializeField] 
 
@@ -17,9 +24,17 @@ public class Stats : NetworkBehaviour
     private float maxStam = 100;
     private float maxMana = 150;
 
+    private float timeSinceStam;
+    private float timeSinceDamage;
+    private float timeSinceMana;
+
     public void UpdateUI()
     {
         Debug.LogError("UpdateUI Not Yet Implimented");
+
+        //update bars
+
+        //update screen effects
     }
 
     public void Damage(float val)
@@ -38,7 +53,23 @@ public class Stats : NetworkBehaviour
 
     public bool UseMana(float val)
     {
-        
+        if (mana - val > 0)
+        {
+            mana -= val;
+            return true
+        }
+        else
+            return false;
+    }
+
+    public bool UseStamina(float val)
+    {
+        if (stam - val > 0)
+        {
+            stam -= val;
+
+            return true;
+        }
     }
 
     public void Death()
@@ -46,5 +77,24 @@ public class Stats : NetworkBehaviour
         // code to set screen to black
 
         // contact player class then teleport them somewhere, wait some time, teleport back into combat.
+    }
+
+    public void Regenerate()
+    {
+        if (timeSinceDamage > timeBeforeHeal)
+            health += healthRate * time.deltaTime;
+        if (timeSinceStam > timeBeforeStam)
+            health += stamRate * time.deltaTime;
+        if (timeSinceMana > timeBeforeMana)
+            mana += manaRate * time.deltaTime;
+    }
+
+    public void Update()
+    {
+        timeSinceDamage += Time.deltaTime;
+        timeSinceMana += Time.deltaTime;
+        timeSinceStam += Time.deltaTime;
+
+        Regenerate();
     }
 }
