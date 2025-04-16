@@ -6,8 +6,10 @@ public class Sword : NetworkBehaviour
 {
     [Header("Combat Stats")]
     [SerializeField] float dmg = 35;
-    [SerializeField] float cooldown = 2;
+    [SerializeField] float cooldown = 4;
     [SerializeField] float stamUsage = 20;
+
+    [SerializeField] Animator animator;
 
     public Stats stats;
 
@@ -32,11 +34,16 @@ public class Sword : NetworkBehaviour
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (!IsOwner) return;
+
+        actualCooldown += Time.deltaTime;
+
+        if (Input.GetKeyDown(KeyCode.Mouse0) && actualCooldown > cooldown)
         {
             if (stats.UseStamina(stamUsage))
             {
-
+                actualCooldown = 0;
+                AskToAttackRPC();
             }
         }
     }
@@ -50,7 +57,7 @@ public class Sword : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void MakeAttackRPC()
     {
-        //Code To animate
+        animator.SetTrigger("Swing");
     }
 
     [Rpc(SendTo.Server)]

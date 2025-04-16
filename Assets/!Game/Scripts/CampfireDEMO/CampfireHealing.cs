@@ -33,8 +33,8 @@ public class campfire : MonoBehaviour
 
             foreach(Collider c in colliders)
             {
-                if (collider.gameObject.tag = "Player")
-                    collider.gameObject.GetComponent<Stats>().Damage(-healAmount);
+                if (GetComponent<Collider>().gameObject.tag == "Player")
+                    GetComponent<Collider>().gameObject.GetComponent<Stats>().Damage(-healAmount);
                 else
                     continue;
             }
