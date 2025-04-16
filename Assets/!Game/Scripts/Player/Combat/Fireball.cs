@@ -6,10 +6,10 @@ public class Fireball : MonoBehaviour
 {
     [SerializeField] float speed = 4;
     [SerializeField] float radius = 3;
-    [SerializeField] ParticleSystem particleSystem;
+    [SerializeField] ParticleSystem fbparticleSystem;
 
-    vector3 target;
-    float damage
+    Vector3 target;
+    float damage;
     
     void OnCollisionEnter(Collision collision)
     {
@@ -19,14 +19,14 @@ public class Fireball : MonoBehaviour
     public void Explode()
     {
         // do particle system;
-        transform.Scale = new vector3(0.001f, 0.001f, 0.001f);
+        transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, radius);
 
         foreach(Collider c in colliders)
         {
-            if (collider.gameObject.tag = "Player")
-                collider.gameObject.GetComponent<Stats>().Damage(damage);
+            if (c.gameObject.tag == "Player")
+                c.gameObject.GetComponent<Stats>().Damage(damage);
             else
                 continue;
         }
@@ -41,6 +41,6 @@ public class Fireball : MonoBehaviour
     public void Update()
     {
         transform.LookAt(target);
-        transform.position += transform.Forward * speed * Time.deltaTime;
+        transform.position += transform.forward * speed * Time.deltaTime;
     }
 }

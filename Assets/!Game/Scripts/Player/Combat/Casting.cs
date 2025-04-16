@@ -6,15 +6,15 @@ using Unity.Netcode;
 public class Casting : NetworkBehaviour
 {
     [Header("References")]
-    [SerializeField] transform handTarget;
-    [SerializeField] transform elbowTarget;
+    [SerializeField] Transform handTarget;
+    [SerializeField] Transform elbowTarget;
     [SerializeField] ParticleSystem healParticleSystem;
     [SerializeField] ParticleSystem fireballParticleSystem;
     [Header("IKTargets")]
-    [SerializeField] vector3 handTargetTo;
-    [SerializeField] vector3 elbowTargetTo;
-    [SerializeField] vector3 handTargetToFireball;
-    [SerializeField] vector3 elbowTargetToFireball;
+    [SerializeField] Vector3 handTargetTo;
+    [SerializeField] Vector3 elbowTargetTo;
+    [SerializeField] Vector3 handTargetToFireball;
+    [SerializeField] Vector3 elbowTargetToFireball;
     [Header("Spell Stats")]
     [SerializeField] float healCost = 100;
     [SerializeField] float healAmmount = 75;
@@ -29,8 +29,8 @@ public class Casting : NetworkBehaviour
     private GameObject cameraObj;
     private Stats stats;
 
-    vector3 handTargetStart;
-    vector3 elbowTargetStart;
+    Vector3 handTargetStart;
+    Vector3 elbowTargetStart;
 
     float lastFireball;
     float lastHeal;
@@ -45,7 +45,7 @@ public class Casting : NetworkBehaviour
     public void Initialize(GameObject player)
     {
         this.player = player;
-        cameraObj = GameObject.FindObjectByTag("MainCamera");
+        cameraObj = GameObject.FindGameObjectWithTag("MainCamera");
         stats = player.GetComponent<Stats>();
     }
 
@@ -53,10 +53,10 @@ public class Casting : NetworkBehaviour
     {
         timeSpentCasting += Time.deltaTime;
 
-        float lerpAmmount = MathF.Clamp(timeSpentCasting / (healCastTime / 2), 0, 1);
+        float lerpAmmount = Mathf.Clamp(timeSpentCasting / (healCastTime / 2), 0, 1);
 
-        handTarget.position = vector3.lerp(handTargetStart, handTargetTo + transform.position, lerpAmmount);
-        eblowTarget.position = vector3.lerp(elbowTargetStart, elbowTargetTo + transform.position, lerpAmmount);
+        handTarget.position = Vector3.Lerp(handTargetStart, handTargetTo + transform.position, lerpAmmount);
+        elbowTarget.position = Vector3.Lerp(elbowTargetStart, elbowTargetTo + transform.position, lerpAmmount);
 
         if (timeSpentCasting / (healCastTime / 2) > 1)
         {
@@ -75,10 +75,10 @@ public class Casting : NetworkBehaviour
     {
         timeSpentCasting += Time.deltaTime;
 
-        float lerpAmmount = MathF.Clamp(timeSpentCasting / (fireballCastTime / 2), 0, 1);
+        float lerpAmmount = Mathf.Clamp(timeSpentCasting / (fireballCastTime / 2), 0, 1);
 
-        handTarget.position = vector3.lerp(handTargetStart, handTargetToFireball + transform.position, lerpAmmount);
-        eblowTarget.position = vector3.lerp(elbowTargetStart, elbowTargetToFireball + transform.position, lerpAmmount);
+        handTarget.position = Vector3.Lerp(handTargetStart, handTargetToFireball + transform.position, lerpAmmount);
+        elbowTarget.position = Vector3.Lerp(elbowTargetStart, elbowTargetToFireball + transform.position, lerpAmmount);
 
         if (timeSpentCasting / (fireballCastTime / 2) > 1)
         {
