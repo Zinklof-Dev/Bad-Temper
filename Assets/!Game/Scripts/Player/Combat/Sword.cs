@@ -22,11 +22,11 @@ public class Sword : NetworkBehaviour
         this.stats = stats;
     }
 
-    void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.collider.gameObject.tag == "Player")
+        if (other.gameObject.tag == "Player")
         {
-            Stats hitStats = collision.collider.gameObject.GetComponent<Stats>();
+            Stats hitStats = other.gameObject.GetComponent<Stats>();
 
             hitStats.Damage(dmg);
         }
@@ -44,6 +44,7 @@ public class Sword : NetworkBehaviour
             {
                 actualCooldown = 0;
                 AskToAttackRPC();
+                animator.SetTrigger("Swing");
             }
         }
     }
@@ -57,6 +58,10 @@ public class Sword : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void MakeAttackRPC()
     {
+        if (IsOwner)
+        {
+            return;
+        }
         animator.SetTrigger("Swing");
     }
 

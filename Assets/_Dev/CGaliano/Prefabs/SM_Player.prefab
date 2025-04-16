@@ -426,7 +426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3567486727
+  GlobalObjectIdHash: 1051440283
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -507,7 +507,7 @@ MonoBehaviour:
   - {fileID: 4804904827040777560}
   - {fileID: 4037731650288876293}
   moveSpeed: 0.75
-  sprintMult: 2
+  sprintMult: 1
   inAirMult: 0.05
   jumpForce: 0.15
   jumpMem: 1
@@ -923,7 +923,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
