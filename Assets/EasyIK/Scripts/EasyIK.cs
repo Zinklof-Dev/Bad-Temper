@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
+//using UnityEditor;
 using System.Linq;
 
 public class EasyIK : MonoBehaviour
@@ -197,6 +197,8 @@ public class EasyIK : MonoBehaviour
     }
 
     // Visual debugging
+    // Commented out because Handles uses UnityEditor, and no UnityEditor stuff can be built. - Cole 4/17/25
+    /*
     void OnDrawGizmos()
     {   
         if (debugJoints == true)
@@ -293,3 +295,4 @@ public class EasyIK : MonoBehaviour
          }
      }
 }
+*/
