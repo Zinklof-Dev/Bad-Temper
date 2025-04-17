@@ -18,8 +18,10 @@ MonoBehaviour:
   m_PlatformBuildProfile:
     rid: 8775036699050508352
   m_Scenes:
-  - m_enabled: 1
+  - m_enabled: 0
     m_path: Assets/_Dev/CGaliano/Scenes/DEVscene.unity
+  - m_enabled: 1
+    m_path: Assets/_Dev/CGaliano/Scenes/COmbat.unity
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []
