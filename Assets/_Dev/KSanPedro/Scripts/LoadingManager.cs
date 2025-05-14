@@ -16,6 +16,7 @@ public class LoadingManager : NetworkBehaviour
     [Header("LoadingSettings")]
     [SerializeField] bool allowChristianLoadingTips;
     [SerializeField] bool debugLoad;
+    [SerializeField] bool destroyAfterLoad;
     [Header("Player Spawn Points")]
     // To find circle of all points a distance from (0,0), do x^2 + y^2 = a^2
     [SerializeField] private Vector3[] spawnPoints;
@@ -34,6 +35,8 @@ public class LoadingManager : NetworkBehaviour
     private bool _ServerHasSeed = false;
     private bool _CampfirePlaced = false;
     private int _Seed;
+    private bool done = false;
+    private Player player;
 
     private string[] loadingTips = {
     "This is a loading tip!",
@@ -99,6 +102,8 @@ public class LoadingManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         PreLoadChecklist();
+
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
         if (IsServer)
         {
@@ -212,6 +217,8 @@ public class LoadingManager : NetworkBehaviour
 
     private void Update()
     {
+        if(done) 
+            return;
         timeElapsed += Time.deltaTime;
         EvaluateBar();
         ChangeLoadingTip();
@@ -224,7 +231,11 @@ public class LoadingManager : NetworkBehaviour
             _LoadingText = null;
             Destroy(_LoadingCanvas);
             //code to teleport player, player script needs updated
-            Destroy(this);
+
+            if(destroyAfterLoad)
+                Destroy(this);
+
+            done = true;
         }
     }
 
@@ -310,7 +321,7 @@ public class LoadingManager : NetworkBehaviour
     private void TeleportPlayerRpc(Vector3 position, RpcParams rpcParams = default)
     {
         Debug.Log("Player Position: " + position);
-        Player.Teleport(position);
+        player.TeleportNonCommand(position.x, position.y + 10, position.z);
     }
     private async void AskToTeleportAgain()
     {

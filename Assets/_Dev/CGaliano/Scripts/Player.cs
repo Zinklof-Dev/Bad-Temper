@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using Unity.Collections;
 using ZinklofDev.ConsoleV2;
+using Unity.VisualScripting;
 
 public class Player : NetworkBehaviour
 {
@@ -12,7 +13,7 @@ public class Player : NetworkBehaviour
     [SerializeField] public float maxHealth = 100f;
     [SerializeField] public bool playerLive = true;
     [Space(10)]
-    [Header("Movement")]
+    [Header("Survival Mode Movement")]
     [SerializeField] private float movementSpeed;
     [SerializeField] private float sprintMult;
     [SerializeField] private float jumpForce;
@@ -20,6 +21,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private float terminalVelocity;
     [SerializeField] private Vector3 velocity;
     [SerializeField] private float drag;
+    [Header("Movment")]
+    [SerializeField] static int gameMode = 0;
     [Header("Camera")]
     [SerializeField] private float sensitivity;
     [SerializeField] private Vector3 cameraRotationEuler;
@@ -28,6 +31,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private CharacterController characterController;
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private TextMeshPro username;
+    [SerializeField] private GameObject playerModel;
     [Header("ignore me")]
     [SerializeField] NetworkVariable<FixedString32Bytes> networkUsername = new NetworkVariable<FixedString32Bytes>(
         writePerm: NetworkVariableWritePermission.Owner
@@ -39,10 +43,13 @@ public class Player : NetworkBehaviour
     private static Player playerClass = null;
     [SerializeField] private Player playerClassNonStatic = null;
 
+    private static GameObject _playerModel;
+
     // private BasicPhysObject currentlyHeldPhysObject;
 
     public override void OnNetworkSpawn()
     {
+        _playerModel = playerModel;
         //subscribe to the event for the value of the username getting changed for this GameObject.
         networkUsername.OnValueChanged += OnNetworkUsernameValueChanged;
 
@@ -64,8 +71,8 @@ public class Player : NetworkBehaviour
             networkUsername.Value = ClientBackend.playerUsername;
 
             // Save reference to this playerclass, and playerobject, for command use later
-            playerClass = this;
-            playerClassNonStatic = playerClass;
+            playerClassNonStatic = this;
+            playerClass = playerClassNonStatic;
         }
         //now let unity do its usual stuff
         base.OnNetworkSpawn();
@@ -256,11 +263,30 @@ public class Player : NetworkBehaviour
             ZinklofDev.ConsoleV2.Console.Log("Player Commands cannot be run when no player exists (IE you're in the game scene)", "Teleport");
             return;
         }
-        else if (!playerClass.IsServer)
+        /*else if (!playerClass.IsServer)
         {
             ZinklofDev.ConsoleV2.Console.Log("You lack sufficient permission to run this command (IE server only command)", "Teleport");
             return;
+        }*/
+        else
+        {
+            playerClass.characterController.transform.position = new Vector3(x, y, z);
+            ZinklofDev.ConsoleV2.Console.Log("New player position is: " + playerClass.gameObject.transform.position, "Teleport");
         }
+    }
+
+    public void TeleportNonCommand(float x, float y, float z)
+    {
+        if (playerClass == null)
+        {
+            ZinklofDev.ConsoleV2.Console.Log("Player Commands cannot be run when no player exists (IE you're in the game scene)", "Teleport");
+            return;
+        }
+        /*else if (!playerClass.IsServer)
+        {
+            ZinklofDev.ConsoleV2.Console.Log("You lack sufficient permission to run this command (IE server only command)", "Teleport");
+            return;
+        }*/
         else
         {
             playerClass.characterController.transform.position = new Vector3(x, y, z);
@@ -272,14 +298,24 @@ public class Player : NetworkBehaviour
     // It also lacks the server check as it doesn't need to ensure its the server (unless exploited which at that point they can likely change the variable IsServer anyways) as it can only be called by code rather than by command or user input.
     public static void Teleport(Vector3 pos)
     {
-        if (playerClass = null)
+        /*if (playerClass = null)
         {
             Debug.LogError("Attempted to TP player that does not exist");
-        }
-        else
-        {
+        }*/
+        //else
+       // {
             playerClass.characterController.transform.position = pos;
-        }
+       // }
+    }
+
+    [Command("Change Player's Gamemode")]
+    public static void Gamemode(int newGameMode)
+    {
+        gameMode = newGameMode;
+        if(gameMode == 0)
+            _playerModel.SetActive(true);
+         else
+            _playerModel.SetActive(false);
     }
 
     /*public void PickupOrDropObject()
@@ -314,17 +350,46 @@ public class Player : NetworkBehaviour
             {
                 XRotation();
                 YRotation();
-
+                if (gameMode == 1)
+                    SpectatorMode();
                 // check for mouse1 here then call pickup/drop func
             }
 
-            CalculateMovement();
-
+            if (gameMode == 0)
+                CalculateMovement();
             //ApplyFallDamage();
         }
         catch (Exception e)
         {
             Debug.Log(e);
+        }
+    }
+
+    void SpectatorMode()
+    {
+        // Get input from the player
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+
+        // Calculate the movement direction
+        Vector3 movementDirection = new Vector3(horizontalInput, 0, verticalInput);
+
+        // Normalize the movement direction (to prevent faster diagonal movement)
+        movementDirection.Normalize();
+
+        // Move the player
+        transform.Translate(movementDirection * movementSpeed * Time.deltaTime * 69);
+
+        // Get Horizontal Input
+        if(Input.GetKey(KeyCode.Space))
+        {
+            movementDirection = Vector3.up;
+            transform.Translate(movementDirection * movementSpeed * Time.deltaTime * 69);
+        }
+        else if(Input.GetKey(KeyCode.LeftShift))
+        {
+            movementDirection = Vector3.down;
+            transform.Translate(movementDirection * movementSpeed * Time.deltaTime * 69);
         }
     }
 }
